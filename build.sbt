@@ -12,6 +12,7 @@ lazy val scalaHttp = crossProject.in(file(".")).
     name := "scala-http-client",
     version := "0.1-SNAPSHOT",
     scalaVersion := "2.11.7",
+    organization := "fr.hmil",
 
     libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.0-M15",
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.0-M15" % "test"

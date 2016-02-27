@@ -8,7 +8,11 @@ import java.lang.Math
   */
 object Dummy {
   def main(args: Array[String]): Unit = {
-    DummyShared.greet("JVM")
+    greet
+  }
+
+  def greet: Unit = {
+    DummyShared.greet("Java")
   }
 
   def random: Double = Math.random()

@@ -7,7 +7,7 @@ object DummyShared {
     *
     * @param context The execution context from which the greeting message is being sent
     */
-  def greet(context: String) = println("Hello world from " + context + "!")
+  def greet(context: String): Unit = println("Hello world from " + context + "!")
 
-  def nativeRandom = Dummy.random
+  def nativeRandom: Double = Dummy.random
 }

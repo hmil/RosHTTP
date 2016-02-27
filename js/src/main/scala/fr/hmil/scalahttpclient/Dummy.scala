@@ -13,6 +13,10 @@ object Math extends js.Object {
   */
 object Dummy extends js.JSApp {
   def main(): Unit = {
+    greet
+  }
+
+  def greet: Unit = {
     DummyShared.greet("JavaScript")
   }
 
