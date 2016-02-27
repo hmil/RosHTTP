@@ -11,5 +11,5 @@ object Dummy {
     DummyShared.greet("JVM")
   }
 
-  def random = Math.random()
+  def random: Double = Math.random()
 }

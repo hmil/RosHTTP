@@ -16,5 +16,5 @@ object Dummy extends js.JSApp {
     DummyShared.greet("JavaScript")
   }
 
-  def random = Math.random()
+  def random: Double = Math.random()
 }
