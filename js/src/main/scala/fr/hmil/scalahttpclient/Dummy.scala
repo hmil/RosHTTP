@@ -14,6 +14,7 @@ object Math extends js.Object {
 object Dummy extends js.JSApp {
   def main(): Unit = {
     greet
+    HttpDriver.send(new HttpRequest())
   }
 
   def greet: Unit = {
