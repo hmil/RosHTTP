@@ -1,4 +1,4 @@
-package fr.hmil.scalahttpclient.node.http
+package fr.hmil.scalahttp.node.http
 
 import scala.collection.mutable.{Map, Seq}
 import scala.scalajs.js

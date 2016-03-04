@@ -1,5 +1,6 @@
-package fr.hmil.scalahttpclient.node
-import fr.hmil.scalahttpclient.node.http._
+package fr.hmil.scalahttp.node
+
+import fr.hmil.scalahttp.node.http.{Http, HttpModule}
 
 
 /**
@@ -12,6 +13,7 @@ object Modules {
 
   /**
     * Gets javascript module using either require() or the global context
+    *
     * @param module Module descriptor
     * @tparam T Module API facade type
     * @return The requested module as a scala facade

@@ -1,4 +1,4 @@
-package fr.hmil.scalahttpclient
+package fr.hmil.scalahttp.client
 
 import scala.scalajs.js
 
@@ -14,7 +14,10 @@ object Math extends js.Object {
 object Dummy extends js.JSApp {
   def main(): Unit = {
     greet
-    HttpDriver.send(new HttpRequest())
+    HttpRequest.create
+        .withHost("blog.hmil.fr")
+        .withPath("/")
+      .send
   }
 
   def greet: Unit = {

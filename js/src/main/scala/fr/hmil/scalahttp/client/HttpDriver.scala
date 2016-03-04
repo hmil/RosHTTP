@@ -1,7 +1,7 @@
-package fr.hmil.scalahttpclient
+package fr.hmil.scalahttp.client
 
-import fr.hmil.scalahttpclient.node.Modules.http
-import fr.hmil.scalahttpclient.node.http.{IncomingMessage, RequestOptions}
+import fr.hmil.scalahttp.node.Modules.http
+import fr.hmil.scalahttp.node.http.{IncomingMessage, RequestOptions}
 
 import scala.concurrent.{Future, Promise}
 
@@ -10,16 +10,16 @@ object HttpDriver {
   def send(req: HttpRequest): Future[HttpResponse] = {
     val p: Promise[HttpResponse] = Promise[HttpResponse]()
 
-    val req = http.request(RequestOptions(
-      hostname = "blog.hmil.fr",
-      port = 80,
-      method = "GET",
-      path = "/"
+    val nodeRequest = http.request(RequestOptions(
+      hostname = req.host,
+      port = req.port,
+      method = req.method.name,
+      path = req.path
     ), (message: IncomingMessage) => {
       println("HTTP/" + message.httpVersion + " " + message.statusCode + " " + message.statusMessage)
     })
 
-    req.end()
+    nodeRequest.end()
     p.future
   }
 }

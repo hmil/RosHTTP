@@ -1,6 +1,6 @@
-package fr.hmil.scalahttpclient.node.http
+package fr.hmil.scalahttp.node.http
 
-import fr.hmil.scalahttpclient.node.buffer.Buffer
+import fr.hmil.scalahttp.node.buffer.Buffer
 
 import scala.scalajs.js
 
@@ -66,6 +66,7 @@ class ClientRequest extends js.Object {
 
   /**
     * Once a socket is assigned to this request and is connected socket.setTimeout() will be called.
+    *
     * @param timeout Milliseconds before a request is considered to be timed out.
     * @param callback Optional function to be called when a timeout occurs. Same as binding to the timeout event.
     */
@@ -77,6 +78,7 @@ class ClientRequest extends js.Object {
     * Sends a chunk of the body. By calling this method many times, the user can stream
     * a request body to aserver--in that case it is suggested to use the ['Transfer-Encoding', 'chunked']
     * header line when creating the request.
+    *
     * @param chunk should be a Buffer or a string.
     * @param encoding optional and only applies when chunk is a string. Defaults to 'utf8'.
     * @param callback optional and will be called when this chunk of data is flushed.

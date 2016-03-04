@@ -1,4 +1,4 @@
-package fr.hmil.scalahttpclient
+package fr.hmil.scalahttp.client
 
 import org.scalatest._
 import org.scalatest.matchers._

@@ -1,4 +1,4 @@
-package fr.hmil.scalahttpclient.node.buffer
+package fr.hmil.scalahttp.node.buffer
 
 import scala.scalajs.js
 
@@ -10,6 +10,7 @@ import scala.scalajs.js
   *
   * @see https://nodejs.org/api/buffer.html
   */
+@js.native
 class Buffer extends js.Object
 /*
   Body not implemented

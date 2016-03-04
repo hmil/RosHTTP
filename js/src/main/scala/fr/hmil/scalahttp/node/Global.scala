@@ -1,4 +1,4 @@
-package fr.hmil.scalahttpclient.node
+package fr.hmil.scalahttp.node
 
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSName

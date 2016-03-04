@@ -1,4 +1,4 @@
-package fr.hmil.scalahttpclient
+package fr.hmil.scalahttp.client
 
 import java.lang.Math
 
