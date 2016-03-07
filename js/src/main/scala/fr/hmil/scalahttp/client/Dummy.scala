@@ -1,6 +1,8 @@
 package fr.hmil.scalahttp.client
 
 import scala.scalajs.js
+import scala.scalajs.js.annotation.JSExport
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @js.native
 object Math extends js.Object {
@@ -11,13 +13,18 @@ object Math extends js.Object {
   *
   * Uses [[DummyShared]] to greet user with the proper context string
   */
+@JSExport
 object Dummy extends js.JSApp {
+  @JSExport
   def main(): Unit = {
-    greet
     HttpRequest.create
-        .withHost("blog.hmil.fr")
+        .withHost("localhost")
+        .withPort(8080)
         .withPath("/")
       .send
+      .map(res => println(res.body))
+
+
   }
 
   def greet: Unit = {

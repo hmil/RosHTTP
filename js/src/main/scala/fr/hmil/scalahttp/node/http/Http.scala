@@ -60,5 +60,3 @@ trait Http extends js.Object{
 @js.native
 @JSName("http")
 object Http extends Http
-
-object HttpModule extends Module("http", Http)

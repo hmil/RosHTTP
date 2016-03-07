@@ -4,6 +4,7 @@ package fr.hmil.scalahttp
 
 final class Method private(val name: String)
 
+
 /**
   * TODO: doc
   */
@@ -16,7 +17,6 @@ object Method {
   val DELETE = Method("DELETE")
   val TRACE = Method("TRACE")
   val CONNECT = Method("CONNECT")
-
   implicit def apply(name: String): Method = new Method(name)
 }
 

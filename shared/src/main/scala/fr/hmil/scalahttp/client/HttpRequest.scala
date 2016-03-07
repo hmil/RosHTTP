@@ -21,7 +21,7 @@ final class HttpRequest  private (
     copy(host = host)
 
   def withPath(path: String): HttpRequest =
-  copy(path = path)
+    copy(path = path)
 
   def withPort(port: Int): HttpRequest =
     copy(port = port)
@@ -33,6 +33,8 @@ final class HttpRequest  private (
     // TODO: parse url into components
     copy()
   }
+
+  def url: String = s"$protocol://$host:$port$path"
 
   def send: Future[HttpResponse] = {
     HttpDriver.send(this)

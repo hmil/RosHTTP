@@ -1,6 +1,6 @@
 package fr.hmil.scalahttp.node
 
-import fr.hmil.scalahttp.node.http.{Http, HttpModule}
+import fr.hmil.scalahttp.node.http.Http
 
 
 /**
@@ -11,24 +11,7 @@ import fr.hmil.scalahttp.node.http.{Http, HttpModule}
   */
 object Modules {
 
-  /**
-    * Gets javascript module using either require() or the global context
-    *
-    * @param module Module descriptor
-    * @tparam T Module API facade type
-    * @return The requested module as a scala facade
-    */
-  private def require[T](module: Module[T]): T = {
-    if (!module.inst.isInstanceOf[Unit]) {
-      println("Using context")
-      module.inst
-    }
-    else {
-      println("Using require")
-      Global.require[T](module.name)
-    }
-  }
-
-  lazy val http: Http = require(HttpModule)
+  object HttpModule extends Module("http", Http)
+  lazy val http: Http = HttpModule.api
 
 }
