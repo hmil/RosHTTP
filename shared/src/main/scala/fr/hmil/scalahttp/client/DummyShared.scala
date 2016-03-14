@@ -1,13 +1,20 @@
 package fr.hmil.scalahttp.client
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
+
 /** Shared utilities for dummy scripts */
 object DummyShared {
 
-  /** Greets users with additional information about the message's origin
-    *
-    * @param context The execution context from which the greeting message is being sent
-    */
-  def greet(context: String): Unit = println("Hello world from " + context + "!")
-
-  def nativeRandom: Double = Dummy.random
+  def main(): Unit = {
+    HttpRequest.create
+      .withHost("localhost")
+      .withPort(8080)
+      .withPath("/")
+      .send()
+      .onComplete({
+        case Success(res) => println(res.body)
+        case Failure(t) => println("An error has occurred: " + t.getMessage)
+      })
+  }
 }

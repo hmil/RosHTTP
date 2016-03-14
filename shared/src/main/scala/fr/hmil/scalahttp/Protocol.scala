@@ -7,7 +7,7 @@ final case class Protocol private(name: String) {
 }
 
 object Protocol {
-  val HTTP = Protocol("HTTP")
-  val HTTPS = Protocol("HTTPS")
+  val HTTP = Protocol("http")
+  val HTTPS = Protocol("https")
 }
 

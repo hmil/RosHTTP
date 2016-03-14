@@ -36,7 +36,7 @@ final class HttpRequest  private (
 
   def url: String = s"$protocol://$host:$port$path"
 
-  def send: Future[HttpResponse] = {
+  def send(): Future[HttpResponse] = {
     HttpDriver.send(this)
   }
 
