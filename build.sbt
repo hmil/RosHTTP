@@ -17,14 +17,15 @@ lazy val scalaHttp = crossProject.in(file(".")).
     libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.0-M15",
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.0-M15" % "test"
   ).
-jvmSettings(
-  // Add JVM-specific settings here
-).
-jsSettings(
+  jvmSettings(
+    // Add JVM-specific settings here
+  ).
+  jsSettings(
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0",
     // Add JS-specific settings here
     // scalaJSUseRhino in Global := false,
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0",
-    jsEnv := NodeJSEnv().value
+    jsEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox)//, false, identity)
+    // jsEnv := NodeJSEnv().value
     // jsEnv := PhantomJSEnv(autoExit = false).value
   )
 

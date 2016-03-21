@@ -1,5 +1,3 @@
-sbt.version = 0.13.9
-
 resolvers += "Local Maven Repository" at "file://"+Path.userHome.absolutePath+"/.ivy2/local"
 
-set logLevel in Global := Level.Info
+libraryDependencies += "org.scala-js" %% "scalajs-env-selenium" % "0.1.2-SNAPSHOT"

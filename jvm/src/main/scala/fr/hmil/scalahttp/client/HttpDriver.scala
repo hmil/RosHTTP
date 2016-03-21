@@ -2,32 +2,33 @@ package fr.hmil.scalahttp.client
 
 import java.io._
 import java.net.{HttpURLConnection, URL}
-import scala.concurrent.ExecutionContext.Implicits.global
+import java.util.concurrent.Executors
 import scala.io.Source
 
 import scala.concurrent
-import scala.concurrent.{Promise, Future}
+import scala.concurrent.{ExecutionContext, Promise, Future}
 
 object HttpDriver {
+
+  implicit val ec = new ExecutionContext {
+    val threadPool = Executors.newWorkStealingPool()
+
+    def execute(runnable: Runnable): Unit = {
+      threadPool.submit(runnable)
+    }
+
+    def reportFailure(t: Throwable): Unit = {}
+  }
 
   def send(req: HttpRequest): Future[HttpResponse] = {
     println("Connecting to " + req.url)
     val connection = new URL(req.url).openConnection().asInstanceOf[HttpURLConnection]
 
     concurrent.Future {
-      println("fuu")
-
-      // Doesn't work:
       val res = new HttpResponse(
-        connection.getResponseCode,
-        new BufferedReader(new InputStreamReader(connection.getInputStream)).readLine()
+        connection.getResponseCode(),
+        Source.fromInputStream(connection.getInputStream()).mkString
       )
-      // Works:
-      // val res = new HttpResponse(
-      //   42,
-      //   "test"
-      // )
-      println("bar")
       res
     }
   }
