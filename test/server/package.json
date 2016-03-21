@@ -1,0 +1,15 @@
+{
+  "name": "scala-http-client-test-server",
+  "version": "0.0.1",
+  "description": "A testing server for scala-http-client",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.13.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}

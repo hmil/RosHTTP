@@ -1,0 +1,6 @@
+This folder contains a nodejs web server which is used to test scala-http-client.
+The server serves both a testing API and the runtime scripts required by the sbt
+scala-js test runner.
+
+To setup the server, run `npm install` in this directory
+To run the server, run `node index.js`

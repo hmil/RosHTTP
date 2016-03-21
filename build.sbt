@@ -1,18 +1,23 @@
+import org.scalajs.jsenv.selenium.SeleniumJSEnv
+import org.scalajs.jsenv.selenium.SpecificFileMaterializer
+
 name := "scala-http-client root project"
 
+
 lazy val root = project.in(file(".")).
-  aggregate(scalaHttpJS, scalaHttpJVM).
-  settings(
+aggregate(scalaHttpJS, scalaHttpJVM).
+settings(
     publish := {},
     publishLocal := {}
-  )
+)
 
 lazy val scalaHttp = crossProject.in(file(".")).
-  settings(
+settings(
     name := "scala-http-client",
     version := "0.1-SNAPSHOT",
     scalaVersion := "2.11.7",
     organization := "fr.hmil",
+
 
     libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.0-M15",
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.0-M15" % "test"
@@ -24,8 +29,13 @@ lazy val scalaHttp = crossProject.in(file(".")).
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0",
     // Add JS-specific settings here
     // scalaJSUseRhino in Global := false,
-    jsEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox)//, false, identity)
-    // jsEnv := NodeJSEnv().value
+    //
+    //
+
+    //parallelExecution in Test := false,
+    //jsEnv := new SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox)
+    //    .withMaterializer(new SpecificFileMaterializer("test/server/runtime", "http://localhost:3000/runtime"))
+    jsEnv := NodeJSEnv().value
     // jsEnv := PhantomJSEnv(autoExit = false).value
   )
 
