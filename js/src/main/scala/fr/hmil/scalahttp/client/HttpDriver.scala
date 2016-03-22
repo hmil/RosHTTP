@@ -4,6 +4,7 @@ import fr.hmil.scalahttp.node.Modules.{HttpModule, http}
 import fr.hmil.scalahttp.node.http.{IncomingMessage, RequestOptions}
 import org.scalajs.dom
 import org.scalajs.dom.raw.ErrorEvent
+import java.io.IOException
 
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
@@ -29,19 +30,24 @@ object HttpDriver {
       path = req.path
     ), (message: IncomingMessage) => {
 
-      var body = ""
-
-      message.on("data", { (s: js.Dynamic) =>
-        body = body + s
+      if (message.statusCode >= 400) {
+        p.failure(new IOException("Temporary behaviour on error status codes"))
         ()
-      })
+      } else {
+        var body = ""
 
-      message.on("end", { (s: js.Dynamic) =>
-        p.success(new HttpResponse(200, body))
+        message.on("data", { (s: js.Dynamic) =>
+          body = body + s
+          ()
+        })
+
+        message.on("end", { (s: js.Dynamic) =>
+          p.success(new HttpResponse(message.statusCode, body))
+          ()
+        })
+
         ()
-      })
-
-      ()
+      }
     })
 
     nodeRequest.end()

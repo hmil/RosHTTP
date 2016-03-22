@@ -1,6 +1,3 @@
-import org.scalajs.jsenv.selenium.SeleniumJSEnv
-import org.scalajs.jsenv.selenium.SpecificFileMaterializer
-
 name := "scala-http-client root project"
 
 
@@ -11,33 +8,29 @@ settings(
     publishLocal := {}
 )
 
-lazy val scalaHttp = crossProject.in(file(".")).
-settings(
+lazy val scalaHttp = crossProject.in(file("."))
+  .configure(InBrowserTesting.cross)
+  .settings(
     name := "scala-http-client",
     version := "0.1-SNAPSHOT",
     scalaVersion := "2.11.7",
     organization := "fr.hmil",
 
-
     libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.0-M15",
-    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.0-M15" % "test"
-  ).
-  jvmSettings(
-    // Add JVM-specific settings here
-  ).
-  jsSettings(
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0",
-    // Add JS-specific settings here
-    // scalaJSUseRhino in Global := false,
-    //
-    //
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.0-M15" % "test",
+    libraryDependencies += "com.lihaoyi" %%% "utest" % "0.4.3",
 
-    //parallelExecution in Test := false,
-    //jsEnv := new SeleniumJSEnv(org.scalajs.jsenv.selenium.Firefox)
-    //    .withMaterializer(new SpecificFileMaterializer("test/server/runtime", "http://localhost:3000/runtime"))
+    testFrameworks += new TestFramework("utest.runner.Framework")
+  )
+  .jvmSettings(
+    // jvm-specific settings
+  )
+  .jsSettings(
+    // js-specific settings
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0",
+
     jsEnv := NodeJSEnv().value
-    // jsEnv := PhantomJSEnv(autoExit = false).value
   )
 
-lazy val scalaHttpJVM = scalaHttp.jvm
-lazy val scalaHttpJS = scalaHttp.js
+lazy val scalaHttpJVM = scalaHttp.jvm.configure(InBrowserTesting.jvm)
+lazy val scalaHttpJS = scalaHttp.js.configure(InBrowserTesting.js)

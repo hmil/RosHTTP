@@ -1,4 +1,9 @@
 language: scala
 scala:
   - 2.11.7
-script: sbt ++$TRAVIS_SCALA_VERSION scalastyle test
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION scalastyle
+  - sbt ++$TRAVIS_SCALA_VERSION scalaHttpJS/test
+  - sbt ++$TRAVIS_SCALA_VERSION scalaHttpJVM/test
+  - sbt ++$TRAVIS_SCALA_VERSION chrome:test
+  - sbt ++$TRAVIS_SCALA_VERSION firefox:test
