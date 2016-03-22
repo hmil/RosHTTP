@@ -18,14 +18,4 @@ class IncomingMessage extends js.Object {
   val url: String = js.native
 
   def on(event: String, cb: js.Function1[js.Dynamic, Unit]): Unit = js.native
-
-  /*def on[T](event: Event[T], cb: (T) => Unit): Unit = {
-    on(event.name, (obj: js.Dynamic) =>
-      cb(obj.asInstanceOf[T])
-    )
-  }*/
 }
-
-//class Event[T](val name: String)
-
-//object DataEvent extends Event[String]("data")

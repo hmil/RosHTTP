@@ -65,14 +65,20 @@ object HttpDriver {
     }
     xhr.onreadystatechange = { (e: dom.Event) =>
        // TODO: create a stream depending on readystate
-      if (xhr.readyState == dom.XMLHttpRequest.DONE) p.success(new HttpResponse(xhr.status, xhr.responseText))
+      if (xhr.readyState == dom.XMLHttpRequest.DONE) {
+        if (xhr.status >= 400) {
+          p.failure(new IOException("Temporary behaviour on error status codes"))
+        } else {
+          p.success(new HttpResponse(xhr.status, xhr.responseText))
+        }
+      }
       /*
       readystate values:
-      0	UNSENT	Client has been created. open() not called yet.
-      1	OPENED	open() has been called.
-      2	HEADERS_RECEIVED	send() has been called, and headers and status are available.
-      3	LOADING	Downloading; responseText holds partial data.
-      4	DONE	The operation is complete.
+      0  UNSENT  Client has been created. open() not called yet.
+      1  OPENED  open() has been called.
+      2  HEADERS_RECEIVED  send() has been called, and headers and status are available.
+      3  LOADING  Downloading; responseText holds partial data.
+      4  DONE  The operation is complete.
        */
     }
     xhr.send()
