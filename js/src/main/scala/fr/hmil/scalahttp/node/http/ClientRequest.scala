@@ -1,5 +1,6 @@
 package fr.hmil.scalahttp.node.http
 
+import fr.hmil.scalahttp.events.EventEmitter
 import fr.hmil.scalahttp.node.buffer.Buffer
 
 import scala.scalajs.js
@@ -8,7 +9,7 @@ import scala.scalajs.js
   * Complete nodejs http ClientRequest API facade
   */
 @js.native
-class ClientRequest extends js.Object {
+class ClientRequest extends EventEmitter {
 
   /**
     * Marks the request as aborting. Calling this will cause remaining data in

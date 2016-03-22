@@ -50,6 +50,11 @@ object HttpDriver {
       }
     })
 
+    nodeRequest.on("error", { (s: js.Dynamic) =>
+      p.failure(new IOException(s.toString))
+      ()
+    })
+
     nodeRequest.end()
 
     p.future

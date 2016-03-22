@@ -1,10 +1,12 @@
 package fr.hmil.scalahttp.node.http
 
+import fr.hmil.scalahttp.events.EventEmitter
+
 import scala.collection.mutable
 import scala.scalajs.js
 
 @js.native
-class IncomingMessage extends js.Object {
+class IncomingMessage extends EventEmitter {
   val headers: mutable.Map[String, String] = js.native
   val httpVersion: String = js.native
   val method: String = js.native
@@ -16,6 +18,4 @@ class IncomingMessage extends js.Object {
   // message.socket -- not facaded here
   val trailers: mutable.Map[String, String] = js.native
   val url: String = js.native
-
-  def on(event: String, cb: js.Function1[js.Dynamic, Unit]): Unit = js.native
 }

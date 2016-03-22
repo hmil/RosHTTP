@@ -7,11 +7,11 @@ app.get('/status/:statusCode', function(req, res) {
 });
 
 app.get('/redirect/temporary/:dest', function(req, res) {
-  res.redirect(`/${req.params.dest}`);
+  res.redirect('/' + req.params.dest);
 });
 
 app.get('/redirect/permanent/:dest', function(req, res) {
-  res.redirect(301 ,`/${req.params.dest}`);
+  res.redirect(301 ,'/' + req.params.dest);
 });
 
 
