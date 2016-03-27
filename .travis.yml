@@ -2,6 +2,11 @@ language: scala
 scala:
   - 2.11.7
 
+install:
+  - nvm list
+  - nvm install 4.4.0
+  - nvm use 4.4.0
+
 before_script:
   # Init xvfb for headless browser testing
   - export DISPLAY=:99.0
