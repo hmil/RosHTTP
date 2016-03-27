@@ -22,10 +22,8 @@ object Helpers {
     */
   def require[T](module: Module[T]): Option[T] = {
     if (!js.isUndefined(module.inst)) {
-      println("Using context")
       Some(module.inst)
     } else if (isRequireAvailable) {
-      println("Using require")
       Some(Global.require[T](module.name))
     } else {
       None
