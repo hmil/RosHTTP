@@ -30,5 +30,5 @@ lazy val scalaHttp = crossProject.in(file("."))
     jsEnv := NodeJSEnv().value
   )
 
-lazy val scalaHttpJVM = scalaHttp.jvm.configure(InBrowserTesting.jvm)
-lazy val scalaHttpJS = scalaHttp.js.configure(InBrowserTesting.js)
+lazy val scalaHttpJVM = scalaHttp.jvm
+lazy val scalaHttpJS = scalaHttp.js

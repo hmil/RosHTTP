@@ -30,24 +30,23 @@ object HttpDriver {
       path = req.path
     ), (message: IncomingMessage) => {
 
-      if (message.statusCode >= 400) {
-        p.failure(new IOException("Temporary behaviour on error status codes"))
+      var body = ""
+
+      message.on("data", { (s: js.Dynamic) =>
+        body = body + s
         ()
-      } else {
-        var body = ""
+      })
 
-        message.on("data", { (s: js.Dynamic) =>
-          body = body + s
-          ()
-        })
-
-        message.on("end", { (s: js.Dynamic) =>
+      message.on("end", { (s: js.Dynamic) =>
+        if (message.statusCode < 400) {
           p.success(new HttpResponse(message.statusCode, body))
-          ()
-        })
-
+        } else {
+          p.failure(HttpException.badStatus(new HttpResponse(message.statusCode, body)))
+        }
         ()
-      }
+      })
+
+      ()
     })
 
     nodeRequest.on("error", { (s: js.Dynamic) =>
@@ -66,13 +65,13 @@ object HttpDriver {
     val xhr = new dom.XMLHttpRequest()
     xhr.open(req.method.name, req.url)
     xhr.onerror = { (e: ErrorEvent) =>
-      // p.failure(new HttpError) TODO
+      p.failure(HttpException.networkError(new IOException(e.message)))
     }
     xhr.onreadystatechange = { (e: dom.Event) =>
        // TODO: create a stream depending on readystate
       if (xhr.readyState == dom.XMLHttpRequest.DONE) {
         if (xhr.status >= 400) {
-          p.failure(new IOException("Temporary behaviour on error status codes"))
+          p.failure(HttpException.badStatus(new HttpResponse(xhr.status, xhr.responseText)))
         } else {
           p.success(new HttpResponse(xhr.status, xhr.responseText))
         }
