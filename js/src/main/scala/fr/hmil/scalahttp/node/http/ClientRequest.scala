@@ -1,6 +1,6 @@
 package fr.hmil.scalahttp.node.http
 
-import fr.hmil.scalahttp.events.EventEmitter
+import fr.hmil.scalahttp.node.events.EventEmitter
 import fr.hmil.scalahttp.node.buffer.Buffer
 
 import scala.scalajs.js

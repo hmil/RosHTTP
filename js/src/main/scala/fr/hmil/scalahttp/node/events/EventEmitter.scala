@@ -1,4 +1,4 @@
-package fr.hmil.scalahttp.events
+package fr.hmil.scalahttp.node.events
 
 import scala.scalajs.js
 

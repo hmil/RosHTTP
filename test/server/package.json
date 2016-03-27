@@ -4,7 +4,8 @@
   "description": "A testing server for scala-http-client",
   "main": "index.js",
   "dependencies": {
-    "express": "^4.13.4"
+    "express": "^4.13.4",
+    "morgan": "^1.7.0"
   },
   "devDependencies": {},
   "scripts": {
