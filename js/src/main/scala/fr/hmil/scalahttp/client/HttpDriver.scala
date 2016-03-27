@@ -20,9 +20,7 @@ object HttpDriver {
     }
   }
 
-  def sendWithNode(req: HttpRequest): Future[HttpResponse] = {
-    val p: Promise[HttpResponse] = Promise[HttpResponse]()
-
+  def makeNodeRequest(req: HttpRequest, p: Promise[HttpResponse]): Unit = {
     val nodeRequest = http.request(RequestOptions(
       hostname = req.host,
       port = req.port,
@@ -30,22 +28,25 @@ object HttpDriver {
       path = req.path
     ), (message: IncomingMessage) => {
 
-      var body = ""
+      if (message.statusCode >= 300 && message.statusCode < 400 && message.headers.contains("location")) {
+        makeNodeRequest(req.withURL(message.headers("location")), p)
+      } else {
+        var body = ""
 
-      message.on("data", { (s: js.Dynamic) =>
-        body = body + s
-        ()
-      })
+        message.on("data", { (s: js.Dynamic) =>
+          body = body + s
+          ()
+        })
 
-      message.on("end", { (s: js.Dynamic) =>
-        if (message.statusCode < 400) {
-          p.success(new HttpResponse(message.statusCode, body))
-        } else {
-          p.failure(HttpException.badStatus(new HttpResponse(message.statusCode, body)))
-        }
-        ()
-      })
-
+        message.on("end", { (s: js.Dynamic) =>
+          if (message.statusCode < 400) {
+            p.success(new HttpResponse(message.statusCode, body))
+          } else {
+            p.failure(HttpException.badStatus(new HttpResponse(message.statusCode, body)))
+          }
+          ()
+        })
+      }
       ()
     })
 
@@ -55,6 +56,12 @@ object HttpDriver {
     })
 
     nodeRequest.end()
+  }
+
+  def sendWithNode(req: HttpRequest): Future[HttpResponse] = {
+    val p: Promise[HttpResponse] = Promise[HttpResponse]()
+
+    makeNodeRequest(req, p)
 
     p.future
   }

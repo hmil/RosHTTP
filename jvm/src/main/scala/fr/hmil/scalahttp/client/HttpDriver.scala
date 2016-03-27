@@ -9,20 +9,19 @@ import scala.io.Source
 object HttpDriver {
 
   def send(req: HttpRequest): Future[HttpResponse] = {
-    val connection = new URL(req.url).openConnection().asInstanceOf[HttpURLConnection]
-
     concurrent.Future {
-      val code = connection.getResponseCode()
+      val connection = new URL(req.url).openConnection().asInstanceOf[HttpURLConnection]
+      val code = connection.getResponseCode
 
       if (code < 400) {
         new HttpResponse(
           code,
-          Source.fromInputStream(connection.getInputStream()).mkString
+          Source.fromInputStream(connection.getInputStream).mkString
         )
       } else {
         throw HttpException.badStatus(new HttpResponse(
           code,
-          Source.fromInputStream(connection.getErrorStream()).mkString
+          Source.fromInputStream(connection.getErrorStream).mkString
         ))
       }
     }

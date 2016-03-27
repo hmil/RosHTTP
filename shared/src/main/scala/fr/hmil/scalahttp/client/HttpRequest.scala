@@ -1,6 +1,7 @@
 package fr.hmil.scalahttp.client
 
-import fr.hmil.scalahttp.{Protocol, Method}
+import java.net.URI
+import fr.hmil.scalahttp.{Method, Protocol}
 import scala.concurrent.Future
 
 /**
@@ -30,8 +31,13 @@ final class HttpRequest  private (
     copy(protocol = protocol)
 
   def withURL(url: String): HttpRequest = {
-    // TODO: parse url into components
-    copy()
+    val parser = new URI(url)
+    copy(
+      protocol = if (parser.getScheme != null) parser.getScheme else protocol,
+      host = if (parser.getHost != null) parser.getHost else host,
+      port = if (parser.getPort != -1) parser.getPort else port,
+      path = if (parser.getPath != null) parser.getPath else path
+    )
   }
 
   def url: String = s"$protocol://$host:$port$path"
@@ -44,7 +50,7 @@ final class HttpRequest  private (
       method: Method      = this.method,
       host: String        = this.host,
       path: String        = this.path,
-      port: Int   = this.port,
+      port: Int           = this.port,
       protocol: Protocol  = this.protocol
   ): HttpRequest = {
     new HttpRequest(
@@ -58,11 +64,12 @@ final class HttpRequest  private (
 }
 
 object HttpRequest {
-  def create: HttpRequest = new HttpRequest(
+  def apply(): HttpRequest = new HttpRequest(
     method = Method.GET,
     host = null,
     path = null,
     port = 80,
     protocol = Protocol.HTTP
   )
+  def apply(url: String): HttpRequest = this() withURL(url)
 }

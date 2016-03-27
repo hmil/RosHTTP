@@ -7,7 +7,7 @@ import scala.concurrent.Future
 
 object HttpRequestSpec extends TestSuite {
 
-  private val serverRequest = HttpRequest.create withHost "localhost" withPort 3000
+  private val serverRequest = HttpRequest() withHost "localhost" withPort 3000
 
   /*
    * Status codes defined in HTTP/1.1 spec
@@ -79,7 +79,7 @@ object HttpRequestSpec extends TestSuite {
     "The test server should be reachable" - {
       serverRequest
         .withPath("/")
-        .send() map { s => assert(s.statusCode == 200) }
+        .send() map { s => s.statusCode ==> 200 }
     }
 
     "Status codes < 400 should complete the request with success" - {
@@ -88,7 +88,7 @@ object HttpRequestSpec extends TestSuite {
           .withPath(s"/status/$status")
           .send()
           .map({ s =>
-            assert(s.statusCode == status)
+            s.statusCode ==> status
           })
       }).reduce((f1, f2) => f1.flatMap(_=>f2))
     }
@@ -114,34 +114,28 @@ object HttpRequestSpec extends TestSuite {
           }
       ).reduce((f1, f2) => f1.flatMap(_=>f2))
     }
+
+    "Redirects are followed by default" - {
+      serverRequest
+        .withPath("/redirect/temporary/echo/redirected")
+        .send()
+        .map(s => {
+          s.body ==> "redirected"
+        })
+    }
+
+    /*
+    "Redirects can be disabled" - {
+      // well, no they cannot because of a stupid W3C spec flaw...
+      serverRequest
+        .withPath("/redirect/temporary/echo/redirected")
+        .withRedirect(false)
+        .send()
+        .map(s => {
+          s.body ==> "redirecting..."
+        })
+    }
+    */
   }
 }
-/*
-class HttpRequestSpec extends AsyncFlatSpec with Matchers {
 
-  private val serverRequest = HttpRequest.create withHost "localhost" withPort 3000
-
-
-  "The test server" should "be reachable" in {
-    serverRequest
-      .withPath("/")
-      .send() map { s => s.statusCode should be (200) }
-  }
-  "Status codes < 400" should "complete the request with success" in {
-    serverRequest
-      .withPath("/status/200")
-      .send()
-      .map({ s => s.statusCode should be (200)})
-  }
-
-  "Status codes >= 400" should "complete the request with failure" in {
-    val req = serverRequest
-      .withPath("/status/400")
-      .send()
-
-    req.recover({case t => "The failure" should be ("have happened")})
-      .map(s => "The failure" should be ("have happened"))
-  }
-
-}
-*/

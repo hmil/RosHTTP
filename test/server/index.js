@@ -8,12 +8,15 @@ app.get('/status/:statusCode', function(req, res) {
   res.sendStatus(req.params.statusCode);
 });
 
-app.get('/redirect/temporary/:dest', function(req, res) {
-  res.redirect('/' + req.params.dest);
+app.get('/redirect/temporary/*', function(req, res) {
+  res.statusCode = 302;
+  res.append('Location', '/' + req.param(0));
+  res.write("redirecting...");
+  res.end();
 });
 
-app.get('/redirect/permanent/:dest', function(req, res) {
-  res.redirect(301 ,'/' + req.params.dest);
+app.get('/redirect/permanent/*', function(req, res) {
+  res.redirect(301 ,'/' + req.params(0));
 });
 
 

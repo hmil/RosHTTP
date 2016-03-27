@@ -2,7 +2,17 @@ package fr.hmil.scalahttp
 
 
 
-final class Method private(val name: String)
+final case class Method private (name: String) {
+
+  override implicit def toString: String = name
+
+  override def equals(o: Any): Boolean = o match {
+    case that: Method => that.name.equalsIgnoreCase(this.name)
+    case _ => false
+  }
+
+  override def hashCode: Int = name.toUpperCase.hashCode
+}
 
 
 /**
@@ -17,6 +27,6 @@ object Method {
   val DELETE = Method("DELETE")
   val TRACE = Method("TRACE")
   val CONNECT = Method("CONNECT")
-  implicit def apply(name: String): Method = new Method(name)
+  implicit def fromString(name: String): Method = new Method(name)
 }
 
