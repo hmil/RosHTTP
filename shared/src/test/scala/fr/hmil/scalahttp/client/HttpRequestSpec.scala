@@ -82,6 +82,12 @@ object HttpRequestSpec extends TestSuite {
         .send() map { s => s.statusCode ==> 200 }
     }
 
+    "Example from the readme does actually work" - {
+      HttpRequest("http://www.scala-lang.org/")
+        .send()
+        .map(response => println(response.body))
+    }
+
     "Status codes < 400 should complete the request with success" - {
       goodStatus.map(status => {
         serverRequest

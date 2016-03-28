@@ -5,10 +5,8 @@ import fr.hmil.scalahttp.node.http.{IncomingMessage, RequestOptions}
 import org.scalajs.dom
 import org.scalajs.dom.raw.ErrorEvent
 import java.io.IOException
-
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
-import scala.util.Try
 
 object HttpDriver {
 
@@ -34,6 +32,7 @@ object HttpDriver {
         var body = ""
 
         message.on("data", { (s: js.Dynamic) =>
+          // TODO: handle charset
           body = body + s
           ()
         })
@@ -75,7 +74,8 @@ object HttpDriver {
       p.failure(HttpException.networkError(new IOException(e.message)))
     }
     xhr.onreadystatechange = { (e: dom.Event) =>
-       // TODO: create a stream depending on readystate
+      // TODO: create a stream depending on readystate
+      // TODO: handle charset
       if (xhr.readyState == dom.XMLHttpRequest.DONE) {
         if (xhr.status >= 400) {
           p.failure(HttpException.badStatus(new HttpResponse(xhr.status, xhr.responseText)))
