@@ -5,7 +5,11 @@ import fr.hmil.scalahttp.{Method, Protocol}
 import scala.concurrent.Future
 
 /**
-  * TODO: doc
+  * Builds an HTTP request.
+  *
+  * The request is sent using  [[send]]. A request can be sent multiple times.
+  * Each time yields a Future[HttpResponse] which either succeeds with an [[HttpResponse]]
+  * or fails with an [[HttpException]]
   */
 final class HttpRequest  private (
     val method: Method,

@@ -1,6 +1,6 @@
 package fr.hmil.scalahttp
 
-object HttpUtils {
+private object HttpUtils {
 
   /**
     * Extracts the charset from a content-type header string

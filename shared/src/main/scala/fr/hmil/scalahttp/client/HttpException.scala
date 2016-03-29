@@ -11,7 +11,9 @@ import java.io.IOException
   * This exception must be constructed via the companion object in order to factor out
   * error messages.
   *
-  * @param response The http response. In case of network error, the response can be None
+  * @param response The http response.
+  *
+  *   In case of network error, the response can be None
   */
 class HttpException private (
     val response: Option[HttpResponse],
