@@ -5,6 +5,10 @@ import fr.hmil.scalahttp.node.http.{IncomingMessage, RequestOptions}
 import org.scalajs.dom
 import org.scalajs.dom.raw.ErrorEvent
 import java.io.IOException
+
+import fr.hmil.scalahttp.HttpUtils
+import fr.hmil.scalahttp.node.buffer.Buffer
+
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
 
@@ -26,14 +30,16 @@ object HttpDriver {
       path = req.path
     ), (message: IncomingMessage) => {
 
+      val charset = HttpUtils.charsetFromContentType(message.headers.get("content-type").orNull)
+
       if (message.statusCode >= 300 && message.statusCode < 400 && message.headers.contains("location")) {
         makeNodeRequest(req.withURL(message.headers("location")), p)
       } else {
         var body = ""
 
         message.on("data", { (s: js.Dynamic) =>
-          // TODO: handle charset
-          body = body + s
+          val buf = s.asInstanceOf[Buffer]
+          body += buf.toString(charset)
           ()
         })
 
@@ -75,7 +81,6 @@ object HttpDriver {
     }
     xhr.onreadystatechange = { (e: dom.Event) =>
       // TODO: create a stream depending on readystate
-      // TODO: handle charset
       if (xhr.readyState == dom.XMLHttpRequest.DONE) {
         if (xhr.status >= 400) {
           p.failure(HttpException.badStatus(new HttpResponse(xhr.status, xhr.responseText)))

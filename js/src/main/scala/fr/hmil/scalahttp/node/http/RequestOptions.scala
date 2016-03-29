@@ -19,7 +19,7 @@ trait RequestOptions extends js.Object {
   val headers: Map[String, String]
   val auth: String
   val agent: Agent
-  // val createConnection -- TODO
+  // val createConnection
 }
 
 object RequestOptions {
@@ -75,4 +75,3 @@ object RequestOptions {
     r.asInstanceOf[RequestOptions]
   }
 }
-
