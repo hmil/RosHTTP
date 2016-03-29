@@ -82,12 +82,23 @@ object HttpRequestSpec extends TestSuite {
         .send() map { s => s.statusCode ==> 200 }
     }
 
-    "Example from the readme does actually work" - {
-      // (But override println to avoid flooding the console)
-      def println(s: String) = assert(s.length > 1000)
-      HttpRequest("http://schema.org/WebPage")
-        .send()
-        .map(response => println(response.body))
+    "Examples from the readme actually work" - {
+      "Main example" - {
+        // (But override println to avoid flooding the console)
+        def println(s: String) = assert(s.length > 1000)
+        HttpRequest("http://schema.org/WebPage")
+          .send()
+          .map(response => println(response.body))
+      }
+
+      "Error handling example" - {
+        HttpRequest("http://hmil.github.io/foobar")
+          .send()
+          .onFailure {
+            case e:HttpException if e.response.isDefined =>
+              s"Got a status: ${e.response.get.statusCode}" ==> "Got a status: 404"
+          }
+      }
     }
 
     "Status codes < 400 should complete the request with success" - {
