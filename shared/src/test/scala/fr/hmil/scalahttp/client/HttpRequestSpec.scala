@@ -83,7 +83,9 @@ object HttpRequestSpec extends TestSuite {
     }
 
     "Example from the readme does actually work" - {
-      HttpRequest("http://www.scala-lang.org/")
+      // (But override println to avoid flooding the console)
+      def println(s: String) = assert(s.length > 1000)
+      HttpRequest("http://schema.org/WebPage")
         .send()
         .map(response => println(response.body))
     }

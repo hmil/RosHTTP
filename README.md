@@ -14,7 +14,7 @@ WIP, this package is not published yet
 
 ```scala
 // Runs consistently on the jvm, in node.js and in the browser!
-HttpRequest("http://www.scala-lang.org/")
+HttpRequest("http://schema.org/WebPage")
   .send()
   .map(response => println(response.body))
 ```
