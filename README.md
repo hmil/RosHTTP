@@ -1,4 +1,5 @@
-# Scala http client
+# Scala http client 
+[![Build Status](https://travis-ci.org/hmil/scala-http-client.svg?branch=master)](https://travis-ci.org/hmil/scala-http-client)
 
 A human-readable scala http client API compatible with:
 
@@ -30,7 +31,7 @@ HttpRequest("http://hmil.github.io/foobar")
   .send()
   .onFailure {
     case e:HttpException if e.response.isDefined =>
-      println(s"Got a status:${e.response.get.statusCode}")
+      println(s"Got a status: ${e.response.get.statusCode}")
       // Repsonse body is available at: e.response.get.body
   }
 ```
@@ -43,7 +44,7 @@ Example:
 val baseRequest HttpRequest("http://localhost/")
 val homeRequest = baseRequest withPort 3000 withPath "/home"
 
-baseRequest.send() // queries "localhost/""
+baseRequest.send() // queries "localhost/"
 homeRequest.send() // queries "localhost:3000/home"
 ```
 
