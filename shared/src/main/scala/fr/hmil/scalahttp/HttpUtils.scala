@@ -23,5 +23,4 @@ private object HttpUtils {
       })
     }
   }
-
 }

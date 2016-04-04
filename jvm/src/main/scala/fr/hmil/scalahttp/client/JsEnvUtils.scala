@@ -1,6 +1,6 @@
 package fr.hmil.scalahttp.client
 
-object JsEnvUtils {
+private object JsEnvUtils {
   val userAgent: String = "jvm"
 
   // Check each browser

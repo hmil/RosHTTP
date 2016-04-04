@@ -3,11 +3,10 @@ package fr.hmil.scalahttp.client
 import utest._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 object HttpRequestSpec extends TestSuite {
 
-  private val serverRequest = HttpRequest() withHost "localhost" withPort 3000
+  private val SERVER_URL = "http://localhost:3000"
 
   /*
    * Status codes defined in HTTP/1.1 spec
@@ -76,10 +75,12 @@ object HttpRequestSpec extends TestSuite {
   )
 
   val tests = this{
-    "The test server should be reachable" - {
-      serverRequest
-        .withPath("/")
-        .send() map { s => s.statusCode ==> 200 }
+
+    "Meta" - {
+      "The test server should be reachable" - {
+        HttpRequest(SERVER_URL)
+          .send() map { s => s.statusCode ==> 200 }
+      }
     }
 
     "Examples from the readme actually work" - {
@@ -101,60 +102,161 @@ object HttpRequestSpec extends TestSuite {
       }
     }
 
-    "Status codes < 400 should complete the request with success" - {
-      goodStatus.map(status => {
-        serverRequest
-          .withPath(s"/status/$status")
+    "General" - {
+      "Status codes < 400 should complete the request with success" - {
+        goodStatus.map(status => {
+          HttpRequest(SERVER_URL)
+            .withPath(s"/status/$status")
+            .send()
+            .map({ s =>
+              s.statusCode ==> status
+            })
+        }).reduce((f1, f2) => f1.flatMap(_ => f2))
+      }
+
+      "Status codes >= 400 should complete the request with failure" - {
+        badStatus.map(status =>
+          HttpRequest(SERVER_URL)
+            .withPath(s"/status/$status")
+            .send()
+            .failed.map(_ => "success")
+        ).reduce((f1, f2) => f1.flatMap(_ => f2))
+      }
+
+      "Redirects are followed" - {
+        HttpRequest(SERVER_URL)
+          .withPath("/redirect/temporary/echo/redirected")
           .send()
-          .map({ s =>
-            s.statusCode ==> status
+          .map(s => {
+            s.body ==> "redirected"
           })
-      }).reduce((f1, f2) => f1.flatMap(_=>f2))
+      }
     }
 
-    "Status codes >= 400 should complete the request with failure" - {
-      badStatus.map(status =>
-        serverRequest
-          .withPath(s"/status/$status")
-          .send()
-          .failed.map(_ => "success")
-      ).reduce((f1, f2) => f1.flatMap(_=>f2))
-    }
-
-    "The message body can be obtained on failed requests" - {
-      badStatus.map(status =>
-        serverRequest
-          .withPath(s"/status/$status")
-          .send()
-          .failed.map {
+    "Error handling" - {
+      "The message body can be obtained on failed requests" - {
+        badStatus.map(status =>
+          HttpRequest(SERVER_URL)
+            .withPath(s"/status/$status")
+            .send()
+            .failed.map {
             case e:HttpException if e.response.isDefined =>
               statusText(e.response.get.statusCode) ==> e.response.get.body
             case _ => assert(false)
           }
-      ).reduce((f1, f2) => f1.flatMap(_=>f2))
+        ).reduce((f1, f2) => f1.flatMap(_=>f2))
+      }
     }
 
-    "Redirects are followed by default" - {
-      serverRequest
-        .withPath("/redirect/temporary/echo/redirected")
-        .send()
-        .map(s => {
-          s.body ==> "redirected"
-        })
-    }
+    "Query string" - {
+      "set in constructor" - {
+        "vanilla" - {
+          HttpRequest(s"$SERVER_URL/query?Hello%20world.")
+            .send()
+            .map(s => {
+              s.body ==> "Hello world."
+            })
+        }
 
-    /*
-    "Redirects can be disabled" - {
-      // well, no they cannot because of a stupid W3C spec flaw...
-      serverRequest
-        .withPath("/redirect/temporary/echo/redirected")
-        .withRedirect(false)
-        .send()
-        .map(s => {
-          s.body ==> "redirecting..."
-        })
+        "with illegal characters" - {
+          HttpRequest(s"$SERVER_URL/query?Heizölrückstoßabdämpfung%20+")
+            .send()
+            .map(s => {
+              s.body ==> "Heizölrückstoßabdämpfung +"
+            })
+        }
+      }
+
+      "set in withQueryString" - {
+
+        "vanilla" - {
+          HttpRequest(s"$SERVER_URL/query")
+            .withQueryString("Hello world.")
+            .send()
+            .map(s => {
+              s.body ==> "Hello world."
+            })
+        }
+
+        "with illegal characters" - {
+          HttpRequest(s"$SERVER_URL/query")
+            .withQueryString("Heizölrückstoßabdämpfung %20+")
+            .send()
+            .map(s => {
+              s.body ==> "Heizölrückstoßabdämpfung %20+"
+            })
+        }
+
+        "is escaped" - {
+          HttpRequest(s"$SERVER_URL/query")
+            .withQueryString("Heizölrückstoßabdämpfung")
+            .queryString.get ==> "Heiz%C3%B6lr%C3%BCcksto%C3%9Fabd%C3%A4mpfung"
+        }
+      }
+
+      "set in withRawQueryString" - {
+        HttpRequest(s"$SERVER_URL/query")
+          .withRawQueryString("Heiz%C3%B6lr%C3%BCcksto%C3%9Fabd%C3%A4mpfung")
+          .send()
+          .map(s => {
+            s.body ==> "Heizölrückstoßabdämpfung"
+          })
+      }
+
+      "set in withQueryParameter" - {
+        "single" - {
+          HttpRequest(s"$SERVER_URL/query/parsed")
+            .withQueryParameter("device", "neon")
+            .send()
+            .map(s => {
+              s.body ==> "{\"device\":\"neon\"}"
+            })
+        }
+
+        "added in batch" - {
+          HttpRequest(s"$SERVER_URL/query/parsed")
+            .withQueryParameters(Map(
+              "device" -> "neon",
+              "element" -> "argon"))
+            .send()
+            .map(s => {
+              s.body ==> "{\"device\":\"neon\",\"element\":\"argon\"}"
+            })
+        }
+
+        "added in batch with illegal characters" - {
+          HttpRequest(s"$SERVER_URL/query/parsed")
+            .withQueryParameters(Map(
+              " zařízení" -> "topný olej vůle potlačující",
+              "chäřac+=r&" -> "+Heizölrückstoßabdämpfung=r&"))
+            .send()
+            .map(s => {
+              s.body ==> "{\" zařízení\":\"topný olej vůle potlačující\"," +
+                "\"chäřac+=r&\":\"+Heizölrückstoßabdämpfung=r&\"}"
+            })
+        }
+
+        "added in sequence" - {
+          HttpRequest(s"$SERVER_URL/query/parsed")
+            .withQueryParameters(Map(
+              "element" -> "argon",
+              "device" -> "chair"
+            ))
+            .withQueryParameter("tool", "hammer")
+            .withQueryParameter("device", "neon")
+            .send()
+            .map(s => {
+              s.body ==> "{\"element\":\"argon\",\"device\":\"neon\",\"tool\":\"hammer\"}"
+            })
+        }
+
+        "as list parameter" - {
+          HttpRequest(s"$SERVER_URL/query/parsed")
+            .withQueryParameter("map", List("foo", "bar"))
+            .queryString.get ==> "map%5B0%5D=foo&map%5B1%5D=bar"
+        }
+      }
     }
-    */
   }
 }
 
