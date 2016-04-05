@@ -1,5 +1,6 @@
-# Scala http client 
-[![Build Status](https://travis-ci.org/hmil/scala-http-client.svg?branch=master)](https://travis-ci.org/hmil/scala-http-client)
+# Scala http client
+[![Build Status](https://travis-ci.org/hmil/scala-http-client.svg?branch=master)]
+(https://travis-ci.org/hmil/scala-http-client)
 
 A human-readable scala http client API compatible with:
 
@@ -7,13 +8,17 @@ A human-readable scala http client API compatible with:
 - most **browsers** (_via_ [scala-js](https://github.com/scala-js/scala-js))
 - **node.js** (_via_ [scala-js](https://github.com/scala-js/scala-js))
 
-## Installation
+# Installation
 
 WIP, this package is not published yet
 
-## Usage
+# Usage
 
-Basic usage:
+The following is a simplified usage guide. You may find useful information in
+the [API doc](http://hmil.github.io/scala-http-client/docs/index.html) too.
+## Basic usage
+
+<!--- test: "Main example" -->
 ```scala
 // Runs consistently on the jvm, in node.js and in the browser!
 HttpRequest("http://schema.org/WebPage")
@@ -21,11 +26,12 @@ HttpRequest("http://schema.org/WebPage")
   .map(response => println(response.body))
 ```
 
-When you `send()` a request, you get a `Future[HttpResponse]` which resolves to an
-HttpResponse if everything went fine or fails with an HttpException if a network error
-occurred or if a statusCode > 400 was received.
+When you `send()` a request, you get a `Future[HttpResponse]` which resolves to
+an HttpResponse if everything went fine or fails with an HttpException if a
+network error occurred or if a statusCode > 400 was received.
 When applicable, the response body of a failed request can be read:
 
+<!--- test: "Error handling" -->
 ```scala
 HttpRequest("http://hmil.github.io/foobar")
   .send()
@@ -36,21 +42,73 @@ HttpRequest("http://hmil.github.io/foobar")
   }
 ```
 
-Requests are immutable but they can be customized using `.withXXX` methods (these
-return a new request, they do not modify the original).
 
-Example:
+## Configuring requests
+
+Every aspect of a request can be customized using `.withXXX` methods. These are
+meant to be chained, they do not modify the original request.
+
+### URI
+
+The URI can be built using `.withProtocol`, `.withHost`, `.withPort`,
+`.withPath`, and `.withQuery...`. The latter is a bit more complex and
+is detailed below.
+
+<!--- test: "Composite URI" -->
 ```scala
-val baseRequest HttpRequest("http://localhost/")
-val homeRequest = baseRequest withPort 3000 withPath "/home"
-
-baseRequest.send() // queries "localhost/"
-homeRequest.send() // queries "localhost:3000/home"
+HttpRequest()
+  .withProtocol("HTTP")
+  .withHost("localhost")
+  .withPort(3000)
+  .withPath("/weather")
+  .withQueryParameter("city", "London")
+  .send() // GET http://localhost:3000/weather?city=London
 ```
 
-More features coming soon.
+#### `.withQueryString`
+The whole querystring can be set to a custom value like this:
 
-Read the [API doc](http://hmil.github.io/scala-http-client/docs/index.html) for further details.
+```scala
+// Sets the query string such that the target url ends in "?hello%20world"
+request.withQueryString("hello world")
+```
+
+`.withQueryString(string)` urlencodes string and replaces the whole query string
+with the result.
+To bypass encoding, use `.withQueryStringRaw(rawString)`.
+
+#### `.withQueryParameter`
+Most of the time, the query string is used to pass key/value pairs in the
+`application/x-www-form-urlencoded` format.
+[HttpRequest](http://hmil.github.io/scala-http-client/docs/index.html#fr.hmil.scalahttp.client.HttpRequest)
+offers an API to add, update and delete keys in the query string.  
+
+<!--- test: "Query parameters" -->
+```scala
+request
+  .withQueryParameter("foo", "bar")
+  .withQueryParameter("table", List("a", "b", "c"))
+  .withoutQueryParameter("table[1]")
+  .withQueryParameter("map", Map(
+    "d" -> "dval",
+    "e" -> "e value"
+  ))
+  .withQueryParameters(Map(
+    "license" -> "MIT",
+    "copy" -> "© 2016"
+  ))
+  /* Query is now:
+   ?foo=bar&table[0]=a&table[2]=c&map[d]=dval&map[e]=e%20value&license=MIT&copy=%C2%A9%202016
+  */
+```
+
+Use `.withoutQuery` to get rid of the whole query string.
+
+---
+
+Watch the [v1 milestone](https://github.com/hmil/scala-http-client/milestones/v1.0.0)
+for upcoming features. Feedback is very welcome so feel free to file an issue if you
+see something that is missing.
 
 ## Known limitations
 
