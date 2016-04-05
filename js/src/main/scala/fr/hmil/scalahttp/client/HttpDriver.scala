@@ -4,7 +4,7 @@ import fr.hmil.scalahttp.node.Modules.HttpModule
 
 import scala.concurrent.Future
 
-object HttpDriver {
+private object HttpDriver {
 
   def send(req: HttpRequest): Future[HttpResponse] = {
     if (HttpModule.isAvailable) {

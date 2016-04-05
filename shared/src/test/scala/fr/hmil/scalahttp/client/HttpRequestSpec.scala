@@ -1,5 +1,6 @@
 package fr.hmil.scalahttp.client
 
+import fr.hmil.scalahttp.Protocol
 import utest._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -92,13 +93,48 @@ object HttpRequestSpec extends TestSuite {
           .map(response => println(response.body))
       }
 
-      "Error handling example" - {
+      "Error handling" - {
         HttpRequest("http://hmil.github.io/foobar")
           .send()
           .onFailure {
             case e:HttpException if e.response.isDefined =>
               s"Got a status: ${e.response.get.statusCode}" ==> "Got a status: 404"
           }
+      }
+
+      "Composite URI" - {
+        HttpRequest()
+          .withProtocol("HTTP")
+          .withHost("localhost")
+          .withPort(3000)
+          .withPath("/query")
+          .withQueryParameter("city", "London")
+          .send()
+      }
+
+      "Query parameters" - {
+        val q = HttpRequest()
+          .withQueryParameter("foo", "bar")
+          .withQueryParameter("table", List("a", "b", "c"))
+          .withoutQueryParameter("table[1]")
+          .withQueryParameter("map", Map(
+            "d" -> "dval",
+            "e" -> "e value"
+          ))
+          .withQueryParameters(Map(
+            "license" -> "MIT",
+            "copy" -> "© 2016"
+          ))
+          .queryString.get
+
+        assert(q.contains("foo=bar"))
+        assert(q.contains("table%5B0%5D=a"))
+        assert(q.contains("table%5B2%5D=c"))
+        assert(q.contains("map%5Bd%5D=dval"))
+        assert(q.contains("map%5Be%5D=e%20value"))
+        assert(q.contains("license=MIT"))
+        assert(q.contains("copy=%C2%A9%202016"))
+        assert(!q.contains("table%5B1%5D"))
       }
     }
 
@@ -196,7 +232,7 @@ object HttpRequestSpec extends TestSuite {
 
       "set in withRawQueryString" - {
         HttpRequest(s"$SERVER_URL/query")
-          .withRawQueryString("Heiz%C3%B6lr%C3%BCcksto%C3%9Fabd%C3%A4mpfung")
+          .withQueryStringRaw("Heiz%C3%B6lr%C3%BCcksto%C3%9Fabd%C3%A4mpfung")
           .send()
           .map(s => {
             s.body ==> "Heizölrückstoßabdämpfung"
@@ -253,7 +289,46 @@ object HttpRequestSpec extends TestSuite {
         "as list parameter" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
             .withQueryParameter("map", List("foo", "bar"))
-            .queryString.get ==> "map%5B0%5D=foo&map%5B1%5D=bar"
+            .send()
+            .map(s => {
+              s.body ==> "{\"map\":[\"foo\",\"bar\"]}"
+            })
+        }
+
+        "removed" - {
+          val req = HttpRequest(s"$SERVER_URL/query/parsed")
+            .withQueryParameters(Map(
+              "element" -> "argon",
+              "device" -> "chair"
+            ))
+            .withoutQueryParameter("device")
+
+          assert(!req.queryParameters.contains("device"))
+        }
+
+        "removed last parameter" - {
+          val req = HttpRequest(s"$SERVER_URL/query/parsed")
+            .withQueryParameter("device", "chair")
+            .withoutQueryParameter("device")
+
+          assert(req.queryString.isEmpty)
+        }
+      }
+    }
+
+    "Protocol" - {
+      "can be set to HTTP" - {
+        HttpRequest()
+          .withProtocol("http")
+          .withProtocol("HTTP")
+          .withProtocol(Protocol.HTTP)
+      }
+
+      "cannot be set to HTTPS" - {
+        intercept[IllegalArgumentException] {
+          HttpRequest()
+            .withProtocol("https")
+          assert(false)
         }
       }
     }

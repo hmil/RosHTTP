@@ -11,13 +11,13 @@ app.get('/status/:statusCode', function(req, res) {
 
 app.get('/redirect/temporary/*', function(req, res) {
   res.statusCode = 302;
-  res.append('Location', '/' + req.param(0));
+  res.append('Location', '/' + req.params[0]);
   res.write("redirecting...");
   res.end();
 });
 
 app.get('/redirect/permanent/*', function(req, res) {
-  res.redirect(301 ,'/' + req.params(0));
+  res.redirect(301 ,'/' + req.params[0]);
 });
 
 

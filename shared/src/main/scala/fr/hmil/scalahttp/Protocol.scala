@@ -8,16 +8,16 @@ final case class Protocol private(name: String) {
   override implicit def toString: String = name
 
   override def equals(o: Any): Boolean = o match {
-    case that: Method => that.name.equalsIgnoreCase(this.name)
+    case that: Protocol => that.name.equals(this.name)
     case _ => false
   }
 
-  override def hashCode: Int = name.toUpperCase.hashCode
+  override def hashCode: Int = name.hashCode
 }
 
 object Protocol {
-  val HTTP = Protocol("http")
-  val HTTPS = Protocol("https")
+  val HTTP = Protocol("HTTP")
+  val HTTPS = Protocol("HTTPS")
 
-  implicit def fromString(name: String): Protocol = new Protocol(name)
+  implicit def fromString(name: String): Protocol = new Protocol(name.toUpperCase)
 }
