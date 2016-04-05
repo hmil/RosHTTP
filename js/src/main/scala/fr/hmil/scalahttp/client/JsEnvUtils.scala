@@ -6,7 +6,7 @@ package fr.hmil.scalahttp.client
 import scala.util.Try
 import scalajs.js.Dynamic.global
 
-object JsEnvUtils {
+private object JsEnvUtils {
 
   /** Sample (real) values are:
     * - Mozilla/5.0 (Unknown; Linux x86_64) AppleWebKit/538.1 (KHTML, like Gecko) PhantomJS/2.1.1 Safari/538.1

@@ -8,7 +8,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.io.Source
 
-object HttpDriver {
+private object HttpDriver {
 
   def send(req: HttpRequest): Future[HttpResponse] = {
     concurrent.Future {

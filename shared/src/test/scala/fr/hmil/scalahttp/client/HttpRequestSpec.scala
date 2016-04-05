@@ -1,13 +1,13 @@
 package fr.hmil.scalahttp.client
 
+import fr.hmil.scalahttp.Protocol
 import utest._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 object HttpRequestSpec extends TestSuite {
 
-  private val serverRequest = HttpRequest() withHost "localhost" withPort 3000
+  private val SERVER_URL = "http://localhost:3000"
 
   /*
    * Status codes defined in HTTP/1.1 spec
@@ -76,74 +76,262 @@ object HttpRequestSpec extends TestSuite {
   )
 
   val tests = this{
-    "The test server should be reachable" - {
-      serverRequest
-        .withPath("/")
-        .send() map { s => s.statusCode ==> 200 }
+
+    "Meta" - {
+      "The test server should be reachable" - {
+        HttpRequest(SERVER_URL)
+          .send() map { s => s.statusCode ==> 200 }
+      }
     }
 
-    "Example from the readme does actually work" - {
-      // (But override println to avoid flooding the console)
-      def println(s: String) = assert(s.length > 1000)
-      HttpRequest("http://schema.org/WebPage")
-        .send()
-        .map(response => println(response.body))
-    }
-
-    "Status codes < 400 should complete the request with success" - {
-      goodStatus.map(status => {
-        serverRequest
-          .withPath(s"/status/$status")
+    "Examples from the readme actually work" - {
+      "Main example" - {
+        // (But override println to avoid flooding the console)
+        def println(s: String) = assert(s.length > 1000)
+        HttpRequest("http://schema.org/WebPage")
           .send()
-          .map({ s =>
-            s.statusCode ==> status
+          .map(response => println(response.body))
+      }
+
+      "Error handling" - {
+        HttpRequest("http://hmil.github.io/foobar")
+          .send()
+          .onFailure {
+            case e:HttpException if e.response.isDefined =>
+              s"Got a status: ${e.response.get.statusCode}" ==> "Got a status: 404"
+          }
+      }
+
+      "Composite URI" - {
+        HttpRequest()
+          .withProtocol("HTTP")
+          .withHost("localhost")
+          .withPort(3000)
+          .withPath("/query")
+          .withQueryParameter("city", "London")
+          .send()
+      }
+
+      "Query parameters" - {
+        val q = HttpRequest()
+          .withQueryParameter("foo", "bar")
+          .withQueryParameter("table", List("a", "b", "c"))
+          .withoutQueryParameter("table[1]")
+          .withQueryParameter("map", Map(
+            "d" -> "dval",
+            "e" -> "e value"
+          ))
+          .withQueryParameters(Map(
+            "license" -> "MIT",
+            "copy" -> "© 2016"
+          ))
+          .queryString.get
+
+        assert(q.contains("foo=bar"))
+        assert(q.contains("table%5B0%5D=a"))
+        assert(q.contains("table%5B2%5D=c"))
+        assert(q.contains("map%5Bd%5D=dval"))
+        assert(q.contains("map%5Be%5D=e%20value"))
+        assert(q.contains("license=MIT"))
+        assert(q.contains("copy=%C2%A9%202016"))
+        assert(!q.contains("table%5B1%5D"))
+      }
+    }
+
+    "General" - {
+      "Status codes < 400 should complete the request with success" - {
+        goodStatus.map(status => {
+          HttpRequest(SERVER_URL)
+            .withPath(s"/status/$status")
+            .send()
+            .map({ s =>
+              s.statusCode ==> status
+            })
+        }).reduce((f1, f2) => f1.flatMap(_ => f2))
+      }
+
+      "Status codes >= 400 should complete the request with failure" - {
+        badStatus.map(status =>
+          HttpRequest(SERVER_URL)
+            .withPath(s"/status/$status")
+            .send()
+            .failed.map(_ => "success")
+        ).reduce((f1, f2) => f1.flatMap(_ => f2))
+      }
+
+      "Redirects are followed" - {
+        HttpRequest(SERVER_URL)
+          .withPath("/redirect/temporary/echo/redirected")
+          .send()
+          .map(s => {
+            s.body ==> "redirected"
           })
-      }).reduce((f1, f2) => f1.flatMap(_=>f2))
+      }
     }
 
-    "Status codes >= 400 should complete the request with failure" - {
-      badStatus.map(status =>
-        serverRequest
-          .withPath(s"/status/$status")
-          .send()
-          .failed.map(_ => "success")
-      ).reduce((f1, f2) => f1.flatMap(_=>f2))
-    }
-
-    "The message body can be obtained on failed requests" - {
-      badStatus.map(status =>
-        serverRequest
-          .withPath(s"/status/$status")
-          .send()
-          .failed.map {
+    "Error handling" - {
+      "The message body can be obtained on failed requests" - {
+        badStatus.map(status =>
+          HttpRequest(SERVER_URL)
+            .withPath(s"/status/$status")
+            .send()
+            .failed.map {
             case e:HttpException if e.response.isDefined =>
               statusText(e.response.get.statusCode) ==> e.response.get.body
             case _ => assert(false)
           }
-      ).reduce((f1, f2) => f1.flatMap(_=>f2))
+        ).reduce((f1, f2) => f1.flatMap(_=>f2))
+      }
     }
 
-    "Redirects are followed by default" - {
-      serverRequest
-        .withPath("/redirect/temporary/echo/redirected")
-        .send()
-        .map(s => {
-          s.body ==> "redirected"
-        })
+    "Query string" - {
+      "set in constructor" - {
+        "vanilla" - {
+          HttpRequest(s"$SERVER_URL/query?Hello%20world.")
+            .send()
+            .map(s => {
+              s.body ==> "Hello world."
+            })
+        }
+
+        "with illegal characters" - {
+          HttpRequest(s"$SERVER_URL/query?Heizölrückstoßabdämpfung%20+")
+            .send()
+            .map(s => {
+              s.body ==> "Heizölrückstoßabdämpfung +"
+            })
+        }
+      }
+
+      "set in withQueryString" - {
+
+        "vanilla" - {
+          HttpRequest(s"$SERVER_URL/query")
+            .withQueryString("Hello world.")
+            .send()
+            .map(s => {
+              s.body ==> "Hello world."
+            })
+        }
+
+        "with illegal characters" - {
+          HttpRequest(s"$SERVER_URL/query")
+            .withQueryString("Heizölrückstoßabdämpfung %20+")
+            .send()
+            .map(s => {
+              s.body ==> "Heizölrückstoßabdämpfung %20+"
+            })
+        }
+
+        "is escaped" - {
+          HttpRequest(s"$SERVER_URL/query")
+            .withQueryString("Heizölrückstoßabdämpfung")
+            .queryString.get ==> "Heiz%C3%B6lr%C3%BCcksto%C3%9Fabd%C3%A4mpfung"
+        }
+      }
+
+      "set in withRawQueryString" - {
+        HttpRequest(s"$SERVER_URL/query")
+          .withQueryStringRaw("Heiz%C3%B6lr%C3%BCcksto%C3%9Fabd%C3%A4mpfung")
+          .send()
+          .map(s => {
+            s.body ==> "Heizölrückstoßabdämpfung"
+          })
+      }
+
+      "set in withQueryParameter" - {
+        "single" - {
+          HttpRequest(s"$SERVER_URL/query/parsed")
+            .withQueryParameter("device", "neon")
+            .send()
+            .map(s => {
+              s.body ==> "{\"device\":\"neon\"}"
+            })
+        }
+
+        "added in batch" - {
+          HttpRequest(s"$SERVER_URL/query/parsed")
+            .withQueryParameters(Map(
+              "device" -> "neon",
+              "element" -> "argon"))
+            .send()
+            .map(s => {
+              s.body ==> "{\"device\":\"neon\",\"element\":\"argon\"}"
+            })
+        }
+
+        "added in batch with illegal characters" - {
+          HttpRequest(s"$SERVER_URL/query/parsed")
+            .withQueryParameters(Map(
+              " zařízení" -> "topný olej vůle potlačující",
+              "chäřac+=r&" -> "+Heizölrückstoßabdämpfung=r&"))
+            .send()
+            .map(s => {
+              s.body ==> "{\" zařízení\":\"topný olej vůle potlačující\"," +
+                "\"chäřac+=r&\":\"+Heizölrückstoßabdämpfung=r&\"}"
+            })
+        }
+
+        "added in sequence" - {
+          HttpRequest(s"$SERVER_URL/query/parsed")
+            .withQueryParameters(Map(
+              "element" -> "argon",
+              "device" -> "chair"
+            ))
+            .withQueryParameter("tool", "hammer")
+            .withQueryParameter("device", "neon")
+            .send()
+            .map(s => {
+              s.body ==> "{\"element\":\"argon\",\"device\":\"neon\",\"tool\":\"hammer\"}"
+            })
+        }
+
+        "as list parameter" - {
+          HttpRequest(s"$SERVER_URL/query/parsed")
+            .withQueryParameter("map", List("foo", "bar"))
+            .send()
+            .map(s => {
+              s.body ==> "{\"map\":[\"foo\",\"bar\"]}"
+            })
+        }
+
+        "removed" - {
+          val req = HttpRequest(s"$SERVER_URL/query/parsed")
+            .withQueryParameters(Map(
+              "element" -> "argon",
+              "device" -> "chair"
+            ))
+            .withoutQueryParameter("device")
+
+          assert(!req.queryParameters.contains("device"))
+        }
+
+        "removed last parameter" - {
+          val req = HttpRequest(s"$SERVER_URL/query/parsed")
+            .withQueryParameter("device", "chair")
+            .withoutQueryParameter("device")
+
+          assert(req.queryString.isEmpty)
+        }
+      }
     }
 
-    /*
-    "Redirects can be disabled" - {
-      // well, no they cannot because of a stupid W3C spec flaw...
-      serverRequest
-        .withPath("/redirect/temporary/echo/redirected")
-        .withRedirect(false)
-        .send()
-        .map(s => {
-          s.body ==> "redirecting..."
-        })
+    "Protocol" - {
+      "can be set to HTTP" - {
+        HttpRequest()
+          .withProtocol("http")
+          .withProtocol("HTTP")
+          .withProtocol(Protocol.HTTP)
+      }
+
+      "cannot be set to HTTPS" - {
+        intercept[IllegalArgumentException] {
+          HttpRequest()
+            .withProtocol("https")
+          assert(false)
+        }
+      }
     }
-    */
   }
 }
 
