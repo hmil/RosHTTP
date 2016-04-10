@@ -118,7 +118,7 @@ Use `.withoutQuery` to get rid of the whole query string.
 
 ---
 
-Watch the [v1 milestone](https://github.com/hmil/scala-http-client/milestones/v1.0.0)
+Watch the [issues](https://github.com/hmil/scala-http-client/issues)
 for upcoming features. Feedback is very welcome so feel free to file an issue if you
 see something that is missing.
 
