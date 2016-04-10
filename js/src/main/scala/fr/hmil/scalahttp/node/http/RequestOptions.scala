@@ -52,7 +52,7 @@ object RequestOptions {
     socketPath: js.UndefOr[String] = js.undefined,
     method: js.UndefOr[String] = js.undefined,
     path: js.UndefOr[String] = js.undefined,
-    headers: js.UndefOr[Map[String, String]] = js.undefined,
+    headers: js.UndefOr[js.Dictionary[String]] = js.undefined,
     auth: js.UndefOr[String] = js.undefined,
     agent: js.UndefOr[Agent] = js.undefined
 

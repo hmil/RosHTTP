@@ -122,8 +122,9 @@ see something that is missing.
 
 ## Known limitations
 
+- Some headers cannot be set in the browser ([list](https://developer.mozilla.org/en-US/docs/Glossary/Forbidden_header_name)).
 - There is no way to avoid redirects in the browser. This is a W3C spec.
-- Chrome does not allow userspace handling of a 407 status code (ie: it is treated
-  like a network error). see https://bugs.chromium.org/p/chromium/issues/detail?id=372136
+- Chrome does not allow userspace handling of a 407 status code. It is treated
+  like a network error. See [chromium issue](https://bugs.chromium.org/p/chromium/issues/detail?id=372136).
 
 ## Changelog
