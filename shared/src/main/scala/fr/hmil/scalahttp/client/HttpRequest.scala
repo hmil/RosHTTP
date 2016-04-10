@@ -11,8 +11,6 @@ import scala.concurrent.Future
   * The request is sent using  [[send]]. A request can be sent multiple times.
   * Each time yields a Future[HttpResponse] which either succeeds with an [[HttpResponse]]
   * or fails with an [[HttpException]]
-  *
-  * TODO: document class methods
   */
 final class HttpRequest  private (
     val method: Method,
