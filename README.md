@@ -10,7 +10,14 @@ A human-readable scala http client API compatible with:
 
 # Installation
 
-WIP, this package is not published yet
+Add a dependency to the snapshot release in your build.sbt:
+
+```scala
+resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+libraryDependencies += "fr.hmil" %%% "scala-http-client" % "0.1.0-SNAPSHOT"
+```
+
+> There is no stable release available yet.
 
 # Usage
 
@@ -20,6 +27,11 @@ the [API doc](http://hmil.github.io/scala-http-client/docs/index.html) too.
 
 <!--- test: "Main example" -->
 ```scala
+import fr.hmil.scalahttp.client.HttpRequest
+import scala.concurrent.ExecutionContext.Implicits.global
+
+/* ... */
+
 // Runs consistently on the jvm, in node.js and in the browser!
 HttpRequest("http://schema.org/WebPage")
   .send()
