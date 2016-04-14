@@ -37,7 +37,7 @@ object NodeDriver {
           if (message.statusCode < 400) {
             p.success(new HttpResponse(message.statusCode, body))
           } else {
-            p.failure(HttpException.badStatus(new HttpResponse(message.statusCode, body)))
+            p.failure(HttpResponseError.badStatus(new HttpResponse(message.statusCode, body)))
           }
           ()
         })

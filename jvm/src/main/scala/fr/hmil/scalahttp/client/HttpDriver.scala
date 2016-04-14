@@ -12,20 +12,25 @@ private object HttpDriver {
 
   def send(req: HttpRequest): Future[HttpResponse] = {
     concurrent.Future {
-      val connection = new URL(req.url).openConnection().asInstanceOf[HttpURLConnection]
-      val code = connection.getResponseCode
-      val charset = HttpUtils.charsetFromContentType(connection.getHeaderField("content-type"))
+      try {
+        val connection = new URL(req.url).openConnection().asInstanceOf[HttpURLConnection]
+        val code = connection.getResponseCode
+        val charset = HttpUtils.charsetFromContentType(connection.getHeaderField("content-type"))
 
-      if (code < 400) {
-        new HttpResponse(
-          code,
-          Source.fromInputStream(connection.getInputStream)(charset).mkString
-        )
-      } else {
-        throw HttpException.badStatus(new HttpResponse(
-          code,
-          Source.fromInputStream(connection.getErrorStream)(charset).mkString
-        ))
+        if (code < 400) {
+          new HttpResponse(
+            code,
+            Source.fromInputStream(connection.getInputStream)(charset).mkString
+          )
+        } else {
+          throw HttpResponseError.badStatus(new HttpResponse(
+            code,
+            Source.fromInputStream(connection.getErrorStream)(charset).mkString
+          ))
+        }
+      } catch {
+        case e: HttpResponseError => throw e
+        case e: Throwable => throw new HttpNetworkError(e)
       }
     }
   }

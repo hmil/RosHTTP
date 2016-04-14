@@ -10,7 +10,7 @@ import scala.concurrent.Future
   *
   * The request is sent using  [[send]]. A request can be sent multiple times.
   * Each time yields a Future[HttpResponse] which either succeeds with an [[HttpResponse]]
-  * or fails with an [[HttpException]]
+  * or fails with an [[HttpNetworkError]]
   */
 final class HttpRequest  private (
     val method: Method,
@@ -22,19 +22,6 @@ final class HttpRequest  private (
 
   /** The path with the query string or just the path if there is no query string */
   val longPath = path + queryString.map(q => s"?$q").getOrElse("")
-
-  /** A map of query parameters present in the query string */
-  val queryParameters: Map[String, String] =
-    queryString
-      .map(
-        _.split('&')
-        .flatMap(_.split('=').toList match {
-          case x :: y :: Nil =>
-            Some(CrossPlatformUtils.decodeQueryString(x) -> CrossPlatformUtils.decodeQueryString(y))
-          case _ => None
-        })
-        .toMap)
-      .getOrElse(Map.empty[String, String])
 
   /** The target url for this request */
   val url: String = s"$protocol://$host:$port$longPath"
@@ -120,7 +107,7 @@ final class HttpRequest  private (
     *
     * @return A copy of this [[HttpRequest]] without query string
     */
-  def withoutQuery(): HttpRequest =
+  def withoutQueryString(): HttpRequest =
     copy(queryString = None)
 
   /** Adds a query parameter or updates it if it already exists.
@@ -133,7 +120,11 @@ final class HttpRequest  private (
     * @return A copy of this [[HttpRequest]] with an updated query string.
     */
   def withQueryParameter(key: String, value: String): HttpRequest =
-    withQueryParameters(Map(key -> value))
+    copy(queryString = Some(
+      queryString.map(q => q + '&').getOrElse("") +
+      CrossPlatformUtils.encodeQueryString(key) +
+      "=" +
+      CrossPlatformUtils.encodeQueryString(value)))
 
   /** Adds a query array parameter or updates it if it already exists.
     *
@@ -150,7 +141,7 @@ final class HttpRequest  private (
     * @see [[withQueryParameter(String,String)]]
     */
   def withQueryParameter(key: String, values: List[String]): HttpRequest =
-    withQueryParameter(key, (values.indices.map(_.toString) zip values).toMap)
+    values.foldLeft(this)((acc, value) => acc.withQueryParameter(key, value))
 
   /** Adds a query map parameter or updates it if it already exists.
     *
@@ -176,16 +167,7 @@ final class HttpRequest  private (
     * @see [[withQueryParameter(String,String)]]
     */
   def withQueryParameters(parameters: Map[String, String]): HttpRequest =
-    setQueryParameters(queryParameters ++ parameters.map(p => (p._1, p._2)))
-
-  /** Removes one query parameter from the query string.
-    *
-    * @param key The unescaped parameter key to remove
-    * @return A copy of this [[HttpRequest]] with an updated query string.
-    * @see [[withQueryParameter(String,String)]]
-    */
-  def withoutQueryParameter(key: String): HttpRequest =
-    setQueryParameters(queryParameters - key)
+    parameters.foldLeft(this)((acc, entry) => acc.withQueryParameter(entry._1, entry._2))
 
   /** Updates request protocol, host, port, path and queryString according to a url.
     *
@@ -210,33 +192,18 @@ final class HttpRequest  private (
   /** Sends this request.
     *
     * A request can be sent multiple times. When a request is sent, it returns a Future[HttpResponse]
-    * which either succeeds with an [[HttpResponse]] or fails with an [[HttpException]].
+    * which either succeeds with an [[HttpResponse]] or fails with an [[HttpNetworkError]].
     *
     * Possible reasons for the future failing are:
     * - A status code >= 400
     * - A network error
     *
     * Note that in some cases the response body can still be obtained after a failure
-    * through the [[HttpException]].
+    * through the [[HttpNetworkError]].
     *
-    * @return A future of HttpResponse which may fail with an [[HttpException]]
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]]
     */
   def send(): Future[HttpResponse] = HttpDriver.send(this)
-
-
-  /** Internal method to replace all query parameters at once */
-  private def setQueryParameters(parameters: Map[String, String]): HttpRequest = {
-    if (parameters.isEmpty) {
-      withoutQuery()
-    } else {
-      withQueryStringRaw(parameters
-        .foldRight(List.empty[String])((e, acc) => {
-          CrossPlatformUtils.encodeQueryString(e._1) + "=" + CrossPlatformUtils.encodeQueryString(e._2) ::
-            acc
-        })
-        .mkString("&"))
-    }
-  }
 
   /** Internal method to back public facing .withXXX methods. */
   private def copy(

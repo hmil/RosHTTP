@@ -97,8 +97,8 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest("http://hmil.github.io/foobar")
           .send()
           .onFailure {
-            case e:HttpException if e.response.isDefined =>
-              s"Got a status: ${e.response.get.statusCode}" ==> "Got a status: 404"
+            case e:HttpResponseError =>
+              s"Got a status: ${e.response.statusCode}" ==> "Got a status: 404"
           }
       }
 
@@ -116,7 +116,6 @@ object HttpRequestSpec extends TestSuite {
         val q = HttpRequest()
           .withQueryParameter("foo", "bar")
           .withQueryParameter("table", List("a", "b", "c"))
-          .withoutQueryParameter("table[1]")
           .withQueryParameter("map", Map(
             "d" -> "dval",
             "e" -> "e value"
@@ -125,16 +124,8 @@ object HttpRequestSpec extends TestSuite {
             "license" -> "MIT",
             "copy" -> "© 2016"
           ))
-          .queryString.get
-
-        assert(q.contains("foo=bar"))
-        assert(q.contains("table%5B0%5D=a"))
-        assert(q.contains("table%5B2%5D=c"))
-        assert(q.contains("map%5Bd%5D=dval"))
-        assert(q.contains("map%5Be%5D=e%20value"))
-        assert(q.contains("license=MIT"))
-        assert(q.contains("copy=%C2%A9%202016"))
-        assert(!q.contains("table%5B1%5D"))
+          .queryString.get ==>
+          "foo=bar&table=a&table=b&table=c&map%5Bd%5D=dval&map%5Be%5D=e%20value&license=MIT&copy=%C2%A9%202016"
       }
     }
 
@@ -176,8 +167,8 @@ object HttpRequestSpec extends TestSuite {
             .withPath(s"/status/$status")
             .send()
             .failed.map {
-            case e:HttpException if e.response.isDefined =>
-              statusText(e.response.get.statusCode) ==> e.response.get.body
+            case e:HttpResponseError =>
+              statusText(e.response.statusCode) ==> e.response.body
             case _ => assert(false)
           }
         ).reduce((f1, f2) => f1.flatMap(_=>f2))
@@ -282,7 +273,7 @@ object HttpRequestSpec extends TestSuite {
             .withQueryParameter("device", "neon")
             .send()
             .map(s => {
-              s.body ==> "{\"element\":\"argon\",\"device\":\"neon\",\"tool\":\"hammer\"}"
+              s.body ==> "{\"element\":\"argon\",\"device\":[\"chair\",\"neon\"],\"tool\":\"hammer\"}"
             })
         }
 
@@ -294,26 +285,16 @@ object HttpRequestSpec extends TestSuite {
               s.body ==> "{\"map\":[\"foo\",\"bar\"]}"
             })
         }
-
-        "removed" - {
-          val req = HttpRequest(s"$SERVER_URL/query/parsed")
-            .withQueryParameters(Map(
-              "element" -> "argon",
-              "device" -> "chair"
-            ))
-            .withoutQueryParameter("device")
-
-          assert(!req.queryParameters.contains("device"))
-        }
-
-        "removed last parameter" - {
-          val req = HttpRequest(s"$SERVER_URL/query/parsed")
-            .withQueryParameter("device", "chair")
-            .withoutQueryParameter("device")
-
-          assert(req.queryString.isEmpty)
-        }
       }
+
+      "removed" - {
+        val req = HttpRequest(s"$SERVER_URL/query/parsed")
+          .withQueryString("device=chair")
+          .withoutQueryString()
+
+        assert(req.queryString.isEmpty)
+      }
+
     }
 
     "Protocol" - {
@@ -334,4 +315,3 @@ object HttpRequestSpec extends TestSuite {
     }
   }
 }
-

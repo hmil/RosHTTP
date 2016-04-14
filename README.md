@@ -48,9 +48,8 @@ When applicable, the response body of a failed request can be read:
 HttpRequest("http://hmil.github.io/foobar")
   .send()
   .onFailure {
-    case e:HttpException if e.response.isDefined =>
-      println(s"Got a status: ${e.response.get.statusCode}")
-      // Repsonse body is available at: e.response.get.body
+    case e:HttpResponseError =>
+      s"Got a status: ${e.response.statusCode}" ==> "Got a status: 404"
   }
 ```
 
@@ -100,7 +99,6 @@ offers an API to add, update and delete keys in the query string.
 request
   .withQueryParameter("foo", "bar")
   .withQueryParameter("table", List("a", "b", "c"))
-  .withoutQueryParameter("table[1]")
   .withQueryParameter("map", Map(
     "d" -> "dval",
     "e" -> "e value"
@@ -110,11 +108,11 @@ request
     "copy" -> "© 2016"
   ))
   /* Query is now:
-   ?foo=bar&table[0]=a&table[2]=c&map[d]=dval&map[e]=e%20value&license=MIT&copy=%C2%A9%202016
+   foo=bar&table=a&table=b&table=c&map[d]=dval&map[e]=e%20value&license=MIT&copy=%C2%A9%202016
   */
 ```
 
-Use `.withoutQuery` to get rid of the whole query string.
+Use `.withoutQueryString` to get rid of the whole query string.
 
 ---
 
