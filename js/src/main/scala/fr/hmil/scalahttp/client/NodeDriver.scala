@@ -17,6 +17,7 @@ object NodeDriver {
       hostname = req.host,
       port = req.port,
       method = req.method.name,
+      headers = js.Dictionary(req.headers.toSeq: _*),
       path = req.longPath
     ), (message: IncomingMessage) => {
 

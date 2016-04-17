@@ -1,9 +1,10 @@
 package fr.hmil.scalahttp.client
 
-import java.net.{URI, URLEncoder}
+import java.net.URI
 
-import fr.hmil.scalahttp.{HttpUtils, Method, Protocol}
+import fr.hmil.scalahttp.{Method, Protocol}
 
+import scala.collection.immutable.TreeMap
 import scala.concurrent.Future
 
 /** Builds an HTTP request.
@@ -18,7 +19,8 @@ final class HttpRequest  private (
     val path: String,
     val port: Int,
     val protocol: Protocol,
-    val queryString: Option[String]) {
+    val queryString: Option[String],
+    val headers: Map[String, String]) {
 
   /** The path with the query string or just the path if there is no query string */
   val longPath = path + queryString.map(q => s"?$q").getOrElse("")
@@ -169,6 +171,23 @@ final class HttpRequest  private (
   def withQueryParameters(parameters: Map[String, String]): HttpRequest =
     parameters.foldLeft(this)((acc, entry) => acc.withQueryParameter(entry._1, entry._2))
 
+  /** Adds or updates a header to the current set of headers.
+    *
+    * @param key The header key (case insensitive)
+    * @param value The header value
+    * @return A copy of this [[HttpRequest]] with an updated header set.
+    */
+  def withHeader(key: String, value: String): HttpRequest =
+    copy(headers = headers + (key -> value))
+
+  /** Adds or updates multiple headers to the current set of headers.
+    *
+    * @param newHeaders The headers to add.
+    * @return A copy of this [[HttpRequest]] with an updated header set.
+    */
+  def withHeaders(newHeaders: Map[String, String]): HttpRequest =
+    copy(headers = headers ++ newHeaders)
+
   /** Updates request protocol, host, port, path and queryString according to a url.
     *
     * @param url A valid HTTP url
@@ -177,15 +196,15 @@ final class HttpRequest  private (
   def withURL(url: String): HttpRequest = {
     val parser = new URI(url)
     copy(
-      protocol = if (parser.getScheme != null) parser.getScheme else protocol,
-      host = if (parser.getHost != null) parser.getHost else host,
-      port = if (parser.getPort != -1) parser.getPort else port,
-      path = if (parser.getPath != null) parser.getPath else  path,
-      queryString =
-        if (parser.getQuery != null)
-          Some(CrossPlatformUtils.encodeQueryString(parser.getQuery))
-        else
-          queryString
+    protocol = if (parser.getScheme != null) parser.getScheme else protocol,
+    host = if (parser.getHost != null) parser.getHost else host,
+    port = if (parser.getPort != -1) parser.getPort else port,
+    path = if (parser.getPath != null) parser.getPath else  path,
+    queryString =
+    if (parser.getQuery != null)
+    Some(CrossPlatformUtils.encodeQueryString(parser.getQuery))
+    else
+    queryString
     )
   }
 
@@ -212,7 +231,8 @@ final class HttpRequest  private (
       path: String        = this.path,
       port: Int           = this.port,
       protocol: Protocol  = this.protocol,
-      queryString: Option[String] = this.queryString
+      queryString: Option[String] = this.queryString,
+      headers: Map[String, String] = this.headers
   ): HttpRequest = {
     new HttpRequest(
       method    = method,
@@ -220,12 +240,18 @@ final class HttpRequest  private (
       path      = path,
       port      = port,
       protocol  = protocol,
-      queryString = queryString)
+      queryString = queryString,
+      headers = headers)
   }
 
 }
 
 object HttpRequest {
+
+  private object CaseInsensitiveOrdered extends Ordering[String] {
+    def compare(x: String, y: String): Int =
+      x.compareToIgnoreCase(y)
+  }
 
   private val default = new HttpRequest(
     method = Method.GET,
@@ -233,7 +259,8 @@ object HttpRequest {
     path = null,
     port = 80,
     protocol = Protocol.HTTP,
-    queryString = None
+    queryString = None,
+    headers = TreeMap()(CaseInsensitiveOrdered)
   )
 
   /** Creates a blank HTTP request.
