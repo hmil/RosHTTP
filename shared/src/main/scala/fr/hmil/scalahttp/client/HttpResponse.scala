@@ -1,9 +1,5 @@
 package fr.hmil.scalahttp.client
 
-import java.net.URL
-
-import scala.concurrent.Future
-
 /**
  * A successful HTTP response.
  *

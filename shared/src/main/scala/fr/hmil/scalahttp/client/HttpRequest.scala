@@ -1,8 +1,8 @@
 package fr.hmil.scalahttp.client
 
-import java.net.{URI, URLEncoder}
+import java.net.URI
 
-import fr.hmil.scalahttp.{HttpUtils, Method, Protocol}
+import fr.hmil.scalahttp.{Method, Protocol}
 
 import scala.collection.immutable.TreeMap
 import scala.concurrent.Future
@@ -171,10 +171,20 @@ final class HttpRequest  private (
   def withQueryParameters(parameters: Map[String, String]): HttpRequest =
     parameters.foldLeft(this)((acc, entry) => acc.withQueryParameter(entry._1, entry._2))
 
-  // TODO: DOC
+  /** Adds or updates a header to the current set of headers.
+    *
+    * @param key The header key (case insensitive)
+    * @param value The header value
+    * @return A copy of this [[HttpRequest]] with an updated header set.
+    */
   def withHeader(key: String, value: String): HttpRequest =
     copy(headers = headers + (key -> value))
 
+  /** Adds or updates multiple headers to the current set of headers.
+    *
+    * @param newHeaders The headers to add.
+    * @return A copy of this [[HttpRequest]] with an updated header set.
+    */
   def withHeaders(newHeaders: Map[String, String]): HttpRequest =
     copy(headers = headers ++ newHeaders)
 
@@ -238,8 +248,7 @@ final class HttpRequest  private (
 
 object HttpRequest {
 
-  private object CaseInsensitiveOrdered extends Ordering[String]
-  {
+  private object CaseInsensitiveOrdered extends Ordering[String] {
     def compare(x: String, y: String): Int =
       x.compareToIgnoreCase(y)
   }

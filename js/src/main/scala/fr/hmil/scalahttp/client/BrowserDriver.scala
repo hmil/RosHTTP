@@ -1,7 +1,5 @@
 package fr.hmil.scalahttp.client
 
-import java.io.IOException
-
 import org.scalajs.dom
 import org.scalajs.dom.raw.ErrorEvent
 
