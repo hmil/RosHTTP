@@ -2,6 +2,7 @@ package fr.hmil.scalahttp.client
 
 import java.net.URI
 
+import fr.hmil.scalahttp.client.HeaderUtils.CaseInsensitiveOrder
 import fr.hmil.scalahttp.{Method, Protocol}
 
 import scala.collection.immutable.TreeMap
@@ -248,11 +249,6 @@ final class HttpRequest  private (
 
 object HttpRequest {
 
-  private object CaseInsensitiveOrdered extends Ordering[String] {
-    def compare(x: String, y: String): Int =
-      x.compareToIgnoreCase(y)
-  }
-
   private val default = new HttpRequest(
     method = Method.GET,
     host = null,
@@ -260,7 +256,7 @@ object HttpRequest {
     port = 80,
     protocol = Protocol.HTTP,
     queryString = None,
-    headers = TreeMap()(CaseInsensitiveOrdered)
+    headers = TreeMap()(CaseInsensitiveOrder)
   )
 
   /** Creates a blank HTTP request.

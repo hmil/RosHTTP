@@ -3,6 +3,7 @@ package fr.hmil.scalahttp.client
 import java.io.IOException
 
 import fr.hmil.scalahttp.HttpUtils
+import fr.hmil.scalahttp.client.HeaderUtils.CaseInsensitiveString
 import fr.hmil.scalahttp.node.Modules._
 import fr.hmil.scalahttp.node.buffer.Buffer
 import fr.hmil.scalahttp.node.http.{IncomingMessage, RequestOptions}
@@ -35,10 +36,15 @@ object NodeDriver {
         })
 
         message.on("end", { (s: js.Dynamic) =>
+          val response = new HttpResponse(
+            message.statusCode, body,
+            message.headers
+              .map({ t => (new CaseInsensitiveString(t._1), t._2)})
+              .toMap[CaseInsensitiveString, String])
           if (message.statusCode < 400) {
-            p.success(new HttpResponse(message.statusCode, body))
+            p.success(response)
           } else {
-            p.failure(HttpResponseError.badStatus(new HttpResponse(message.statusCode, body)))
+            p.failure(HttpResponseError.badStatus(response))
           }
           ()
         })

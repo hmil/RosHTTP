@@ -3,6 +3,7 @@ package fr.hmil.scalahttp.client
 import java.net.{HttpURLConnection, URL}
 
 import fr.hmil.scalahttp.HttpUtils
+import fr.hmil.scalahttp.client.HeaderUtils.CaseInsensitiveString
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -31,17 +32,28 @@ private object HttpDriver {
 
   private def readResponse(connection: HttpURLConnection): HttpResponse = {
     val code = connection.getResponseCode
-    val charset = HttpUtils.charsetFromContentType(connection.getHeaderField("content-type"))
+    val headers = Iterator.from(0)
+      .map(i => (i, connection.getHeaderField(i)))
+      .takeWhile(_._2 != null)
+      .flatMap({ t =>
+        connection.getHeaderFieldKey(t._1) match {
+          case null => None
+          case key => Some((new CaseInsensitiveString(key), t._2.mkString.trim))
+        }
+      }).toMap[CaseInsensitiveString, String]
+    val charset = HttpUtils.charsetFromContentType(headers.getOrElse("content-type", null))
 
     if (code < 400) {
       new HttpResponse(
         code,
-        Source.fromInputStream(connection.getInputStream)(charset).mkString
+        Source.fromInputStream(connection.getInputStream)(charset).mkString,
+        headers
       )
     } else {
       throw HttpResponseError.badStatus(new HttpResponse(
         code,
-        Source.fromInputStream(connection.getErrorStream)(charset).mkString
+        Source.fromInputStream(connection.getErrorStream)(charset).mkString,
+        headers
       ))
     }
   }
