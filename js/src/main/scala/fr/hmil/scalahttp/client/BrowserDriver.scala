@@ -1,6 +1,5 @@
 package fr.hmil.scalahttp.client
 
-import fr.hmil.scalahttp.client.HeaderUtils.CaseInsensitiveString
 import org.scalajs.dom
 import org.scalajs.dom.raw.ErrorEvent
 
@@ -22,16 +21,16 @@ object BrowserDriver {
     xhr.onreadystatechange = { (e: dom.Event) =>
       if (xhr.readyState == dom.XMLHttpRequest.DONE) {
         val headers = xhr.getAllResponseHeaders() match {
-          case null => Map[CaseInsensitiveString, String]()
+          case null => Map[String, String]()
           case s: String => s.split("\r\n").map({ s =>
             val split = s.split(": ")
-            (new CaseInsensitiveString(split.head), split.tail.mkString.trim)
-          }).toMap[CaseInsensitiveString, String]
+            (split.head, split.tail.mkString.trim)
+          }).toMap[String, String]
         }
         val response = new HttpResponse(
           xhr.status,
           xhr.responseText,
-          headers)
+          HeaderMap(headers))
         if (xhr.status >= 400) {
           p.failure(HttpResponseError.badStatus(response))
         } else {
