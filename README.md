@@ -112,7 +112,28 @@ request
   */
 ```
 
-Use `.withoutQueryString` to get rid of the whole query string.
+### Request headers
+
+Set individual headers using `.withHeader`
+```scala
+request.withHeader("Accept", "text/html")
+```
+Or multiple headers at once using `.withHeaders`
+```scala
+request.withHeaders(Map(
+  "Accept" -> "text/html",
+  "Cookie" -> "sessionid=f00ba242cafe"
+))
+```
+
+### Response headers
+
+A map of response headers is available on the [[HttpResponse]] object:
+```scala
+request.send().map({res =>
+  println(res.headers("Set-Cookie"))
+})
+```
 
 ---
 

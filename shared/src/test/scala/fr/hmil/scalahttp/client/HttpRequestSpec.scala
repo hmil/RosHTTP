@@ -314,8 +314,6 @@ object HttpRequestSpec extends TestSuite {
       }
     }
 
-
-
     "Request headers" - {
       "Can be set with a map" - {
         val headers = Map(
@@ -374,6 +372,28 @@ object HttpRequestSpec extends TestSuite {
           assert(res.body.contains("\"custom\":\"barbar\""))
           assert(res.body.contains("\"accept\":\"application/json\""))
         })
+      }
+    }
+
+    "Response headers" - {
+
+      "can be read in the general case" - {
+        HttpRequest(s"$SERVER_URL/")
+          .send()
+          .map({
+            res =>
+              println(res.headers)
+              res.headers("X-Powered-By") ==> "Express"
+          })
+      }
+
+      "can be read in the error case" - {
+        HttpRequest(s"$SERVER_URL/status/400")
+          .send()
+          .failed.map {
+            case e: HttpResponseError =>
+              e.response.headers("X-Powered-By") ==> "Express"
+          }
       }
     }
   }

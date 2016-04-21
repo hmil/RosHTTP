@@ -1,10 +1,6 @@
 package fr.hmil.scalahttp.client
 
 /**
- * A successful HTTP response.
- *
- * This only contains the status code and the response body.
- *
- * Response headers will be implemented soon.
+ * An HTTP response obtained via an [[HttpRequest]]
  */
-class HttpResponse(val statusCode: Int, val body: String)
+class HttpResponse(val statusCode: Int, val body: String, val headers: HeaderMap[String])

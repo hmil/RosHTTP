@@ -4,7 +4,6 @@ import java.net.URI
 
 import fr.hmil.scalahttp.{Method, Protocol}
 
-import scala.collection.immutable.TreeMap
 import scala.concurrent.Future
 
 /** Builds an HTTP request.
@@ -20,7 +19,7 @@ final class HttpRequest  private (
     val port: Int,
     val protocol: Protocol,
     val queryString: Option[String],
-    val headers: Map[String, String]) {
+    val headers: HeaderMap[String]) {
 
   /** The path with the query string or just the path if there is no query string */
   val longPath = path + queryString.map(q => s"?$q").getOrElse("")
@@ -178,7 +177,7 @@ final class HttpRequest  private (
     * @return A copy of this [[HttpRequest]] with an updated header set.
     */
   def withHeader(key: String, value: String): HttpRequest =
-    copy(headers = headers + (key -> value))
+    copy(headers = HeaderMap(headers + (key -> value)))
 
   /** Adds or updates multiple headers to the current set of headers.
     *
@@ -186,7 +185,7 @@ final class HttpRequest  private (
     * @return A copy of this [[HttpRequest]] with an updated header set.
     */
   def withHeaders(newHeaders: Map[String, String]): HttpRequest =
-    copy(headers = headers ++ newHeaders)
+    copy(headers = HeaderMap(headers ++ newHeaders))
 
   /** Updates request protocol, host, port, path and queryString according to a url.
     *
@@ -232,7 +231,7 @@ final class HttpRequest  private (
       port: Int           = this.port,
       protocol: Protocol  = this.protocol,
       queryString: Option[String] = this.queryString,
-      headers: Map[String, String] = this.headers
+      headers: HeaderMap[String] = this.headers
   ): HttpRequest = {
     new HttpRequest(
       method    = method,
@@ -248,11 +247,6 @@ final class HttpRequest  private (
 
 object HttpRequest {
 
-  private object CaseInsensitiveOrdered extends Ordering[String] {
-    def compare(x: String, y: String): Int =
-      x.compareToIgnoreCase(y)
-  }
-
   private val default = new HttpRequest(
     method = Method.GET,
     host = null,
@@ -260,7 +254,7 @@ object HttpRequest {
     port = 80,
     protocol = Protocol.HTTP,
     queryString = None,
-    headers = TreeMap()(CaseInsensitiveOrdered)
+    headers = HeaderMap()
   )
 
   /** Creates a blank HTTP request.

@@ -20,10 +20,21 @@ object BrowserDriver {
     }
     xhr.onreadystatechange = { (e: dom.Event) =>
       if (xhr.readyState == dom.XMLHttpRequest.DONE) {
+        val headers = xhr.getAllResponseHeaders() match {
+          case null => Map[String, String]()
+          case s: String => s.split("\r\n").map({ s =>
+            val split = s.split(": ")
+            (split.head, split.tail.mkString.trim)
+          }).toMap[String, String]
+        }
+        val response = new HttpResponse(
+          xhr.status,
+          xhr.responseText,
+          HeaderMap(headers))
         if (xhr.status >= 400) {
-          p.failure(HttpResponseError.badStatus(new HttpResponse(xhr.status, xhr.responseText)))
+          p.failure(HttpResponseError.badStatus(response))
         } else {
-          p.success(new HttpResponse(xhr.status, xhr.responseText))
+          p.success(response)
         }
       }
     }

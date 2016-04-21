@@ -35,10 +35,17 @@ object NodeDriver {
         })
 
         message.on("end", { (s: js.Dynamic) =>
+          val headers = message.headers.toMap[String, String]
+
+          val response = new HttpResponse(
+            message.statusCode,
+            body,
+            HeaderMap(headers))
+
           if (message.statusCode < 400) {
-            p.success(new HttpResponse(message.statusCode, body))
+            p.success(response)
           } else {
-            p.failure(HttpResponseError.badStatus(new HttpResponse(message.statusCode, body)))
+            p.failure(HttpResponseError.badStatus(response))
           }
           ()
         })

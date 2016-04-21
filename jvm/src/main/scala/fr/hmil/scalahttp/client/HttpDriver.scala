@@ -31,17 +31,28 @@ private object HttpDriver {
 
   private def readResponse(connection: HttpURLConnection): HttpResponse = {
     val code = connection.getResponseCode
-    val charset = HttpUtils.charsetFromContentType(connection.getHeaderField("content-type"))
+    val headerMap = HeaderMap(Iterator.from(0)
+      .map(i => (i, connection.getHeaderField(i)))
+      .takeWhile(_._2 != null)
+      .flatMap({ t =>
+        connection.getHeaderFieldKey(t._1) match {
+          case null => None
+          case key => Some((key, t._2.mkString.trim))
+        }
+      }).toMap[String, String])
+    val charset = HttpUtils.charsetFromContentType(headerMap.getOrElse("content-type", null))
 
     if (code < 400) {
       new HttpResponse(
         code,
-        Source.fromInputStream(connection.getInputStream)(charset).mkString
+        Source.fromInputStream(connection.getInputStream)(charset).mkString,
+        headerMap
       )
     } else {
       throw HttpResponseError.badStatus(new HttpResponse(
         code,
-        Source.fromInputStream(connection.getErrorStream)(charset).mkString
+        Source.fromInputStream(connection.getErrorStream)(charset).mkString,
+        headerMap
       ))
     }
   }
