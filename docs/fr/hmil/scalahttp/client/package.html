@@ -66,25 +66,45 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="fr.hmil.scalahttp.client.HttpException" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="HttpExceptionextendsIOException"></a>
-      <a id="HttpException:HttpException"></a>
+              <ol><li name="fr.hmil.scalahttp.client.HeaderMap" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="HeaderMap[B&gt;:String]extendsMap[String,B]withMapLike[String,B,fr.hmil.scalahttp.client.HeaderMap[B]]"></a>
+      <a id="HeaderMap[B&gt;:String]:HeaderMap[B]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="HttpException.html"><span class="name">HttpException</span></a><span class="result"> extends <span class="extype" name="java.io.IOException">IOException</span></span>
+        <a href="HeaderMap.html"><span class="name">HeaderMap</span></a><span class="tparams">[<span name="B">B &gt;: <span class="extype" name="scala.Predef.String">String</span></span>]</span><span class="result"> extends <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="fr.hmil.scalahttp.client.HeaderMap.B">B</span>] with <span class="extype" name="scala.collection.immutable.MapLike">MapLike</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="fr.hmil.scalahttp.client.HeaderMap.B">B</span>, <a href="HeaderMap.html" class="extype" name="fr.hmil.scalahttp.client.HeaderMap">HeaderMap</a>[<span class="extype" name="fr.hmil.scalahttp.client.HeaderMap.B">B</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.scalahttp.client.package@HttpExceptionextendsIOException" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.scalahttp.client.package@HeaderMap[B&gt;:String]extendsMap[String,B]withMapLike[String,B,fr.hmil.scalahttp.client.HeaderMap[B]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Exception thrown when an error occurs during an HTTP request.</p><div class="fullcomment"><div class="comment cmt"><p>Exception thrown when an error occurs during an HTTP request.</p><p>This exception can occur because of network issues or bad HTTP
-status code (status &gt;= 400).</p><p>This exception must be constructed via the companion object in order to factor out
-error messages.
+      <p class="shortcomment cmt">A set of HTTP headers identified by case insensitive keys</p><div class="fullcomment"><div class="comment cmt"><p>A set of HTTP headers identified by case insensitive keys</p><p>A Map[CaseInsensitiveString, String] would conform to the strict Map specification
+but it would make the API ugly, forcing the explicit usage of CaseInsensitiveString
+instead of string.</p><p>That's why we have the HeaderMap class to represent HTTP headers in a map like
+interface which is nice to use. It is however not *exactly* a map because
+different keys can map to the same value if they are case-insensitive equivalent.
+</p></div><dl class="paramcmts block"><dt class="tparam">B</dt><dd class="cmt"><p>Required for MapLike implementation. Should always be set to String.</p></dd></dl></div>
+    </li><li name="fr.hmil.scalahttp.client.HttpNetworkError" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="HttpNetworkErrorextendsIOException"></a>
+      <a id="HttpNetworkError:HttpNetworkError"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpNetworkError.html"><span class="name">HttpNetworkError</span></a><span class="result"> extends <span class="extype" name="java.io.IOException">IOException</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.client.package@HttpNetworkErrorextendsIOException" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Exception thrown when an error occurs during an HTTP request.</p><div class="fullcomment"><div class="comment cmt"><p>Exception thrown when an error occurs during an HTTP request.</p><p>This exception can occur because of network issues.
 </p></div></div>
     </li><li name="fr.hmil.scalahttp.client.HttpRequest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="HttpRequestextendsAnyRef"></a>
@@ -104,9 +124,9 @@ error messages.
     </span>
       <p class="shortcomment cmt">Builds an HTTP request.</p><div class="fullcomment"><div class="comment cmt"><p>Builds an HTTP request.</p><p>The request is sent using  <a href="HttpRequest.html#send():scala.concurrent.Future[fr.hmil.scalahttp.client.HttpResponse]" class="extmbr" name="fr.hmil.scalahttp.client.HttpRequest#send">send</a>. A request can be sent multiple times.
 Each time yields a Future[HttpResponse] which either succeeds with an <a href="HttpResponse.html" class="extype" name="fr.hmil.scalahttp.client.HttpResponse">HttpResponse</a>
-or fails with an <a href="HttpException.html" class="extype" name="fr.hmil.scalahttp.client.HttpException">HttpException</a></p><p>TODO: document class methods
+or fails with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.scalahttp.client.HttpNetworkError">HttpNetworkError</a>
 </p></div></div>
-    </li><li name="fr.hmil.scalahttp.client.HttpResponse" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="fr.hmil.scalahttp.client.HttpResponse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="HttpResponseextendsAnyRef"></a>
       <a id="HttpResponse:HttpResponse"></a>
       <h4 class="signature">
@@ -122,7 +142,26 @@ or fails with an <a href="HttpException.html" class="extype" name="fr.hmil.scala
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">A successful HTTP response.</p><div class="fullcomment"><div class="comment cmt"><p>A successful HTTP response.</p><p>This only contains the status code and the response body.</p><p>Response headers will be implemented soon.
+      <p class="shortcomment cmt">An HTTP response obtained via an <a href="HttpRequest.html" class="extype" name="fr.hmil.scalahttp.client.HttpRequest">HttpRequest</a>
+</p>
+    </li><li name="fr.hmil.scalahttp.client.HttpResponseError" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="HttpResponseErrorextendsIOException"></a>
+      <a id="HttpResponseError:HttpResponseError"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpResponseError.html"><span class="name">HttpResponseError</span></a><span class="result"> extends <span class="extype" name="java.io.IOException">IOException</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.client.package@HttpResponseErrorextendsIOException" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Exception thrown when an error occurs during an HTTP request.</p><div class="fullcomment"><div class="comment cmt"><p>Exception thrown when an error occurs during an HTTP request.</p><p>This exception can occur because of bad HTTP status code (status &gt;= 400).</p><p>This exception must be constructed via the companion object in order to factor out
+error messages.
 </p></div></div>
     </li></ol>
             </div>
@@ -131,19 +170,19 @@ or fails with an <a href="HttpException.html" class="extype" name="fr.hmil.scala
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="fr.hmil.scalahttp.client.HttpException" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="HttpException"></a>
-      <a id="HttpException:HttpException"></a>
+              <ol><li name="fr.hmil.scalahttp.client.HeaderMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HeaderMap"></a>
+      <a id="HeaderMap:HeaderMap"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="HttpException$.html"><span class="name">HttpException</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="HeaderMap$.html"><span class="name">HeaderMap</span></a>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.scalahttp.client.package@HttpException" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.scalahttp.client.package@HeaderMap" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -161,6 +200,23 @@ or fails with an <a href="HttpException.html" class="extype" name="fr.hmil.scala
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#fr.hmil.scalahttp.client.package@HttpRequest" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="fr.hmil.scalahttp.client.HttpResponseError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpResponseError"></a>
+      <a id="HttpResponseError:HttpResponseError"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpResponseError$.html"><span class="name">HttpResponseError</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.client.package@HttpResponseError" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

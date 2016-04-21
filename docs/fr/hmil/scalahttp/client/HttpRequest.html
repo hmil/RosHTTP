@@ -53,7 +53,7 @@
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Builds an HTTP request.</p><p>The request is sent using  <a href="#send():scala.concurrent.Future[fr.hmil.scalahttp.client.HttpResponse]" class="extmbr" name="fr.hmil.scalahttp.client.HttpRequest#send">send</a>. A request can be sent multiple times.
 Each time yields a Future[HttpResponse] which either succeeds with an <a href="HttpResponse.html" class="extype" name="fr.hmil.scalahttp.client.HttpResponse">HttpResponse</a>
-or fails with an <a href="HttpException.html" class="extype" name="fr.hmil.scalahttp.client.HttpException">HttpException</a></p><p>TODO: document class methods
+or fails with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.scalahttp.client.HttpNetworkError">HttpNetworkError</a>
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
@@ -281,6 +281,23 @@ or fails with an <a href="HttpException.html" class="extype" name="fr.hmil.scala
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="fr.hmil.scalahttp.client.HttpRequest#headers" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="headers:fr.hmil.scalahttp.client.HeaderMap[String]"></a>
+      <a id="headers:HeaderMap[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">headers</span><span class="result">: <a href="HeaderMap.html" class="extype" name="fr.hmil.scalahttp.client.HeaderMap">HeaderMap</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.client.HttpRequest@headers:fr.hmil.scalahttp.client.HeaderMap[String]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="fr.hmil.scalahttp.client.HttpRequest#host" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="host:String"></a>
       <a id="host:String"></a>
@@ -451,23 +468,6 @@ or fails with an <a href="HttpException.html" class="extype" name="fr.hmil.scala
       </a>
     </span>
       
-    </li><li name="fr.hmil.scalahttp.client.HttpRequest#queryParameters" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="queryParameters:Map[String,String]"></a>
-      <a id="queryParameters:Map[String,String]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">queryParameters</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.scalahttp.client.HttpRequest@queryParameters:Map[String,String]" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">A map of query parameters present in the query string</p>
     </li><li name="fr.hmil.scalahttp.client.HttpRequest#queryString" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="queryString:Option[String]"></a>
       <a id="queryString:Option[String]"></a>
@@ -502,11 +502,11 @@ or fails with an <a href="HttpException.html" class="extype" name="fr.hmil.scala
       </a>
     </span>
       <p class="shortcomment cmt">Sends this request.</p><div class="fullcomment"><div class="comment cmt"><p>Sends this request.</p><p>A request can be sent multiple times. When a request is sent, it returns a Future[HttpResponse]
-which either succeeds with an <a href="HttpResponse.html" class="extype" name="fr.hmil.scalahttp.client.HttpResponse">HttpResponse</a> or fails with an <a href="HttpException.html" class="extype" name="fr.hmil.scalahttp.client.HttpException">HttpException</a>.</p><p>Possible reasons for the future failing are:
+which either succeeds with an <a href="HttpResponse.html" class="extype" name="fr.hmil.scalahttp.client.HttpResponse">HttpResponse</a> or fails with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.scalahttp.client.HttpNetworkError">HttpNetworkError</a>.</p><p>Possible reasons for the future failing are:
 - A status code &gt;= 400
 - A network error</p><p>Note that in some cases the response body can still be obtained after a failure
-through the <a href="HttpException.html" class="extype" name="fr.hmil.scalahttp.client.HttpException">HttpException</a>.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A future of HttpResponse which may fail with an <a href="HttpException.html" class="extype" name="fr.hmil.scalahttp.client.HttpException">HttpException</a></p></dd></dl></div>
+through the <a href="HttpNetworkError.html" class="extype" name="fr.hmil.scalahttp.client.HttpNetworkError">HttpNetworkError</a>.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A future of HttpResponse which may fail with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.scalahttp.client.HttpNetworkError">HttpNetworkError</a></p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -627,6 +627,42 @@ through the <a href="HttpException.html" class="extype" name="fr.hmil.scalahttp.
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="fr.hmil.scalahttp.client.HttpRequest#withHeader" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withHeader(key:String,value:String):fr.hmil.scalahttp.client.HttpRequest"></a>
+      <a id="withHeader(String,String):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withHeader</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="fr.hmil.scalahttp.client.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.client.HttpRequest@withHeader(key:String,value:String):fr.hmil.scalahttp.client.HttpRequest" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Adds or updates a header to the current set of headers.</p><div class="fullcomment"><div class="comment cmt"><p>Adds or updates a header to the current set of headers.
+</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"><p>The header key (case insensitive)</p></dd><dt class="param">value</dt><dd class="cmt"><p>The header value</p></dd><dt>returns</dt><dd class="cmt"><p>A copy of this <a href="" class="extype" name="fr.hmil.scalahttp.client.HttpRequest">HttpRequest</a> with an updated header set.</p></dd></dl></div>
+    </li><li name="fr.hmil.scalahttp.client.HttpRequest#withHeaders" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withHeaders(newHeaders:Map[String,String]):fr.hmil.scalahttp.client.HttpRequest"></a>
+      <a id="withHeaders(Map[String,String]):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withHeaders</span><span class="params">(<span name="newHeaders">newHeaders: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="" class="extype" name="fr.hmil.scalahttp.client.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.client.HttpRequest@withHeaders(newHeaders:Map[String,String]):fr.hmil.scalahttp.client.HttpRequest" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Adds or updates multiple headers to the current set of headers.</p><div class="fullcomment"><div class="comment cmt"><p>Adds or updates multiple headers to the current set of headers.
+</p></div><dl class="paramcmts block"><dt class="param">newHeaders</dt><dd class="cmt"><p>The headers to add.</p></dd><dt>returns</dt><dd class="cmt"><p>A copy of this <a href="" class="extype" name="fr.hmil.scalahttp.client.HttpRequest">HttpRequest</a> with an updated header set.</p></dd></dl></div>
     </li><li name="fr.hmil.scalahttp.client.HttpRequest#withHost" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withHost(host:String):fr.hmil.scalahttp.client.HttpRequest"></a>
       <a id="withHost(String):HttpRequest"></a>
@@ -833,42 +869,24 @@ special characters yields undefined behaviour.</p><p>In most cases, <a href="#wi
     </span>
       <p class="shortcomment cmt">Updates request protocol, host, port, path and queryString according to a url.</p><div class="fullcomment"><div class="comment cmt"><p>Updates request protocol, host, port, path and queryString according to a url.
 </p></div><dl class="paramcmts block"><dt class="param">url</dt><dd class="cmt"><p>A valid HTTP url</p></dd><dt>returns</dt><dd class="cmt"><p>A copy of this <a href="" class="extype" name="fr.hmil.scalahttp.client.HttpRequest">HttpRequest</a> with updated URL-related attributes.</p></dd></dl></div>
-    </li><li name="fr.hmil.scalahttp.client.HttpRequest#withoutQuery" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="withoutQuery():fr.hmil.scalahttp.client.HttpRequest"></a>
-      <a id="withoutQuery():HttpRequest"></a>
+    </li><li name="fr.hmil.scalahttp.client.HttpRequest#withoutQueryString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withoutQueryString():fr.hmil.scalahttp.client.HttpRequest"></a>
+      <a id="withoutQueryString():HttpRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">withoutQuery</span><span class="params">()</span><span class="result">: <a href="" class="extype" name="fr.hmil.scalahttp.client.HttpRequest">HttpRequest</a></span>
+        <span class="name">withoutQueryString</span><span class="params">()</span><span class="result">: <a href="" class="extype" name="fr.hmil.scalahttp.client.HttpRequest">HttpRequest</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.scalahttp.client.HttpRequest@withoutQuery():fr.hmil.scalahttp.client.HttpRequest" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.scalahttp.client.HttpRequest@withoutQueryString():fr.hmil.scalahttp.client.HttpRequest" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Removes the query string.</p><div class="fullcomment"><div class="comment cmt"><p>Removes the query string.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A copy of this <a href="" class="extype" name="fr.hmil.scalahttp.client.HttpRequest">HttpRequest</a> without query string</p></dd></dl></div>
-    </li><li name="fr.hmil.scalahttp.client.HttpRequest#withoutQueryParameter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="withoutQueryParameter(key:String):fr.hmil.scalahttp.client.HttpRequest"></a>
-      <a id="withoutQueryParameter(String):HttpRequest"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">withoutQueryParameter</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="" class="extype" name="fr.hmil.scalahttp.client.HttpRequest">HttpRequest</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.scalahttp.client.HttpRequest@withoutQueryParameter(key:String):fr.hmil.scalahttp.client.HttpRequest" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Removes one query parameter from the query string.</p><div class="fullcomment"><div class="comment cmt"><p>Removes one query parameter from the query string.
-</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"><p>The unescaped parameter key to remove</p></dd><dt>returns</dt><dd class="cmt"><p>A copy of this <a href="" class="extype" name="fr.hmil.scalahttp.client.HttpRequest">HttpRequest</a> with an updated query string.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="withQueryParameter(String,String)">withQueryParameter(String,String)</span></p></span></dd></dl></div>
     </li></ol>
             </div>
 
