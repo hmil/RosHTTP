@@ -10,7 +10,14 @@ A human-readable scala http client API compatible with:
 
 # Installation
 
-WIP, this package is not published yet
+Add a dependency to the snapshot release in your build.sbt:
+
+```scala
+resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+libraryDependencies += "fr.hmil" %%% "scala-http-client" % "0.1.0-SNAPSHOT"
+```
+
+> There is no stable release available yet.
 
 # Usage
 
@@ -20,6 +27,11 @@ the [API doc](http://hmil.github.io/scala-http-client/docs/index.html) too.
 
 <!--- test: "Main example" -->
 ```scala
+import fr.hmil.scalahttp.client.HttpRequest
+import scala.concurrent.ExecutionContext.Implicits.global
+
+/* ... */
+
 // Runs consistently on the jvm, in node.js and in the browser!
 HttpRequest("http://schema.org/WebPage")
   .send()
@@ -36,9 +48,8 @@ When applicable, the response body of a failed request can be read:
 HttpRequest("http://hmil.github.io/foobar")
   .send()
   .onFailure {
-    case e:HttpException if e.response.isDefined =>
-      println(s"Got a status: ${e.response.get.statusCode}")
-      // Repsonse body is available at: e.response.get.body
+    case e:HttpResponseError =>
+      s"Got a status: ${e.response.statusCode}" ==> "Got a status: 404"
   }
 ```
 
@@ -88,7 +99,6 @@ offers an API to add, update and delete keys in the query string.
 request
   .withQueryParameter("foo", "bar")
   .withQueryParameter("table", List("a", "b", "c"))
-  .withoutQueryParameter("table[1]")
   .withQueryParameter("map", Map(
     "d" -> "dval",
     "e" -> "e value"
@@ -98,22 +108,44 @@ request
     "copy" -> "© 2016"
   ))
   /* Query is now:
-   ?foo=bar&table[0]=a&table[2]=c&map[d]=dval&map[e]=e%20value&license=MIT&copy=%C2%A9%202016
+   foo=bar&table=a&table=b&table=c&map[d]=dval&map[e]=e%20value&license=MIT&copy=%C2%A9%202016
   */
 ```
 
-Use `.withoutQuery` to get rid of the whole query string.
+### Request headers
+
+Set individual headers using `.withHeader`
+```scala
+request.withHeader("Accept", "text/html")
+```
+Or multiple headers at once using `.withHeaders`
+```scala
+request.withHeaders(Map(
+  "Accept" -> "text/html",
+  "Cookie" -> "sessionid=f00ba242cafe"
+))
+```
+
+### Response headers
+
+A map of response headers is available on the [[HttpResponse]] object:
+```scala
+request.send().map({res =>
+  println(res.headers("Set-Cookie"))
+})
+```
 
 ---
 
-Watch the [v1 milestone](https://github.com/hmil/scala-http-client/milestones/v1.0.0)
+Watch the [issues](https://github.com/hmil/scala-http-client/issues)
 for upcoming features. Feedback is very welcome so feel free to file an issue if you
 see something that is missing.
 
 ## Known limitations
 
+- Some headers cannot be set in the browser ([list](https://developer.mozilla.org/en-US/docs/Glossary/Forbidden_header_name)).
 - There is no way to avoid redirects in the browser. This is a W3C spec.
-- Chrome does not allow userspace handling of a 407 status code (ie: it is treated
-  like a network error). see https://bugs.chromium.org/p/chromium/issues/detail?id=372136
+- Chrome does not allow userspace handling of a 407 status code. It is treated
+  like a network error. See [chromium issue](https://bugs.chromium.org/p/chromium/issues/detail?id=372136).
 
 ## Changelog

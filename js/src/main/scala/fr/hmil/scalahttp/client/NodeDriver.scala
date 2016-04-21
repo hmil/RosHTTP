@@ -17,6 +17,7 @@ object NodeDriver {
       hostname = req.host,
       port = req.port,
       method = req.method.name,
+      headers = js.Dictionary(req.headers.toSeq: _*),
       path = req.longPath
     ), (message: IncomingMessage) => {
 
@@ -34,10 +35,17 @@ object NodeDriver {
         })
 
         message.on("end", { (s: js.Dynamic) =>
+          val headers = message.headers.toMap[String, String]
+
+          val response = new HttpResponse(
+            message.statusCode,
+            body,
+            HeaderMap(headers))
+
           if (message.statusCode < 400) {
-            p.success(new HttpResponse(message.statusCode, body))
+            p.success(response)
           } else {
-            p.failure(HttpException.badStatus(new HttpResponse(message.statusCode, body)))
+            p.failure(HttpResponseError.badStatus(response))
           }
           ()
         })

@@ -83,7 +83,7 @@ object InBrowserTesting {
           scalaJSUseRhino := false)))
 
   def js: Project => Project = {
-    val materializer = new SpecificFileMaterializer("test/server/runtime", "http://localhost:3000/runtime")
+    val materializer = new CustomFileMaterializer("test/server/runtime", "http://localhost:3000/runtime")
     _.configure(
       browserConfig(ConfigFirefox, new SeleniumJSEnv(Firefox).withMaterializer(materializer)),
       browserConfig(ConfigChrome, new SeleniumJSEnv(Chrome).withMaterializer(materializer)))

@@ -97,8 +97,8 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest("http://hmil.github.io/foobar")
           .send()
           .onFailure {
-            case e:HttpException if e.response.isDefined =>
-              s"Got a status: ${e.response.get.statusCode}" ==> "Got a status: 404"
+            case e:HttpResponseError =>
+              s"Got a status: ${e.response.statusCode}" ==> "Got a status: 404"
           }
       }
 
@@ -116,7 +116,6 @@ object HttpRequestSpec extends TestSuite {
         val q = HttpRequest()
           .withQueryParameter("foo", "bar")
           .withQueryParameter("table", List("a", "b", "c"))
-          .withoutQueryParameter("table[1]")
           .withQueryParameter("map", Map(
             "d" -> "dval",
             "e" -> "e value"
@@ -125,16 +124,8 @@ object HttpRequestSpec extends TestSuite {
             "license" -> "MIT",
             "copy" -> "© 2016"
           ))
-          .queryString.get
-
-        assert(q.contains("foo=bar"))
-        assert(q.contains("table%5B0%5D=a"))
-        assert(q.contains("table%5B2%5D=c"))
-        assert(q.contains("map%5Bd%5D=dval"))
-        assert(q.contains("map%5Be%5D=e%20value"))
-        assert(q.contains("license=MIT"))
-        assert(q.contains("copy=%C2%A9%202016"))
-        assert(!q.contains("table%5B1%5D"))
+          .queryString.get ==>
+          "foo=bar&table=a&table=b&table=c&map%5Bd%5D=dval&map%5Be%5D=e%20value&license=MIT&copy=%C2%A9%202016"
       }
     }
 
@@ -163,8 +154,8 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest(SERVER_URL)
           .withPath("/redirect/temporary/echo/redirected")
           .send()
-          .map(s => {
-            s.body ==> "redirected"
+          .map(res => {
+            res.body ==> "redirected"
           })
       }
     }
@@ -176,8 +167,8 @@ object HttpRequestSpec extends TestSuite {
             .withPath(s"/status/$status")
             .send()
             .failed.map {
-            case e:HttpException if e.response.isDefined =>
-              statusText(e.response.get.statusCode) ==> e.response.get.body
+            case e:HttpResponseError =>
+              statusText(e.response.statusCode) ==> e.response.body
             case _ => assert(false)
           }
         ).reduce((f1, f2) => f1.flatMap(_=>f2))
@@ -189,16 +180,16 @@ object HttpRequestSpec extends TestSuite {
         "vanilla" - {
           HttpRequest(s"$SERVER_URL/query?Hello%20world.")
             .send()
-            .map(s => {
-              s.body ==> "Hello world."
+            .map(res => {
+              res.body ==> "Hello world."
             })
         }
 
         "with illegal characters" - {
           HttpRequest(s"$SERVER_URL/query?Heizölrückstoßabdämpfung%20+")
             .send()
-            .map(s => {
-              s.body ==> "Heizölrückstoßabdämpfung +"
+            .map(res => {
+              res.body ==> "Heizölrückstoßabdämpfung +"
             })
         }
       }
@@ -209,8 +200,8 @@ object HttpRequestSpec extends TestSuite {
           HttpRequest(s"$SERVER_URL/query")
             .withQueryString("Hello world.")
             .send()
-            .map(s => {
-              s.body ==> "Hello world."
+            .map(res => {
+              res.body ==> "Hello world."
             })
         }
 
@@ -218,8 +209,8 @@ object HttpRequestSpec extends TestSuite {
           HttpRequest(s"$SERVER_URL/query")
             .withQueryString("Heizölrückstoßabdämpfung %20+")
             .send()
-            .map(s => {
-              s.body ==> "Heizölrückstoßabdämpfung %20+"
+            .map(res => {
+              res.body ==> "Heizölrückstoßabdämpfung %20+"
             })
         }
 
@@ -234,8 +225,8 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest(s"$SERVER_URL/query")
           .withQueryStringRaw("Heiz%C3%B6lr%C3%BCcksto%C3%9Fabd%C3%A4mpfung")
           .send()
-          .map(s => {
-            s.body ==> "Heizölrückstoßabdämpfung"
+          .map(res => {
+            res.body ==> "Heizölrückstoßabdämpfung"
           })
       }
 
@@ -244,8 +235,8 @@ object HttpRequestSpec extends TestSuite {
           HttpRequest(s"$SERVER_URL/query/parsed")
             .withQueryParameter("device", "neon")
             .send()
-            .map(s => {
-              s.body ==> "{\"device\":\"neon\"}"
+            .map(res => {
+              res.body ==> "{\"device\":\"neon\"}"
             })
         }
 
@@ -255,8 +246,8 @@ object HttpRequestSpec extends TestSuite {
               "device" -> "neon",
               "element" -> "argon"))
             .send()
-            .map(s => {
-              s.body ==> "{\"device\":\"neon\",\"element\":\"argon\"}"
+            .map(res => {
+              res.body ==> "{\"device\":\"neon\",\"element\":\"argon\"}"
             })
         }
 
@@ -266,8 +257,8 @@ object HttpRequestSpec extends TestSuite {
               " zařízení" -> "topný olej vůle potlačující",
               "chäřac+=r&" -> "+Heizölrückstoßabdämpfung=r&"))
             .send()
-            .map(s => {
-              s.body ==> "{\" zařízení\":\"topný olej vůle potlačující\"," +
+            .map(res => {
+              res.body ==> "{\" zařízení\":\"topný olej vůle potlačující\"," +
                 "\"chäřac+=r&\":\"+Heizölrückstoßabdämpfung=r&\"}"
             })
         }
@@ -281,8 +272,8 @@ object HttpRequestSpec extends TestSuite {
             .withQueryParameter("tool", "hammer")
             .withQueryParameter("device", "neon")
             .send()
-            .map(s => {
-              s.body ==> "{\"element\":\"argon\",\"device\":\"neon\",\"tool\":\"hammer\"}"
+            .map(res => {
+              res.body ==> "{\"element\":\"argon\",\"device\":[\"chair\",\"neon\"],\"tool\":\"hammer\"}"
             })
         }
 
@@ -290,30 +281,20 @@ object HttpRequestSpec extends TestSuite {
           HttpRequest(s"$SERVER_URL/query/parsed")
             .withQueryParameter("map", List("foo", "bar"))
             .send()
-            .map(s => {
-              s.body ==> "{\"map\":[\"foo\",\"bar\"]}"
+            .map(res => {
+              res.body ==> "{\"map\":[\"foo\",\"bar\"]}"
             })
         }
-
-        "removed" - {
-          val req = HttpRequest(s"$SERVER_URL/query/parsed")
-            .withQueryParameters(Map(
-              "element" -> "argon",
-              "device" -> "chair"
-            ))
-            .withoutQueryParameter("device")
-
-          assert(!req.queryParameters.contains("device"))
-        }
-
-        "removed last parameter" - {
-          val req = HttpRequest(s"$SERVER_URL/query/parsed")
-            .withQueryParameter("device", "chair")
-            .withoutQueryParameter("device")
-
-          assert(req.queryString.isEmpty)
-        }
       }
+
+      "removed" - {
+        val req = HttpRequest(s"$SERVER_URL/query/parsed")
+          .withQueryString("device=chair")
+          .withoutQueryString()
+
+        assert(req.queryString.isEmpty)
+      }
+
     }
 
     "Protocol" - {
@@ -332,6 +313,88 @@ object HttpRequestSpec extends TestSuite {
         }
       }
     }
+
+    "Request headers" - {
+      "Can be set with a map" - {
+        val headers = Map(
+          "accept" -> "text/html, application/xhtml",
+          "Cache-Control" -> "max-age=0",
+          "custom" -> "foobar")
+
+        val req = HttpRequest(s"$SERVER_URL/headers")
+          .withHeaders(headers)
+
+        // Test with corrected case
+        req.headers ==> headers
+
+        req.send().map(res => {
+          assert(res.body.contains("\"accept\":\"text/html, application/xhtml\""))
+          assert(res.body.contains("\"cache-control\":\"max-age=0\""))
+          assert(res.body.contains("\"custom\":\"foobar\""))
+        })
+      }
+
+      "Can be set individually" - {
+        val req = HttpRequest(s"$SERVER_URL/headers")
+          .withHeader("cache-control", "max-age=0")
+          .withHeader("Custom", "foobar")
+
+        req.headers ==> Map(
+            "cache-control" -> "max-age=0",
+            "Custom" -> "foobar")
+
+        req.send().map(res => {
+          assert(res.body.contains("\"cache-control\":\"max-age=0\""))
+          assert(res.body.contains("\"custom\":\"foobar\""))
+        })
+      }
+
+      "Overwrite previous value when set" - {
+        val req = HttpRequest(s"$SERVER_URL/headers")
+          .withHeaders(Map(
+            "accept" -> "text/html, application/xhtml",
+            "Cache-Control" -> "max-age=0",
+            "custom" -> "foobar"
+          ))
+          .withHeaders(Map(
+            "Custom" -> "barbar",
+            "Accept" -> "application/json"
+          ))
+          .withHeader("cache-control", "max-age=128")
+
+        req.headers ==> Map(
+          "cache-control" -> "max-age=128",
+          "Custom" -> "barbar",
+          "Accept" -> "application/json")
+
+        req.send().map(res => {
+          assert(res.body.contains("\"cache-control\":\"max-age=128\""))
+          assert(res.body.contains("\"custom\":\"barbar\""))
+          assert(res.body.contains("\"accept\":\"application/json\""))
+        })
+      }
+    }
+
+    "Response headers" - {
+
+      "can be read in the general case" - {
+        HttpRequest(s"$SERVER_URL/")
+          .send()
+          .map({
+            res =>
+              println(res.headers)
+              res.headers("X-Powered-By") ==> "Express"
+          })
+      }
+
+      "can be read in the error case" - {
+        HttpRequest(s"$SERVER_URL/status/400")
+          .send()
+          .failed.map {
+            case e: HttpResponseError =>
+              e.response.headers("X-Powered-By") ==> "Express"
+          }
+      }
+    }
   }
 }
-
