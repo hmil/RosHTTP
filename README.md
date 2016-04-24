@@ -10,14 +10,11 @@ A human-readable scala http client API compatible with:
 
 # Installation
 
-Add a dependency to the snapshot release in your build.sbt:
+Add a dependency in your build.sbt:
 
 ```scala
-resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-libraryDependencies += "fr.hmil" %%% "scala-http-client" % "0.1.0-SNAPSHOT"
+libraryDependencies += "fr.hmil" %%% "scala-http-client" % "0.1.0"
 ```
-
-> There is no stable release available yet.
 
 # Usage
 
@@ -149,3 +146,6 @@ see something that is missing.
   like a network error. See [chromium issue](https://bugs.chromium.org/p/chromium/issues/detail?id=372136).
 
 ## Changelog
+
+**v0.1.0**
+- First release
