@@ -136,6 +136,8 @@ request.send().map({res =>
 
 ```scala
 // Set the request method to GET, POST, PUT, etc...
+request.withMethod(Method.PUT).send()
+// OR use strings directly with `import fr.hmil.scalahttp.Method.Implicits._`
 request.withMethod("PUT").send()
 ```
 

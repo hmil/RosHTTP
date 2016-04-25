@@ -1,6 +1,7 @@
 package fr.hmil.scalahttp.client
 
 import fr.hmil.scalahttp.Protocol
+import fr.hmil.scalahttp.Method.Implicits._
 import utest._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -113,7 +114,7 @@ object HttpRequestSpec extends TestSuite {
 
       "Composite URI" - {
         HttpRequest()
-          .withProtocol("HTTP")
+          .withProtocol(Protocol.HTTP)
           .withHost("localhost")
           .withPort(3000)
           .withPath("/query")
@@ -309,15 +310,13 @@ object HttpRequestSpec extends TestSuite {
     "Protocol" - {
       "can be set to HTTP" - {
         HttpRequest()
-          .withProtocol("http")
-          .withProtocol("HTTP")
           .withProtocol(Protocol.HTTP)
       }
 
       "cannot be set to HTTPS" - {
         intercept[IllegalArgumentException] {
           HttpRequest()
-            .withProtocol("https")
+            .withProtocol(Protocol.HTTPS)
           assert(false)
         }
       }

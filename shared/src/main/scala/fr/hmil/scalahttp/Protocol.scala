@@ -19,7 +19,7 @@ object Protocol {
   val HTTP = Protocol("HTTP")
   val HTTPS = Protocol("HTTPS")
 
-  implicit def fromString(name: String): Protocol = name.toUpperCase match {
+  def fromString(name: String): Protocol = name.toUpperCase match {
     case "HTTP" => Protocol(name)
     case "HTTPS" => Protocol(name)
     case _ => throw new IllegalArgumentException(s"Invalid protocol: $name")

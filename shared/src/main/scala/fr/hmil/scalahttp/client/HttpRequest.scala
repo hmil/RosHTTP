@@ -200,7 +200,7 @@ final class HttpRequest  private (
   def withURL(url: String): HttpRequest = {
     val parser = new URI(url)
     copy(
-      protocol = if (parser.getScheme != null) parser.getScheme else protocol,
+      protocol = if (parser.getScheme != null) Protocol.fromString(parser.getScheme) else protocol,
       host = if (parser.getHost != null) parser.getHost else host,
       port = if (parser.getPort != -1) parser.getPort else port,
       path = if (parser.getPath != null) parser.getPath else  path,
