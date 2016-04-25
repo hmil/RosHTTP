@@ -27,10 +27,15 @@ final class HttpRequest  private (
   /** The target url for this request */
   val url: String = s"$protocol://$host:$port$longPath"
 
-/*
+  /** Sets the HTTP method. Defaults to GET.
+    *
+    * Beware of browser limitations when using exotic methods.
+    *
+    * @param method The new method
+    * @return A copy of this [[HttpRequest]] with an updated method
+    */
   def withMethod(method: Method): HttpRequest =
     copy(method = method)
-*/
 
   /** Sets the host used in the request URI.
     *
@@ -195,15 +200,16 @@ final class HttpRequest  private (
   def withURL(url: String): HttpRequest = {
     val parser = new URI(url)
     copy(
-    protocol = if (parser.getScheme != null) parser.getScheme else protocol,
-    host = if (parser.getHost != null) parser.getHost else host,
-    port = if (parser.getPort != -1) parser.getPort else port,
-    path = if (parser.getPath != null) parser.getPath else  path,
-    queryString =
-    if (parser.getQuery != null)
-    Some(CrossPlatformUtils.encodeQueryString(parser.getQuery))
-    else
-    queryString
+      protocol = if (parser.getScheme != null) parser.getScheme else protocol,
+      host = if (parser.getHost != null) parser.getHost else host,
+      port = if (parser.getPort != -1) parser.getPort else port,
+      path = if (parser.getPath != null) parser.getPath else  path,
+      queryString = {
+        if (parser.getQuery != null)
+          Some(CrossPlatformUtils.encodeQueryString(parser.getQuery))
+        else
+          queryString
+      }
     )
   }
 
