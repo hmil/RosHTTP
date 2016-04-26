@@ -16,7 +16,7 @@ final class HttpRequest  private (
     val method: Method,
     val host: String,
     val path: String,
-    val port: Int,
+    val port: Option[Int],
     val protocol: Protocol,
     val queryString: Option[String],
     val headers: HeaderMap[String]) {
@@ -25,7 +25,7 @@ final class HttpRequest  private (
   val longPath = path + queryString.map(q => s"?$q").getOrElse("")
 
   /** The target url for this request */
-  val url: String = s"$protocol://$host:$port$longPath"
+  val url: String = s"$protocol://$host${port.map(":"+_).getOrElse("")}$longPath"
 
   /** Sets the HTTP method. Defaults to GET.
     *
@@ -64,20 +64,23 @@ final class HttpRequest  private (
     * @return A copy of this [[HttpRequest]] with an updated port
     */
   def withPort(port: Int): HttpRequest =
-    copy(port = port)
+    copy(port = Some(port))
+
+  /** Discards changes introduced by any call to [[withPort]]
+    *
+    * @return A copy of this [[HttpRequest]] with no explicit port.
+    */
+  def withDefaultPort(): HttpRequest =
+    copy(port = None)
 
   /** Sets the protocol used in the request URL.
     *
-    * At the moment, only HTTP is supported.
+    * Setting the protocol also sets the port accordingly (80 for HTTP, 443 for HTTPS).
     *
-    * @throws IllegalArgumentException when something else than HTTP is passed as argument
-    * @param protocol The HTTP protocol
-    * @return A copy of this [[HttpRequest]] with an updated protocol
+    * @param protocol The HTTP or HTTPS protocol
+    * @return A copy of this [[HttpRequest]] with an updated protocol and port
     */
   def withProtocol(protocol: Protocol): HttpRequest = {
-    if (protocol != Protocol.HTTP) {
-      throw new IllegalArgumentException(s"HttpRequest only supports the HTTP protocol. $protocol was provided")
-    }
     copy(protocol = protocol)
   }
 
@@ -202,7 +205,7 @@ final class HttpRequest  private (
     copy(
       protocol = if (parser.getScheme != null) Protocol.fromString(parser.getScheme) else protocol,
       host = if (parser.getHost != null) parser.getHost else host,
-      port = if (parser.getPort != -1) parser.getPort else port,
+      port = if (parser.getPort != -1) Some(parser.getPort) else port,
       path = if (parser.getPath != null) parser.getPath else  path,
       queryString = {
         if (parser.getQuery != null)
@@ -234,7 +237,7 @@ final class HttpRequest  private (
       method: Method      = this.method,
       host: String        = this.host,
       path: String        = this.path,
-      port: Int           = this.port,
+      port: Option[Int]   = this.port,
       protocol: Protocol  = this.protocol,
       queryString: Option[String] = this.queryString,
       headers: HeaderMap[String] = this.headers
@@ -257,7 +260,7 @@ object HttpRequest {
     method = Method.GET,
     host = null,
     path = null,
-    port = 80,
+    port = None,
     protocol = Protocol.HTTP,
     queryString = None,
     headers = HeaderMap()

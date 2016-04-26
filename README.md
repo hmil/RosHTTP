@@ -32,7 +32,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /* ... */
 
 // Runs consistently on the jvm, in node.js and in the browser!
-HttpRequest("http://schema.org/WebPage")
+HttpRequest("https://schema.org/WebPage")
   .send()
   .map(response => println(response.body))
 ```
@@ -161,6 +161,7 @@ see something that is missing.
 
 **v0.2.0**
 - add `withHttpMethod()`
+- support HTTPS
 
 **v0.1.0**
 - First release

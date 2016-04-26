@@ -1,6 +1,6 @@
 package fr.hmil.scalahttp.node
 
-import fr.hmil.scalahttp.node.http.Http
+import fr.hmil.scalahttp.node.http.{Http, Https}
 
 
 /**
@@ -12,6 +12,8 @@ import fr.hmil.scalahttp.node.http.Http
 object Modules {
 
   object HttpModule extends Module("http", Http)
-  lazy val http: Http = HttpModule.api
+  object HttpsModule extends Module("https", Https)
 
+  lazy val http: Http = HttpModule.api
+  lazy val https: Https = HttpsModule.api
 }

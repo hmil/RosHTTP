@@ -2,20 +2,27 @@ package fr.hmil.scalahttp.client
 
 import java.io.IOException
 
-import fr.hmil.scalahttp.HttpUtils
-import fr.hmil.scalahttp.node.Modules._
+import fr.hmil.scalahttp.{HttpUtils, Protocol}
+import fr.hmil.scalahttp.node.Modules.{http, https}
 import fr.hmil.scalahttp.node.buffer.Buffer
 import fr.hmil.scalahttp.node.http.{IncomingMessage, RequestOptions}
 
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
+import scala.scalajs.js.JSConverters._
 
 object NodeDriver {
 
   def makeRequest(req: HttpRequest, p: Promise[HttpResponse]): Unit = {
-    val nodeRequest = http.request(RequestOptions(
+    val module = {
+      if (req.protocol == Protocol.HTTP)
+        http
+      else
+        https
+    }
+    val nodeRequest = module.request(RequestOptions(
       hostname = req.host,
-      port = req.port,
+      port = req.port.orUndefined,
       method = req.method.toString,
       headers = js.Dictionary(req.headers.toSeq: _*),
       path = req.longPath

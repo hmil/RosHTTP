@@ -1,7 +1,5 @@
 package fr.hmil.scalahttp.node.http
 
-import fr.hmil.scalahttp.node.Module
-
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSName
 

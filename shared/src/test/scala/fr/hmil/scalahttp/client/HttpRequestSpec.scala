@@ -98,7 +98,7 @@ object HttpRequestSpec extends TestSuite {
       "Main example" - {
         // (But override println to avoid flooding the console)
         def println(s: String) = assert(s.length > 1000)
-        HttpRequest("http://schema.org/WebPage")
+        HttpRequest("https://schema.org/WebPage")
           .send()
           .map(response => println(response.body))
       }
@@ -308,17 +308,10 @@ object HttpRequestSpec extends TestSuite {
     }
 
     "Protocol" - {
-      "can be set to HTTP" - {
+      "can be set to HTTP and HTTPS" - {
         HttpRequest()
           .withProtocol(Protocol.HTTP)
-      }
-
-      "cannot be set to HTTPS" - {
-        intercept[IllegalArgumentException] {
-          HttpRequest()
-            .withProtocol(Protocol.HTTPS)
-          assert(false)
-        }
+          .withProtocol(Protocol.HTTPS)
       }
     }
 
