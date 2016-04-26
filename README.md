@@ -1,6 +1,8 @@
 # Scala http client
 [![Build Status](https://travis-ci.org/hmil/scala-http-client.svg?branch=master)]
 (https://travis-ci.org/hmil/scala-http-client)
+[![Latest release](https://hmil.github.io/scala-http-client/version-badge.svg)]
+(https://github.com/hmil/scala-http-client)
 
 A human-readable scala http client API compatible with:
 
