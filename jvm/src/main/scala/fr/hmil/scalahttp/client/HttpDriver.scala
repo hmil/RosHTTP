@@ -25,6 +25,7 @@ private object HttpDriver {
   private def prepareConnection(req: HttpRequest): HttpURLConnection = {
     val connection = new URL(req.url).openConnection().asInstanceOf[HttpURLConnection]
     req.headers.foreach(t => connection.addRequestProperty(t._1, t._2))
+    connection.setRequestMethod(req.method.toString)
 
     connection
   }

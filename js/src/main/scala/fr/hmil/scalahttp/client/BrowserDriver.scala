@@ -11,7 +11,7 @@ object BrowserDriver {
     val p: Promise[HttpResponse] = Promise[HttpResponse]()
 
     val xhr = new dom.XMLHttpRequest()
-    xhr.open(req.method.name, req.url)
+    xhr.open(req.method.toString, req.url)
 
     req.headers.foreach(t => xhr.setRequestHeader(t._1, t._2))
 

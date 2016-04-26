@@ -16,7 +16,7 @@ object NodeDriver {
     val nodeRequest = http.request(RequestOptions(
       hostname = req.host,
       port = req.port,
-      method = req.method.name,
+      method = req.method.toString,
       headers = js.Dictionary(req.headers.toSeq: _*),
       path = req.longPath
     ), (message: IncomingMessage) => {

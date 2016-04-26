@@ -51,6 +51,12 @@ app.get('/headers', function(req, res) {
   res.send(JSON.stringify(req.headers).replace(/"(?!\\),/g, '"\n').replace(/(^{|}$)/g, ''));
 });
 
+app.all('/method', function(req, res) {
+  console.log(req.method);
+  res.set('X-Request-Method', req.method);
+  res.send(req.method);
+});
+
 app.use('/runtime', express.static('runtime'));
 
 app.listen(3000, function () {
