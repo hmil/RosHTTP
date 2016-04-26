@@ -1,6 +1,7 @@
 package fr.hmil.scalahttp.client
 
 import fr.hmil.scalahttp.Protocol
+import fr.hmil.scalahttp.Method.Implicits._
 import utest._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -74,6 +75,15 @@ object HttpRequestSpec extends TestSuite {
     504 -> "Gateway Timeout",
     505 -> "HTTP Version Not Supported"
   )
+  private val legalMethods = {
+    val base = "GET" :: "POST" :: "HEAD" :: "OPTIONS" :: "PUT" :: "DELETE" :: Nil
+    if (JsEnvUtils.isRealBrowser) {
+      // Browsers cannot send TRACE requests
+      base
+    } else {
+      "TRACE" :: base
+    }
+  }
 
   val tests = this{
 
@@ -104,7 +114,7 @@ object HttpRequestSpec extends TestSuite {
 
       "Composite URI" - {
         HttpRequest()
-          .withProtocol("HTTP")
+          .withProtocol(Protocol.HTTP)
           .withHost("localhost")
           .withPort(3000)
           .withPath("/query")
@@ -300,15 +310,13 @@ object HttpRequestSpec extends TestSuite {
     "Protocol" - {
       "can be set to HTTP" - {
         HttpRequest()
-          .withProtocol("http")
-          .withProtocol("HTTP")
           .withProtocol(Protocol.HTTP)
       }
 
       "cannot be set to HTTPS" - {
         intercept[IllegalArgumentException] {
           HttpRequest()
-            .withProtocol("https")
+            .withProtocol(Protocol.HTTPS)
           assert(false)
         }
       }
@@ -394,6 +402,37 @@ object HttpRequestSpec extends TestSuite {
             case e: HttpResponseError =>
               e.response.headers("X-Powered-By") ==> "Express"
           }
+      }
+    }
+
+    "Http method" - {
+
+      "can be set to any legal value" - {
+        legalMethods.map(method =>
+          HttpRequest(SERVER_URL)
+            .withPath(s"/method")
+            .withMethod(method)
+            .send()
+            .map(_.headers("X-Request-Method") ==> method)
+        ).reduce((f1, f2) => f1.flatMap(_=>f2))
+      }
+
+      "ignores case and capitalizes" - {
+        legalMethods.map(method =>
+          HttpRequest(SERVER_URL)
+            .withPath(s"/method")
+            .withMethod(method.toLowerCase)
+            .send()
+            .map(_.headers("X-Request-Method") ==> method)
+        ).reduce((f1, f2) => f1.flatMap(_=>f2))
+      }
+
+      "cannot be set to an illegal value" - {
+        intercept[IllegalArgumentException] {
+          HttpRequest(SERVER_URL)
+            .withMethod("Wuf")
+          assert(false)
+        }
       }
     }
   }

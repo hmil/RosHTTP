@@ -134,6 +134,15 @@ request.send().map({res =>
 })
 ```
 
+### HTTP Method
+
+```scala
+// Set the request method to GET, POST, PUT, etc...
+request.withMethod(Method.PUT).send()
+// OR use strings directly with `import fr.hmil.scalahttp.Method.Implicits._`
+request.withMethod("PUT").send()
+```
+
 ---
 
 Watch the [issues](https://github.com/hmil/scala-http-client/issues)
@@ -146,8 +155,12 @@ see something that is missing.
 - There is no way to avoid redirects in the browser. This is a W3C spec.
 - Chrome does not allow userspace handling of a 407 status code. It is treated
   like a network error. See [chromium issue](https://bugs.chromium.org/p/chromium/issues/detail?id=372136).
+- The `TRACE` HTTP method is unavailable in browsers.
 
 ## Changelog
+
+**v0.2.0**
+- add `withHttpMethod()`
 
 **v0.1.0**
 - First release
