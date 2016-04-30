@@ -2,6 +2,7 @@ package fr.hmil.scalahttp.client
 
 import fr.hmil.scalahttp.Protocol
 import fr.hmil.scalahttp.Method.Implicits._
+import fr.hmil.scalahttp.body.Implicits._
 import utest._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -402,8 +403,7 @@ object HttpRequestSpec extends TestSuite {
 
       "can be set to any legal value" - {
         legalMethods.map(method =>
-          HttpRequest(SERVER_URL)
-            .withPath(s"/method")
+          HttpRequest(s"$SERVER_URL/method")
             .withMethod(method)
             .send()
             .map(_.headers("X-Request-Method") ==> method)
@@ -412,8 +412,7 @@ object HttpRequestSpec extends TestSuite {
 
       "ignores case and capitalizes" - {
         legalMethods.map(method =>
-          HttpRequest(SERVER_URL)
-            .withPath(s"/method")
+          HttpRequest(s"$SERVER_URL/method")
             .withMethod(method.toLowerCase)
             .send()
             .map(_.headers("X-Request-Method") ==> method)
@@ -426,6 +425,27 @@ object HttpRequestSpec extends TestSuite {
             .withMethod("Wuf")
           assert(false)
         }
+      }
+    }
+
+    "Request body" - {
+
+      "can be POSTed with ASCII strings" - {
+        HttpRequest(s"$SERVER_URL/body")
+          .post("Hello world")
+          .map({ res =>
+            res.body ==> "Hello world"
+            res.headers("Content-Type").toLowerCase ==> "text/plain; charset=utf-8"
+          })
+      }
+
+      "can be POSTed with non-ascii strings" - {
+        HttpRequest(s"$SERVER_URL/body")
+          .post("Heizölrückstoßabdämpfung")
+          .map({ res =>
+            res.body ==> "Heizölrückstoßabdämpfung"
+            res.headers("Content-Type").toLowerCase ==> "text/plain; charset=utf-8"
+          })
       }
     }
   }

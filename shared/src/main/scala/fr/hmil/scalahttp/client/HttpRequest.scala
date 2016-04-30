@@ -2,6 +2,7 @@ package fr.hmil.scalahttp.client
 
 import java.net.URI
 
+import fr.hmil.scalahttp.body.BodyPart
 import fr.hmil.scalahttp.{Method, Protocol}
 
 import scala.concurrent.Future
@@ -203,15 +204,15 @@ final class HttpRequest  private (
   def withURL(url: String): HttpRequest = {
     val parser = new URI(url)
     copy(
-      protocol = if (parser.getScheme != null) Protocol.fromString(parser.getScheme) else protocol,
-      host = if (parser.getHost != null) parser.getHost else host,
-      port = if (parser.getPort != -1) Some(parser.getPort) else port,
-      path = if (parser.getPath != null) parser.getPath else  path,
-      queryString = {
+    protocol = if (parser.getScheme != null) Protocol.fromString(parser.getScheme) else protocol,
+    host = if (parser.getHost != null) parser.getHost else host,
+    port = if (parser.getPort != -1) Some(parser.getPort) else port,
+    path = if (parser.getPath != null) parser.getPath else  path,
+    queryString = {
         if (parser.getQuery != null)
-          Some(CrossPlatformUtils.encodeQueryString(parser.getQuery))
+        Some(CrossPlatformUtils.encodeQueryString(parser.getQuery))
         else
-          queryString
+        queryString
       }
     )
   }
@@ -230,7 +231,21 @@ final class HttpRequest  private (
     *
     * @return A future of HttpResponse which may fail with an [[HttpNetworkError]]
     */
-  def send(): Future[HttpResponse] = HttpDriver.send(this)
+  def send(): Future[HttpResponse] = HttpDriver.send(this, None)
+
+  // TODO: doc
+  def post(body: BodyPart): Future[HttpResponse] = withMethod(Method.POST).send(body)
+  def put(body: BodyPart): Future[HttpResponse] = withMethod(Method.PUT).send(body)
+  def options(body: BodyPart): Future[HttpResponse] = withMethod(Method.OPTIONS).send(body)
+
+  // TODO: doc + deprecate usage
+  def send(body: BodyPart): Future[HttpResponse] = HttpDriver.send(
+    withHeaders(Map(
+      "Content-Type" -> body.contentType
+      // TODO: if content-length can be omitted, then remove it from body definitions
+      //"Content-Length" -> body.contentLength.toString
+    )),
+    Some(body))
 
   /** Internal method to back public facing .withXXX methods. */
   private def copy(
@@ -240,7 +255,7 @@ final class HttpRequest  private (
       port: Option[Int]   = this.port,
       protocol: Protocol  = this.protocol,
       queryString: Option[String] = this.queryString,
-      headers: HeaderMap[String] = this.headers
+      headers: HeaderMap[String]  = this.headers
   ): HttpRequest = {
     new HttpRequest(
       method    = method,
@@ -249,7 +264,7 @@ final class HttpRequest  private (
       port      = port,
       protocol  = protocol,
       queryString = queryString,
-      headers = headers)
+      headers   = headers)
   }
 
 }

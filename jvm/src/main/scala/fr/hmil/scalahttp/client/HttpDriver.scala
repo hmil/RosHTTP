@@ -1,8 +1,10 @@
 package fr.hmil.scalahttp.client
 
+import java.io.PrintWriter
 import java.net.{HttpURLConnection, URL}
 
 import fr.hmil.scalahttp.HttpUtils
+import fr.hmil.scalahttp.body.BodyPart
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -10,10 +12,10 @@ import scala.io.Source
 
 private object HttpDriver {
 
-  def send(req: HttpRequest): Future[HttpResponse] = {
+  def send(req: HttpRequest, body: Option[BodyPart]): Future[HttpResponse] = {
     concurrent.Future {
       try {
-        val connection = prepareConnection(req)
+        val connection = prepareConnection(req, body)
         readResponse(connection)
       } catch {
         case e: HttpResponseError => throw e
@@ -22,11 +24,16 @@ private object HttpDriver {
     }
   }
 
-  private def prepareConnection(req: HttpRequest): HttpURLConnection = {
+  private def prepareConnection(req: HttpRequest, body: Option[BodyPart]): HttpURLConnection = {
     val connection = new URL(req.url).openConnection().asInstanceOf[HttpURLConnection]
     req.headers.foreach(t => connection.addRequestProperty(t._1, t._2))
     connection.setRequestMethod(req.method.toString)
-
+    body.foreach({part =>
+      connection.setDoOutput(true)
+      val writer = new PrintWriter(connection.getOutputStream)
+      writer.write(part.content)
+      writer.close()
+    })
     connection
   }
 

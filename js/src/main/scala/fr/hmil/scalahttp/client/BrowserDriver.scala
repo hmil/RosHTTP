@@ -1,13 +1,16 @@
 package fr.hmil.scalahttp.client
 
+import fr.hmil.scalahttp.body.BodyPart
 import org.scalajs.dom
 import org.scalajs.dom.raw.ErrorEvent
 
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js.JavaScriptException
+import scala.scalajs.js.JSConverters._
 
 private object BrowserDriver {
-  def send(req: HttpRequest): Future[HttpResponse] = {
+
+  def send(req: HttpRequest, body: Option[BodyPart]): Future[HttpResponse] = {
     val p: Promise[HttpResponse] = Promise[HttpResponse]()
 
     val xhr = new dom.XMLHttpRequest()
@@ -38,7 +41,8 @@ private object BrowserDriver {
         }
       }
     }
-    xhr.send()
+
+    xhr.send(body.map(_.content).orUndefined)
 
     p.future
   }

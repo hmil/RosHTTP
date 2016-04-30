@@ -2,8 +2,13 @@ var express = require('express');
 var app = express();
 var morgan = require('morgan');
 var querystring = require('querystring');
+var bodyParser = require('body-parser');
 
 app.use(morgan('combined'));
+
+app.use(bodyParser.raw({
+  type: '*/*'
+}));
 
 app.get('/status/:statusCode', function(req, res) {
   res.set('X-Status-Code', req.params.statusCode);
@@ -53,9 +58,19 @@ app.get('/headers', function(req, res) {
 });
 
 app.all('/method', function(req, res) {
-  console.log(req.method);
   res.set('X-Request-Method', req.method);
   res.send(req.method);
+});
+
+app.all('/body', function(req, res) {
+  if (!req.headers.hasOwnProperty('content-type')) {
+    res.status(400).send("No request body!");
+  } else if(req.body.length === 0) {
+    res.status(400).send("Empty request body!");
+  } else {
+    res.set('Content-Type', req.headers['content-type']);
+    res.send(req.body);
+  }
 });
 
 app.use('/runtime', express.static('runtime'));

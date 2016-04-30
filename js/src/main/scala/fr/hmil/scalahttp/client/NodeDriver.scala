@@ -2,6 +2,7 @@ package fr.hmil.scalahttp.client
 
 import java.io.IOException
 
+import fr.hmil.scalahttp.body.BodyPart
 import fr.hmil.scalahttp.{HttpUtils, Protocol}
 import fr.hmil.scalahttp.node.Modules.{http, https}
 import fr.hmil.scalahttp.node.buffer.Buffer
@@ -13,7 +14,7 @@ import scala.scalajs.js.JSConverters._
 
 private object NodeDriver {
 
-  def makeRequest(req: HttpRequest, p: Promise[HttpResponse]): Unit = {
+  def makeRequest(req: HttpRequest, body: Option[BodyPart], p: Promise[HttpResponse]): Unit = {
     val module = {
       if (req.protocol == Protocol.HTTP)
         http
@@ -31,7 +32,7 @@ private object NodeDriver {
       val charset = HttpUtils.charsetFromContentType(message.headers.get("content-type").orNull)
 
       if (message.statusCode >= 300 && message.statusCode < 400 && message.headers.contains("location")) {
-        makeRequest(req.withURL(message.headers("location")), p)
+        makeRequest(req.withURL(message.headers("location")), body, p)
       } else {
         var body = ""
 
@@ -65,13 +66,17 @@ private object NodeDriver {
       ()
     })
 
+    body.foreach({ part =>
+      nodeRequest.write(part.content)
+    })
+
     nodeRequest.end()
   }
 
-  def send(req: HttpRequest): Future[HttpResponse] = {
+  def send(req: HttpRequest, body: Option[BodyPart]): Future[HttpResponse] = {
     val p: Promise[HttpResponse] = Promise[HttpResponse]()
 
-    makeRequest(req, p)
+    makeRequest(req, body, p)
 
     p.future
   }
