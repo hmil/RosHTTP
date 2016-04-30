@@ -156,6 +156,7 @@ object HttpRequestSpec extends TestSuite {
           HttpRequest(SERVER_URL)
             .withPath(s"/status/$status")
             .send()
+            .map(r => println(r.headers("X-Status-Code") + " : " + r.statusCode))
             .failed.map(_ => "success")
         ).reduce((f1, f2) => f1.flatMap(_ => f2))
       }
@@ -383,7 +384,6 @@ object HttpRequestSpec extends TestSuite {
           .send()
           .map({
             res =>
-              println(res.headers)
               res.headers("X-Powered-By") ==> "Express"
           })
       }

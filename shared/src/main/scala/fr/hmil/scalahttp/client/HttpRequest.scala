@@ -25,7 +25,7 @@ final class HttpRequest  private (
   val longPath = path + queryString.map(q => s"?$q").getOrElse("")
 
   /** The target url for this request */
-  val url: String = s"$protocol://$host${port.map(":"+_).getOrElse("")}$longPath"
+  val url: String = s"$protocol://$host${port.fold("")(":" + _)}$longPath"
 
   /** Sets the HTTP method. Defaults to GET.
     *

@@ -5,7 +5,7 @@ package fr.hmil.scalahttp
   * When setting a protocol from a string, we want to preserve the initial case such as
   * not to alter the url.
   */
-final case class Protocol private(private val name: String, defaultPort: Int) {
+final case class Protocol private(private val name: String) {
 
   override implicit def toString: String = name
 
@@ -22,8 +22,8 @@ object Protocol {
   val HTTPS = fromString("https")
 
   def fromString(name: String): Protocol = name.toUpperCase match {
-    case "HTTP" => Protocol(name, 80)
-    case "HTTPS" => Protocol(name, 443)
+    case "HTTP" => Protocol(name)
+    case "HTTPS" => Protocol(name)
     case _ => throw new IllegalArgumentException(s"Invalid protocol: $name")
   }
 }

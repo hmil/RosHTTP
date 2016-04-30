@@ -6,6 +6,7 @@ var querystring = require('querystring');
 app.use(morgan('combined'));
 
 app.get('/status/:statusCode', function(req, res) {
+  res.set('X-Status-Code', req.params.statusCode);
   res.sendStatus(req.params.statusCode);
 });
 
