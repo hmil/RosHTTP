@@ -5,7 +5,7 @@ import scala.scalajs.js.annotation.ScalaJSDefined
 
 
 @ScalaJSDefined
-trait AgentOptions extends js.Object {
+private[scalahttp] trait AgentOptions extends js.Object {
   val keepAlive: Boolean
   val keepAliveMsecs: Integer
   val maxSockets: Integer
@@ -13,7 +13,7 @@ trait AgentOptions extends js.Object {
 }
 
 
-object AgentOptions {
+private[scalahttp] object AgentOptions {
 
   /**
     *

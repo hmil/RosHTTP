@@ -6,7 +6,7 @@ import org.scalajs.dom.raw.ErrorEvent
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js.JavaScriptException
 
-object BrowserDriver {
+private object BrowserDriver {
   def send(req: HttpRequest): Future[HttpResponse] = {
     val p: Promise[HttpResponse] = Promise[HttpResponse]()
 

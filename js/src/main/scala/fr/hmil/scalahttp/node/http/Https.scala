@@ -7,8 +7,8 @@ import scala.scalajs.js.annotation.JSName
   * For our purposes, we can just pretend https has the same interface as http
   */
 @js.native
-trait Https extends Http
+private[scalahttp] trait Https extends Http
 
 @js.native
 @JSName("https")
-object Https extends Https
+private[scalahttp] object Https extends Https

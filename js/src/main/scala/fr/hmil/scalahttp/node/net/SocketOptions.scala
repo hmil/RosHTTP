@@ -4,14 +4,14 @@ import scala.scalajs.js
 import scala.scalajs.js.annotation.ScalaJSDefined
 
 @ScalaJSDefined
-trait SocketOptions extends js.Object {
+private[scalahttp] trait SocketOptions extends js.Object {
   // val fd: FileDescriptor - not implemented here
   val allowHalfOpen: Boolean
   val readable: Boolean
   val writable: Boolean
 }
 
-object SocketOptions {
+private[scalahttp] object SocketOptions {
   def apply(
     allowHalfOpen: js.UndefOr[Boolean],
     readable: js.UndefOr[Boolean],

@@ -9,7 +9,7 @@ import scala.scalajs.js
   * This facade is not complete!
   */
 @js.native
-class Agent extends js.Object {
+private[scalahttp] class Agent extends js.Object {
 
   def this(options: AgentOptions) {
     this()

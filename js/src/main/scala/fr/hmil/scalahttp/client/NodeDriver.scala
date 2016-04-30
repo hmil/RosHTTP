@@ -11,7 +11,7 @@ import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 
-object NodeDriver {
+private object NodeDriver {
 
   def makeRequest(req: HttpRequest, p: Promise[HttpResponse]): Unit = {
     val module = {
