@@ -1,8 +1,9 @@
 package fr.hmil.scalahttp.client
 
-import fr.hmil.scalahttp.Protocol
 import fr.hmil.scalahttp.Method.Implicits._
+import fr.hmil.scalahttp.Protocol
 import fr.hmil.scalahttp.body.Implicits._
+import fr.hmil.scalahttp.body.{MultiPartBody, URLEncodedBody}
 import utest._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -445,6 +446,34 @@ object HttpRequestSpec extends TestSuite {
           .map({ res =>
             res.body ==> "Heizölrückstoßabdämpfung"
             res.headers("Content-Type").toLowerCase ==> "text/plain; charset=utf-8"
+          })
+      }
+
+      "can be POSTed as multipart" - {
+        val part = new MultiPartBody(Map(
+          "foo" -> "bar",
+          "engine" -> "Heizölrückstoßabdämpfung"
+        ))
+
+        HttpRequest(s"$SERVER_URL/body")
+          .post(part)
+          .map({ res =>
+            res.body ==> "{\"foo\":\"bar\",\"engine\":\"Heizölrückstoßabdämpfung\"}"
+            res.headers("Content-Type").toLowerCase ==> s"multipart/form-data; boundary=${part.boundary}; charset=utf-8"
+          })
+      }
+
+      "can be POSTed as urlencoded" - {
+        val part = new URLEncodedBody(Map(
+          "foo" -> "bar",
+          "engine" -> "Heizölrückstoßabdämpfung"
+        ))
+
+        HttpRequest(s"$SERVER_URL/body")
+          .post(part)
+          .map({ res =>
+            res.body ==> "{\"foo\":\"bar\",\"engine\":\"Heizölrückstoßabdämpfung\"}"
+            res.headers("Content-Type").toLowerCase ==> s"application/x-www-form-urlencoded; charset=utf-8"
           })
       }
     }

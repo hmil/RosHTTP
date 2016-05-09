@@ -3,9 +3,20 @@ var app = express();
 var morgan = require('morgan');
 var querystring = require('querystring');
 var bodyParser = require('body-parser');
+var multipart = require('connect-multiparty');
 
 app.use(morgan('combined'));
 
+
+app.use(multipart());
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// parse application/json
+app.use(bodyParser.json());
+
+// parse all other types
 app.use(bodyParser.raw({
   type: '*/*'
 }));

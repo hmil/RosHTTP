@@ -3,7 +3,7 @@ package fr.hmil.scalahttp.client
 import java.net.URI
 
 import fr.hmil.scalahttp.body.BodyPart
-import fr.hmil.scalahttp.{Method, Protocol}
+import fr.hmil.scalahttp.{Method, Protocol, CrossPlatformUtils}
 
 import scala.concurrent.Future
 

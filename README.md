@@ -134,6 +134,10 @@ request.send().map({res =>
 })
 ```
 
+### Sending data
+
+TODO
+
 ### HTTP Method
 
 ```scala
@@ -160,6 +164,7 @@ see something that is missing.
 ## Changelog
 
 **v0.2.0**
+- support request body with `post()`, `put()` and `options()`
 - add `withHttpMethod()`
 - support HTTPS
 

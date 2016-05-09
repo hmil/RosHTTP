@@ -1,4 +1,4 @@
-package fr.hmil.scalahttp.client
+package fr.hmil.scalahttp
 
 import scala.scalajs.js
 
