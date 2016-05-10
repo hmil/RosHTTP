@@ -6,5 +6,5 @@ class TextBody(
     override val contentType: String = "text/plain; charset=utf-8"
   ) extends BodyPart {
   override val contentLength: Int = text.length
-  override val content: String = text
+  override val content: Array[Byte] = text.getBytes("utf-8")
 }

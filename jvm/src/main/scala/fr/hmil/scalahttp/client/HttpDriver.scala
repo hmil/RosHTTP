@@ -30,9 +30,9 @@ private object HttpDriver {
     connection.setRequestMethod(req.method.toString)
     body.foreach({part =>
       connection.setDoOutput(true)
-      val writer = new PrintWriter(connection.getOutputStream)
-      writer.write(part.content)
-      writer.close()
+      val os = connection.getOutputStream
+      os.write(part.content)
+      os.close()
     })
     connection
   }
@@ -53,13 +53,15 @@ private object HttpDriver {
     if (code < 400) {
       new HttpResponse(
         code,
-        Source.fromInputStream(connection.getInputStream)(charset).mkString,
+        Source.fromInputStream(connection.getInputStream)(charset)
+          .flatMap(_.toString.getBytes(charset))
+          .toArray,
         headerMap
       )
     } else {
       throw HttpResponseError.badStatus(new HttpResponse(
         code,
-        Source.fromInputStream(connection.getErrorStream)(charset).mkString,
+        Source.fromInputStream(connection.getErrorStream)(charset).flatMap(_.toString.getBytes(charset)).toArray,
         headerMap
       ))
     }

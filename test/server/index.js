@@ -4,6 +4,8 @@ var morgan = require('morgan');
 var querystring = require('querystring');
 var bodyParser = require('body-parser');
 var multipart = require('connect-multiparty');
+var fs = require('fs');
+var path = require('path');
 
 app.use(morgan('combined'));
 
@@ -81,6 +83,17 @@ app.all('/body', function(req, res) {
   } else {
     res.set('Content-Type', req.headers['content-type']);
     res.send(req.body);
+  }
+});
+
+app.post('/upload/:name', function(req, res) {
+  var fdata = fs.readFileSync(path.join(__dirname, "uploads", req.params.name))
+  console.log(res.body);
+
+  if (fdata.compare(req.body)) {
+    res.status(200).send('Ok');
+  } else {
+    res.status(400).send(res.body);
   }
 });
 

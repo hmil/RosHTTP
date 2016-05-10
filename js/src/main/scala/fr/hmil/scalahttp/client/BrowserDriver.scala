@@ -1,5 +1,6 @@
 package fr.hmil.scalahttp.client
 
+import fr.hmil.scalahttp.HttpUtils
 import fr.hmil.scalahttp.body.BodyPart
 import org.scalajs.dom
 import org.scalajs.dom.raw.ErrorEvent
@@ -30,9 +31,10 @@ private object BrowserDriver {
             (split.head, split.tail.mkString.trim)
           }).toMap[String, String]
         }
+        val charset = HttpUtils.charsetFromContentType(headers.getOrElse("content-type", null))
         val response = new HttpResponse(
           xhr.status,
-          xhr.responseText,
+          xhr.responseText.getBytes(charset),
           HeaderMap(headers))
         if (xhr.status >= 400) {
           p.failure(HttpResponseError.badStatus(response))
@@ -42,7 +44,8 @@ private object BrowserDriver {
       }
     }
 
-    xhr.send(body.map(_.content).orUndefined)
+    val charset = HttpUtils.charsetFromContentType(req.headers.getOrElse("content-type", null))
+    xhr.send(body.map(b => new String(b.content, charset)).orUndefined)
 
     p.future
   }

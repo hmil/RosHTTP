@@ -45,9 +45,10 @@ private object NodeDriver {
         message.on("end", { (s: js.Dynamic) =>
           val headers = message.headers.toMap[String, String]
 
+          val charset = HttpUtils.charsetFromContentType(headers.getOrElse("content-type", null))
           val response = new HttpResponse(
             message.statusCode,
-            body,
+            body.getBytes(charset),
             HeaderMap(headers))
 
           if (message.statusCode < 400) {
@@ -66,8 +67,10 @@ private object NodeDriver {
       ()
     })
 
+    val charset = HttpUtils.charsetFromContentType(req.headers.getOrElse("content-type", null))
+
     body.foreach({ part =>
-      nodeRequest.write(part.content)
+      nodeRequest.write(new String(part.content, charset))
     })
 
     nodeRequest.end()
