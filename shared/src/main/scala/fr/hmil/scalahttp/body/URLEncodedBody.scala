@@ -2,8 +2,18 @@ package fr.hmil.scalahttp.body
 
 import fr.hmil.scalahttp.CrossPlatformUtils
 
+/** An urlencoded HTTP body.
+  *
+  * <b>Usage:</b> urlencoded bodies are best suited for simple key/value maps of strings. For more
+  * structured data, use [[JSONBody]]. For binary data, use [[StreamBody]] or [[MultiPartBody]].
+  *
+  * URLEncoded bodies are associated with the mime type "application/x-www-form-urlencoded"
+  * and look like query string parameters (eg. key=value&key2=value2 ).
+  *
+  * @param values A map of key/value pairs to send with the request.
+  */
 class URLEncodedBody(values: Map[String, String]) extends BodyPart {
-  // TODO doc
+
   override val contentType: String = s"application/x-www-form-urlencoded"
 
   override val content: Array[Byte] = {
@@ -13,6 +23,4 @@ class URLEncodedBody(values: Map[String, String]) extends BodyPart {
       CrossPlatformUtils.encodeQueryString(part)
     }).mkString("&").getBytes("utf-8")
   }
-
-  override val contentLength = content.length
 }

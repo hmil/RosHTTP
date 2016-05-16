@@ -2,13 +2,16 @@ package fr.hmil.scalahttp.body
 
 import fr.hmil.scalahttp.body.JSONBody.JSONValue
 
+/** Experimental support for JSON-encoded bodies.
+  *
+  * Allows to send arbitrarily complex JSON data.
+  *
+  * @param value The JSON value to send.
+  */
 class JSONBody(value: JSONValue) extends BodyPart {
-  // TODO doc
   override val contentType: String = s"application/json; charset=utf-8"
 
   override val content: Array[Byte] = value.toString.getBytes("utf-8")
-
-  override val contentLength = content.length
 }
 
 object JSONBody {

@@ -3,7 +3,7 @@ package fr.hmil.scalahttp.client
 import java.io.IOException
 
 import fr.hmil.scalahttp.body.BodyPart
-import fr.hmil.scalahttp.{HttpUtils, Protocol}
+import fr.hmil.scalahttp.{Converters, HttpUtils, Protocol}
 import fr.hmil.scalahttp.node.Modules.{http, https}
 import fr.hmil.scalahttp.node.buffer.Buffer
 import fr.hmil.scalahttp.node.http.{IncomingMessage, RequestOptions}
@@ -67,10 +67,8 @@ private object NodeDriver {
       ()
     })
 
-    val charset = HttpUtils.charsetFromContentType(req.headers.getOrElse("content-type", null))
-
     body.foreach({ part =>
-      nodeRequest.write(new String(part.content, charset))
+      nodeRequest.write(Converters.byteArrayToNodeBuffer(part.content))
     })
 
     nodeRequest.end()

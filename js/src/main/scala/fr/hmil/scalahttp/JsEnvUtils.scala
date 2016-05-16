@@ -1,10 +1,11 @@
-package fr.hmil.scalahttp.client
+package fr.hmil.scalahttp
+
 /*
   Taken from http://japgolly.blogspot.fr/2016/03/scalajs-firefox-chrome-sbt.html
  */
 
+import scala.scalajs.js.Dynamic.global
 import scala.util.Try
-import scalajs.js.Dynamic.global
 
 private object JsEnvUtils {
 

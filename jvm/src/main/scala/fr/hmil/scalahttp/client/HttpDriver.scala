@@ -61,7 +61,9 @@ private object HttpDriver {
     } else {
       throw HttpResponseError.badStatus(new HttpResponse(
         code,
-        Source.fromInputStream(connection.getErrorStream)(charset).flatMap(_.toString.getBytes(charset)).toArray,
+        Source.fromInputStream(connection.getErrorStream)(charset)
+          .flatMap(_.toString.getBytes(charset))
+          .toArray,
         headerMap
       ))
     }

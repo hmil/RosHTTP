@@ -4,6 +4,7 @@ import java.io.FileOutputStream
 
 import fr.hmil.scalahttp.Method.Implicits._
 import fr.hmil.scalahttp.Protocol
+import fr.hmil.scalahttp.JsEnvUtils
 import fr.hmil.scalahttp.body.Implicits._
 import fr.hmil.scalahttp.body.JSONBody._
 import fr.hmil.scalahttp.body.{JSONBody, MultiPartBody, StreamBody, URLEncodedBody}
@@ -520,15 +521,10 @@ object HttpRequestSpec extends TestSuite {
           0xFF, 0x2E, 0x62, 0x85, 0x73, 0xDD, 0xAB, 0x93, 0xC7, 0xFD, 0x03, 0x7E, 0x01, 0x01, 0x9A, 0x49, 0xCF, 0xD0,
           0xA6, 0xE4, 0x8F, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82).map(_.toByte)
 
-        val body = new StreamBody(Stream(bytes: _*))
-
-        println(body.content)
+        val body = new StreamBody(bytes.toStream)
 
         HttpRequest(s"$SERVER_URL/upload/icon.png")
           .post(body)
-          .onFailure({
-            case e: HttpResponseError => println(e.response.body)
-          })
       }
     }
   }

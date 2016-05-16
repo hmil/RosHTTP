@@ -2,11 +2,24 @@ package fr.hmil.scalahttp.body
 
 import scala.util.Random
 
-class MultiPartBody(parts: Map[String, BodyPart]) extends BodyPart {
-  // TODO doc
+/** A body made of multiple parts.
+  *
+  * <b>Usage:</b> A multipart body acts as a container for other bodies. For instance,
+  * the multipart body is commonly used to send a form with binary attachments in conjunction with
+  * the [[StreamBody]].
+  * For simple key/value pairs, use [[URLEncodedBody]] instead.
+  *
+  * <b>Safety consideration:</b> The Multipart
+  *
+  * @param parts The pieces of body. The key in the map is used as `name` for the `Content-Disposition` header
+  *              of each part.
+  * @param subtype The exact multipart mime type as in `multipart/subtype`. Defaults to `form-data`.
+  */
+class MultiPartBody(parts: Map[String, BodyPart], subtype: String = "form-data") extends BodyPart {
+
   val boundary = "----" + Random.alphanumeric.take(24).mkString.toLowerCase
 
-  override val contentType: String = s"multipart/form-data; boundary=$boundary"
+  override val contentType: String = s"multipart/$subtype; boundary=$boundary"
 
   override val content: Array[Byte] = {
     (
@@ -20,6 +33,4 @@ class MultiPartBody(parts: Map[String, BodyPart]) extends BodyPart {
         s"\r\n--$boundary--"
     ).getBytes("utf-8")
   }
-
-  override val contentLength = content.length
 }

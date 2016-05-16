@@ -32,9 +32,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /* ... */
 
 // Runs consistently on the jvm, in node.js and in the browser!
-HttpRequest("https://schema.org/WebPage")
-  .send()
-  .map(response => println(response.body))
+val request = HttpRequest("https://schema.org/WebPage")
+
+request.send().map(response => println(response.body))
 ```
 
 When you `send()` a request, you get a `Future[HttpResponse]` which resolves to
@@ -136,14 +136,47 @@ request.send().map({res =>
 
 ### Sending data
 
-TODO
+You can `post` or `put` some data with your favorite encoding.
+```scala
+val data = new URLEncodedBody(Map(
+  "answer" -> "42",
+  "platform" -> "jvm"
+))
+request.post(data)
+// or
+request.put(data)
+```
+
+Create JSON requests easily using implicit conversions.
+```scala
+import fr.hmil.scalahttp.body.JSONBody._
+
+val data = JSONBody(new JSONObject(Map(
+  "answer" -> 42,
+  "platform" -> "node"
+)))
+request.post(data)
+```
+
+#### File upload
+
+To send file data you must turn a file into a stream of bytes and then send it in a
+StreamBody. For instance, on the jvm you could do:
+```
+val stream = Source.fromFile("icon.png")(scala.io.Codec.ISO8859).map(_.toByte).toStream
+request.post(new StreamBody(stream))
+```
+Note that the codec argument is important to read the file as-is and avoid side-effects
+due to character interpretation.
+
 
 ### HTTP Method
 
 ```scala
 // Set the request method to GET, POST, PUT, etc...
 request.withMethod(Method.PUT).send()
-// OR use strings directly with `import fr.hmil.scalahttp.Method.Implicits._`
+// OR use strings directly with implicit conversions
+import fr.hmil.scalahttp.Method.Implicits._
 request.withMethod("PUT").send()
 ```
 

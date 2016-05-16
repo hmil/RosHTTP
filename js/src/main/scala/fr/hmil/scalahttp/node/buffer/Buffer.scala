@@ -208,4 +208,3 @@ private[scalahttp] class Buffer extends js.Object {
   def writeUIntLE(value: Int, offset: Int): Int = js.native
   def writeUIntLE(value: Int, offset: Int, noAssert: Boolean): Int = js.native
 }
-

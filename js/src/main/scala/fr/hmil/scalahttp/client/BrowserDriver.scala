@@ -1,13 +1,15 @@
 package fr.hmil.scalahttp.client
 
-import fr.hmil.scalahttp.HttpUtils
+import fr.hmil.scalahttp.{Converters, HttpUtils}
 import fr.hmil.scalahttp.body.BodyPart
 import org.scalajs.dom
 import org.scalajs.dom.raw.ErrorEvent
 
 import scala.concurrent.{Future, Promise}
+import scala.scalajs.js
 import scala.scalajs.js.JavaScriptException
 import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.typedarray.Uint8Array
 
 private object BrowserDriver {
 
@@ -44,8 +46,7 @@ private object BrowserDriver {
       }
     }
 
-    val charset = HttpUtils.charsetFromContentType(req.headers.getOrElse("content-type", null))
-    xhr.send(body.map(b => new String(b.content, charset)).orUndefined)
+    xhr.send(body.map(b => Converters.byteArrayToUint8Array(b.content)).orUndefined)
 
     p.future
   }
