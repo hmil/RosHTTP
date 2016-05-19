@@ -1,6 +1,7 @@
 package fr.hmil.scalahttp.client
 
 import java.io.IOException
+import java.nio.ByteBuffer
 
 import fr.hmil.scalahttp.body.BodyPart
 import fr.hmil.scalahttp.{Converters, HttpUtils, Protocol}
@@ -13,6 +14,35 @@ import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 
 private object NodeDriver {
+
+  // Accumulates chunks received by the request and turns them into a ByteBuffer
+  private class BufferAccumulator {
+    private var acc = List[Array[Byte]]()
+
+    def append(buf: Buffer): Unit = {
+      val length = buf.length
+      var i = 0
+      val chunk = new Array[Byte](length)
+      while(i < length) {
+        chunk(i) = buf.readInt8(i).toByte
+        i += 1
+      }
+      acc ::= chunk
+    }
+
+    def collect(): ByteBuffer = {
+      val length = acc.foldRight(0)((chunk, l) => l + chunk.length)
+      val buffer = ByteBuffer.allocate(length)
+      acc.foreach(chunk => {
+        var i = 0
+        while (i < chunk.length) {
+          buffer.put(chunk(i))
+          i += 1
+        }
+      })
+      buffer
+    }
+  }
 
   def makeRequest(req: HttpRequest, body: Option[BodyPart], p: Promise[HttpResponse]): Unit = {
     val module = {
@@ -34,11 +64,11 @@ private object NodeDriver {
       if (message.statusCode >= 300 && message.statusCode < 400 && message.headers.contains("location")) {
         makeRequest(req.withURL(message.headers("location")), body, p)
       } else {
-        var body = ""
+        val body = new BufferAccumulator()
 
         message.on("data", { (s: js.Dynamic) =>
           val buf = s.asInstanceOf[Buffer]
-          body += buf.toString(charset)
+          body.append(buf)
           ()
         })
 
@@ -48,7 +78,7 @@ private object NodeDriver {
           val charset = HttpUtils.charsetFromContentType(headers.getOrElse("content-type", null))
           val response = new HttpResponse(
             message.statusCode,
-            body.getBytes(charset),
+            body.collect(),
             HeaderMap(headers))
 
           if (message.statusCode < 400) {
@@ -68,7 +98,7 @@ private object NodeDriver {
     })
 
     body.foreach({ part =>
-      nodeRequest.write(Converters.byteArrayToNodeBuffer(part.content))
+      nodeRequest.write(Converters.byteBufferToNodeBuffer(part.content))
     })
 
     nodeRequest.end()

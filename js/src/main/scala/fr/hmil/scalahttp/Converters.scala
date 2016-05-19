@@ -1,5 +1,7 @@
 package fr.hmil.scalahttp
 
+import java.nio.ByteBuffer
+
 import fr.hmil.scalahttp.node.buffer.Buffer
 
 import scala.scalajs.js
@@ -11,7 +13,7 @@ private object Converters {
     js.Dynamic.newInstance(js.Dynamic.global.Uint8Array)(arr.toJSArray).asInstanceOf[Uint8Array]
   }
 
-  def byteArrayToNodeBuffer(arr: Array[Byte]): Buffer = {
-    js.Dynamic.newInstance(js.Dynamic.global.Buffer)(byteArrayToUint8Array(arr)).asInstanceOf[Buffer]
+  def byteBufferToNodeBuffer(buff: ByteBuffer): Buffer = {
+    js.Dynamic.newInstance(js.Dynamic.global.Buffer)(byteArrayToUint8Array(buff.array())).asInstanceOf[Buffer]
   }
 }

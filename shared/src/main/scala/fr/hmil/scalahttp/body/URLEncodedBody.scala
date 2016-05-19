@@ -1,5 +1,7 @@
 package fr.hmil.scalahttp.body
 
+import java.nio.ByteBuffer
+
 import fr.hmil.scalahttp.CrossPlatformUtils
 
 /** An urlencoded HTTP body.
@@ -12,15 +14,19 @@ import fr.hmil.scalahttp.CrossPlatformUtils
   *
   * @param values A map of key/value pairs to send with the request.
   */
-class URLEncodedBody(values: Map[String, String]) extends BodyPart {
+class URLEncodedBody private(values: Map[String, String]) extends BodyPart {
 
   override val contentType: String = s"application/x-www-form-urlencoded"
 
-  override val content: Array[Byte] = {
+  override val content: ByteBuffer = ByteBuffer.wrap(
     values.map({case (name, part) =>
       CrossPlatformUtils.encodeQueryString(name) +
       "=" +
       CrossPlatformUtils.encodeQueryString(part)
     }).mkString("&").getBytes("utf-8")
-  }
+  )
+}
+
+object URLEncodedBody {
+  def apply(values: (String, String)*): URLEncodedBody = new URLEncodedBody(Map(values: _*))
 }

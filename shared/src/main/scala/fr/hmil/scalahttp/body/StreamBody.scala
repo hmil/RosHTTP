@@ -1,5 +1,7 @@
 package fr.hmil.scalahttp.body
 
+import java.nio.ByteBuffer
+
 /** A body containing raw binary data
   *
   * <b>Usage:</b> Stream bodies are used to send arbitrary binary data such as
@@ -13,19 +15,18 @@ package fr.hmil.scalahttp.body
   *
   * A stream body is sent with the content-type application/octet-stream.
   *
-  * @param stream The Stream of bytes to send
+  * @param data The bytes to send
   * @param contentType
   */
-class StreamBody(
-    stream: Stream[Byte],
-    override val contentType: String = "application/octet-stream"
+class StreamBody private(
+    data: ByteBuffer,
+    override val contentType: String
   ) extends BodyPart {
 
-  override val content: Array[Byte] = {
-    val acc = new Array[Byte](stream.length)
-    stream.foldLeft(0)({
-      case (i, b) => acc(i) = b; i + 1
-    })
-    acc
-  }
+  override val content: ByteBuffer = data
+}
+
+object StreamBody {
+  def apply(data: ByteBuffer, contentType: String = "application/octet-stream"): StreamBody =
+    new StreamBody(data, contentType)
 }

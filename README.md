@@ -136,12 +136,18 @@ request.send().map({res =>
 
 ### Sending data
 
+An HTTP request can send data wrapped in an implementation of `BodyPart`. The most common
+formats are already provided but you can create your own as well.   
+A set of implicit conversions is provided in `body.Implicits` for convenience.
+
 You can `post` or `put` some data with your favorite encoding.
 ```scala
-val data = new URLEncodedBody(Map(
+import fr.hmil.scalahttp.body.Implicits._
+
+val data = URLEncodedBody(
   "answer" -> "42",
   "platform" -> "jvm"
-))
+)
 request.post(data)
 // or
 request.put(data)
@@ -149,26 +155,54 @@ request.put(data)
 
 Create JSON requests easily using implicit conversions.
 ```scala
-import fr.hmil.scalahttp.body.JSONBody._
+import fr.hmil.scalahttp.body.Implicits._
 
-val data = JSONBody(new JSONObject(Map(
+val data = JSONObject(
   "answer" -> 42,
   "platform" -> "node"
-)))
+)
 request.post(data)
 ```
 
 #### File upload
 
-To send file data you must turn a file into a stream of bytes and then send it in a
+To send file data you must turn a file into a ByteBuffer and then send it in a
 StreamBody. For instance, on the jvm you could do:
 ```
-val stream = Source.fromFile("icon.png")(scala.io.Codec.ISO8859).map(_.toByte).toStream
-request.post(new StreamBody(stream))
+import fr.hmil.scalahttp.body.Implicits._
+
+val bytes = Source.fromFile("icon.png")(scala.io.Codec.ISO8859).map(_.toByte).toArray
+request.post(ByteBuffer.wrap(bytes))
 ```
 Note that the codec argument is important to read the file as-is and avoid side-effects
 due to character interpretation.
 
+#### Multipart
+
+Use the `MultiPartBody` to compose request bodies arbitrarily. It allows for instance
+to send binary data with some textual data.
+
+The following example illustrates how you could send a form to update a user profile
+made of a variety of data types.
+```scala
+import fr.hmil.scalahttp.body.Implicits._
+
+request.post(MultiPartBody(
+  // The name part is sent as plain text
+  "name" -> "John",
+  // The skills part is a complex nested structure sent as JSON
+  "skills" -> JSONObject(
+    "programming" -> JSONObject(
+      "C" -> 3,
+      "PHP" -> 1,
+      "Scala" -> 5
+    ),
+    "design" -> 2
+  ),
+  // The picture is sent using a StreamBody, assuming image_bytes is a ByteBuffer containing the image
+  "picture" -> StreamBody(image_bytes, "image/jpeg")
+))
+```
 
 ### HTTP Method
 
