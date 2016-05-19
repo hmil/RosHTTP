@@ -87,8 +87,7 @@ app.all('/body', function(req, res) {
 });
 
 app.post('/upload/:name', function(req, res) {
-  var fdata = fs.readFileSync(path.join(__dirname, "uploads", req.params.name))
-  console.log(req.body);
+  var fdata = fs.readFileSync(path.join(__dirname, "uploads", req.params.name));
 
   if (fdata.compare(req.body) == 0) {
     res.status(200).send('Ok');
