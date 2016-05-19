@@ -1,5 +1,6 @@
 name := "scala-http-client root project"
 
+crossScalaVersions := Seq("2.10.6", "2.11.7")
 
 lazy val root = project.in(file(".")).
 aggregate(scalaHttpJS, scalaHttpJVM)
