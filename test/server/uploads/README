@@ -1,0 +1,2 @@
+Files in this folder are diffed with files uploaded to /upload.
+The server returns a success when the file matches and a failure otherwise

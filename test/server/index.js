@@ -2,8 +2,26 @@ var express = require('express');
 var app = express();
 var morgan = require('morgan');
 var querystring = require('querystring');
+var bodyParser = require('body-parser');
+var multipart = require('connect-multiparty');
+var fs = require('fs');
+var path = require('path');
 
 app.use(morgan('combined'));
+
+
+app.use(multipart());
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// parse application/json
+app.use(bodyParser.json());
+
+// parse all other types
+app.use(bodyParser.raw({
+  type: '*/*'
+}));
 
 app.get('/status/:statusCode', function(req, res) {
   res.set('X-Status-Code', req.params.statusCode);
@@ -53,9 +71,30 @@ app.get('/headers', function(req, res) {
 });
 
 app.all('/method', function(req, res) {
-  console.log(req.method);
   res.set('X-Request-Method', req.method);
   res.send(req.method);
+});
+
+app.all('/body', function(req, res) {
+  if (!req.headers.hasOwnProperty('content-type')) {
+    res.status(400).send("No request body!");
+  } else if(req.body.length === 0) {
+    res.status(400).send("Empty request body!");
+  } else {
+    res.set('Content-Type', req.headers['content-type']);
+    res.send(req.body);
+  }
+});
+
+app.post('/upload/:name', function(req, res) {
+  var fdata = fs.readFileSync(path.join(__dirname, "uploads", req.params.name))
+  console.log(req.body);
+
+  if (fdata.compare(req.body) == 0) {
+    res.status(200).send('Ok');
+  } else {
+    res.status(400).send(req.body);
+  }
 });
 
 app.use('/runtime', express.static('runtime'));
