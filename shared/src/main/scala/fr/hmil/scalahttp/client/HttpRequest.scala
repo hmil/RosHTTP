@@ -2,7 +2,8 @@ package fr.hmil.scalahttp.client
 
 import java.net.URI
 
-import fr.hmil.scalahttp.{Method, Protocol}
+import fr.hmil.scalahttp.body.BodyPart
+import fr.hmil.scalahttp.{Method, Protocol, CrossPlatformUtils}
 
 import scala.concurrent.Future
 
@@ -16,7 +17,7 @@ final class HttpRequest  private (
     val method: Method,
     val host: String,
     val path: String,
-    val port: Int,
+    val port: Option[Int],
     val protocol: Protocol,
     val queryString: Option[String],
     val headers: HeaderMap[String]) {
@@ -25,12 +26,17 @@ final class HttpRequest  private (
   val longPath = path + queryString.map(q => s"?$q").getOrElse("")
 
   /** The target url for this request */
-  val url: String = s"$protocol://$host:$port$longPath"
+  val url: String = s"$protocol://$host${port.fold("")(":" + _)}$longPath"
 
-/*
+  /** Sets the HTTP method. Defaults to GET.
+    *
+    * Beware of browser limitations when using exotic methods.
+    *
+    * @param method The new method
+    * @return A copy of this [[HttpRequest]] with an updated method
+    */
   def withMethod(method: Method): HttpRequest =
     copy(method = method)
-*/
 
   /** Sets the host used in the request URI.
     *
@@ -59,20 +65,23 @@ final class HttpRequest  private (
     * @return A copy of this [[HttpRequest]] with an updated port
     */
   def withPort(port: Int): HttpRequest =
-    copy(port = port)
+    copy(port = Some(port))
+
+  /** Discards changes introduced by any call to [[withPort]]
+    *
+    * @return A copy of this [[HttpRequest]] with no explicit port.
+    */
+  def withDefaultPort(): HttpRequest =
+    copy(port = None)
 
   /** Sets the protocol used in the request URL.
     *
-    * At the moment, only HTTP is supported.
+    * Setting the protocol also sets the port accordingly (80 for HTTP, 443 for HTTPS).
     *
-    * @throws IllegalArgumentException when something else than HTTP is passed as argument
-    * @param protocol The HTTP protocol
-    * @return A copy of this [[HttpRequest]] with an updated protocol
+    * @param protocol The HTTP or HTTPS protocol
+    * @return A copy of this [[HttpRequest]] with an updated protocol and port
     */
   def withProtocol(protocol: Protocol): HttpRequest = {
-    if (protocol != Protocol.HTTP) {
-      throw new IllegalArgumentException(s"HttpRequest only supports the HTTP protocol. $protocol was provided")
-    }
     copy(protocol = protocol)
   }
 
@@ -195,15 +204,16 @@ final class HttpRequest  private (
   def withURL(url: String): HttpRequest = {
     val parser = new URI(url)
     copy(
-    protocol = if (parser.getScheme != null) parser.getScheme else protocol,
+    protocol = if (parser.getScheme != null) Protocol.fromString(parser.getScheme) else protocol,
     host = if (parser.getHost != null) parser.getHost else host,
-    port = if (parser.getPort != -1) parser.getPort else port,
+    port = if (parser.getPort != -1) Some(parser.getPort) else port,
     path = if (parser.getPath != null) parser.getPath else  path,
-    queryString =
-    if (parser.getQuery != null)
-    Some(CrossPlatformUtils.encodeQueryString(parser.getQuery))
-    else
-    queryString
+    queryString = {
+        if (parser.getQuery != null)
+        Some(CrossPlatformUtils.encodeQueryString(parser.getQuery))
+        else
+        queryString
+      }
     )
   }
 
@@ -221,17 +231,56 @@ final class HttpRequest  private (
     *
     * @return A future of HttpResponse which may fail with an [[HttpNetworkError]]
     */
-  def send(): Future[HttpResponse] = HttpDriver.send(this)
+  def send(): Future[HttpResponse] = HttpDriver.send(this, None)
+
+  /** Sends this request with the POST method and a body
+    *
+    * @see [[send]]
+    * @param body The body to send with the request
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]]
+    */
+  def post(body: BodyPart): Future[HttpResponse] = withMethod(Method.POST).send(body)
+
+  /** Sends this request with the PUT method and a body
+    *
+    * @see [[post]]
+    * @param body The body to send with the request
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]]
+    */
+  def put(body: BodyPart): Future[HttpResponse] = withMethod(Method.PUT).send(body)
+
+  /** Sends this request with the OPTIONS method and a body
+    *
+    * @see [[post]]
+    * @param body The body to send with the request
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]]
+    */
+  def options(body: BodyPart): Future[HttpResponse] = withMethod(Method.OPTIONS).send(body)
+
+  /** Sends this request with a body.
+    *
+    * This method should not be used directly. If you want to [[post]] or [[put]]
+    * some data, you should use the appropriate methods. If you do not want to send
+    * data with the request, you should use [[post]] without arguments.
+    *
+    * @param body The body to send.
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]]
+    */
+  def send(body: BodyPart): Future[HttpResponse] = HttpDriver.send(
+    withHeaders(Map(
+      "Content-Type" -> body.contentType
+    )),
+    Some(body))
 
   /** Internal method to back public facing .withXXX methods. */
   private def copy(
       method: Method      = this.method,
       host: String        = this.host,
       path: String        = this.path,
-      port: Int           = this.port,
+      port: Option[Int]   = this.port,
       protocol: Protocol  = this.protocol,
       queryString: Option[String] = this.queryString,
-      headers: HeaderMap[String] = this.headers
+      headers: HeaderMap[String]  = this.headers
   ): HttpRequest = {
     new HttpRequest(
       method    = method,
@@ -240,7 +289,7 @@ final class HttpRequest  private (
       port      = port,
       protocol  = protocol,
       queryString = queryString,
-      headers = headers)
+      headers   = headers)
   }
 
 }
@@ -251,7 +300,7 @@ object HttpRequest {
     method = Method.GET,
     host = null,
     path = null,
-    port = 80,
+    port = None,
     protocol = Protocol.HTTP,
     queryString = None,
     headers = HeaderMap()

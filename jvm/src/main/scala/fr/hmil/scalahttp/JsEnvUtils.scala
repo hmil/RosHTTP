@@ -1,4 +1,4 @@
-package fr.hmil.scalahttp.client
+package fr.hmil.scalahttp
 
 private object JsEnvUtils {
   val userAgent: String = "jvm"

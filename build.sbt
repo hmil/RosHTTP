@@ -1,5 +1,6 @@
 name := "scala-http-client root project"
 
+crossScalaVersions := Seq("2.10.6", "2.11.7")
 
 lazy val root = project.in(file(".")).
 aggregate(scalaHttpJS, scalaHttpJVM)
@@ -8,9 +9,11 @@ lazy val scalaHttp = crossProject.in(file("."))
   .configure(InBrowserTesting.cross)
   .settings(
     name := "scala-http-client",
-    version := "0.1.0-SNAPSHOT",
+    version := "0.2.0",
     scalaVersion := "2.11.7",
     organization := "fr.hmil",
+    licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT")),
+    homepage := Some(url("http://github.com/hmil/scala-http-client")),
 
     publishMavenStyle := true,
     publishTo := {
@@ -21,6 +24,10 @@ lazy val scalaHttp = crossProject.in(file("."))
         Some("releases" at nexus + "service/local/staging/deploy/maven2")
     },
     pomExtra := (
+      <scm>
+        <url>git@github.com:hmil/scala-http-client.git</url>
+        <connection>scm:git:git@github.com:hmil/scala-http-client.git</connection>
+      </scm>
       <developers>
         <developer>
           <id>hmil</id>

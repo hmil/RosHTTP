@@ -6,7 +6,7 @@ import scala.scalajs.js.annotation.ScalaJSDefined
 
 
 @ScalaJSDefined
-trait RequestOptions extends js.Object {
+private[scalahttp] trait RequestOptions extends js.Object {
   val protocol: String
   val host: String
   val hostname: String
@@ -22,7 +22,7 @@ trait RequestOptions extends js.Object {
   // val createConnection
 }
 
-object RequestOptions {
+private[scalahttp] object RequestOptions {
 
   /**
     * @param protocol Protocol to use. Defaults to 'http:'.

@@ -1,6 +1,7 @@
 # Scala http client
-[![Build Status](https://travis-ci.org/hmil/scala-http-client.svg?branch=master)]
-(https://travis-ci.org/hmil/scala-http-client)
+[![Build Status](https://travis-ci.org/hmil/scala-http-client.svg?branch=master)](https://travis-ci.org/hmil/scala-http-client)
+[![Latest release](https://hmil.github.io/scala-http-client/version-badge.svg)](https://github.com/hmil/scala-http-client)
+[![Scala.js](https://www.scala-js.org/assets/badges/scalajs-0.6.8.svg)](https://www.scala-js.org)
 
 A human-readable scala http client API compatible with:
 
@@ -10,14 +11,11 @@ A human-readable scala http client API compatible with:
 
 # Installation
 
-Add a dependency to the snapshot release in your build.sbt:
+Add a dependency in your build.sbt:
 
 ```scala
-resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
-libraryDependencies += "fr.hmil" %%% "scala-http-client" % "0.1.0-SNAPSHOT"
+libraryDependencies += "fr.hmil" %%% "scala-http-client" % "0.2.0"
 ```
-
-> There is no stable release available yet.
 
 # Usage
 
@@ -33,9 +31,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /* ... */
 
 // Runs consistently on the jvm, in node.js and in the browser!
-HttpRequest("http://schema.org/WebPage")
-  .send()
-  .map(response => println(response.body))
+val request = HttpRequest("https://schema.org/WebPage")
+
+request.send().map(response => println(response.body))
 ```
 
 When you `send()` a request, you get a `Future[HttpResponse]` which resolves to
@@ -135,6 +133,86 @@ request.send().map({res =>
 })
 ```
 
+### Sending data
+
+An HTTP request can send data wrapped in an implementation of `BodyPart`. The most common
+formats are already provided but you can create your own as well.   
+A set of implicit conversions is provided in `body.Implicits` for convenience.
+
+You can `post` or `put` some data with your favorite encoding.
+```scala
+import fr.hmil.scalahttp.body.Implicits._
+
+val data = URLEncodedBody(
+  "answer" -> "42",
+  "platform" -> "jvm"
+)
+request.post(data)
+// or
+request.put(data)
+```
+
+Create JSON requests easily using implicit conversions.
+```scala
+import fr.hmil.scalahttp.body.Implicits._
+
+val data = JSONObject(
+  "answer" -> 42,
+  "platform" -> "node"
+)
+request.post(data)
+```
+
+#### File upload
+
+To send file data you must turn a file into a ByteBuffer and then send it in a
+StreamBody. For instance, on the jvm you could do:
+```
+import fr.hmil.scalahttp.body.Implicits._
+
+val bytes = Source.fromFile("icon.png")(scala.io.Codec.ISO8859).map(_.toByte).toArray
+request.post(ByteBuffer.wrap(bytes))
+```
+Note that the codec argument is important to read the file as-is and avoid side-effects
+due to character interpretation.
+
+#### Multipart
+
+Use the `MultiPartBody` to compose request bodies arbitrarily. It allows for instance
+to send binary data with some textual data.
+
+The following example illustrates how you could send a form to update a user profile
+made of a variety of data types.
+```scala
+import fr.hmil.scalahttp.body.Implicits._
+
+request.post(MultiPartBody(
+  // The name part is sent as plain text
+  "name" -> "John",
+  // The skills part is a complex nested structure sent as JSON
+  "skills" -> JSONObject(
+    "programming" -> JSONObject(
+      "C" -> 3,
+      "PHP" -> 1,
+      "Scala" -> 5
+    ),
+    "design" -> 2
+  ),
+  // The picture is sent using a StreamBody, assuming image_bytes is a ByteBuffer containing the image
+  "picture" -> StreamBody(image_bytes, "image/jpeg")
+))
+```
+
+### HTTP Method
+
+```scala
+// Set the request method to GET, POST, PUT, etc...
+request.withMethod(Method.PUT).send()
+// OR use strings directly with implicit conversions
+import fr.hmil.scalahttp.Method.Implicits._
+request.withMethod("PUT").send()
+```
+
 ---
 
 Watch the [issues](https://github.com/hmil/scala-http-client/issues)
@@ -147,5 +225,14 @@ see something that is missing.
 - There is no way to avoid redirects in the browser. This is a W3C spec.
 - Chrome does not allow userspace handling of a 407 status code. It is treated
   like a network error. See [chromium issue](https://bugs.chromium.org/p/chromium/issues/detail?id=372136).
+- The `TRACE` HTTP method is unavailable in browsers.
 
 ## Changelog
+
+**v0.2.0**
+- support request body with `post()`, `put()` and `options()`
+- add `withHttpMethod()`
+- support HTTPS
+
+**v0.1.0**
+- First release
