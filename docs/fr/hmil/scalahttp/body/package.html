@@ -1,0 +1,325 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>body - fr.hmil.scalahttp.body</title>
+          <meta name="description" content="body - fr.hmil.scalahttp.body" />
+          <meta name="keywords" content="body fr.hmil.scalahttp.body" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'fr.hmil.scalahttp.body.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img alt="Package" src="../../../../lib/package_big.png" />
+        <p id="owner"><a href="../../../package.html" class="extype" name="fr">fr</a>.<a href="../../package.html" class="extype" name="fr.hmil">hmil</a>.<a href="../package.html" class="extype" name="fr.hmil.scalahttp">scalahttp</a></p>
+        <h1>body</h1><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.body.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">body</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="fr.hmil.scalahttp.body.BodyPart" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="BodyPartextendsAnyRef"></a>
+      <a id="BodyPart:BodyPart"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="BodyPart.html"><span class="name">BodyPart</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.body.package@BodyPartextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="fr.hmil.scalahttp.body.JSONBody" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="JSONBodyextendsBodyPart"></a>
+      <a id="JSONBody:JSONBody"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="JSONBody.html"><span class="name">JSONBody</span></a><span class="result"> extends <a href="BodyPart.html" class="extype" name="fr.hmil.scalahttp.body.BodyPart">BodyPart</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.body.package@JSONBodyextendsBodyPart" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Allows to send arbitrarily complex JSON data.</p>
+    </li><li name="fr.hmil.scalahttp.body.MultiPartBody" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="MultiPartBodyextendsBodyPart"></a>
+      <a id="MultiPartBody:MultiPartBody"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="MultiPartBody.html"><span class="name">MultiPartBody</span></a><span class="result"> extends <a href="BodyPart.html" class="extype" name="fr.hmil.scalahttp.body.BodyPart">BodyPart</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.body.package@MultiPartBodyextendsBodyPart" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A body made of multiple parts.</p><div class="fullcomment"><div class="comment cmt"><p>A body made of multiple parts.</p><p><b>Usage:</b> A multipart body acts as a container for other bodies. For instance,
+the multipart body is commonly used to send a form with binary attachments in conjunction with
+the <a href="StreamBody.html" class="extype" name="fr.hmil.scalahttp.body.StreamBody">StreamBody</a>.
+For simple key/value pairs, use <a href="URLEncodedBody.html" class="extype" name="fr.hmil.scalahttp.body.URLEncodedBody">URLEncodedBody</a> instead.</p><p><b>Safety consideration:</b> A random boundary is generated to separate parts. If the boundary was
+to occur within a body part, it would mess up the whole body. In practice, the odds are extremely small though.
+</p></div></div>
+    </li><li name="fr.hmil.scalahttp.body.StreamBody" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="StreamBodyextendsBodyPart"></a>
+      <a id="StreamBody:StreamBody"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="StreamBody.html"><span class="name">StreamBody</span></a><span class="result"> extends <a href="BodyPart.html" class="extype" name="fr.hmil.scalahttp.body.BodyPart">BodyPart</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.body.package@StreamBodyextendsBodyPart" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A body containing raw binary data</p><div class="fullcomment"><div class="comment cmt"><p>A body containing raw binary data</p><p><b>Usage:</b> Stream bodies are used to send arbitrary binary data such as
+audio, video or any other file attachment.
+The content-type can be overridden to something more specific like <code>image/jpeg</code>
+or <code>audio/wav</code> for instance.
+It is common to embed a stream body in a <a href="MultiPartBody.html" class="extype" name="fr.hmil.scalahttp.body.MultiPartBody">MultiPartBody</a> to send additional information
+with the binary file.
+When possible, send a <code>Content-Length</code> header along with an octet-stream body. It may allow the receiver
+end to better handle the loading.</p><p>A stream body is sent with the content-type application/octet-stream.
+</p></div></div>
+    </li><li name="fr.hmil.scalahttp.body.StringBody" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StringBodyextendsBodyPart"></a>
+      <a id="StringBody:StringBody"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="StringBody.html"><span class="name">StringBody</span></a><span class="result"> extends <a href="BodyPart.html" class="extype" name="fr.hmil.scalahttp.body.BodyPart">BodyPart</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.body.package@StringBodyextendsBodyPart" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A simple UTF-8 encoded string body
+</p>
+    </li><li name="fr.hmil.scalahttp.body.URLEncodedBody" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="URLEncodedBodyextendsBodyPart"></a>
+      <a id="URLEncodedBody:URLEncodedBody"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="URLEncodedBody.html"><span class="name">URLEncodedBody</span></a><span class="result"> extends <a href="BodyPart.html" class="extype" name="fr.hmil.scalahttp.body.BodyPart">BodyPart</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.body.package@URLEncodedBodyextendsBodyPart" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An urlencoded HTTP body.</p><div class="fullcomment"><div class="comment cmt"><p>An urlencoded HTTP body.</p><p><b>Usage:</b> urlencoded bodies are best suited for simple key/value maps of strings. For more
+structured data, use <a href="JSONBody.html" class="extype" name="fr.hmil.scalahttp.body.JSONBody">JSONBody</a>. For binary data, use <a href="StreamBody.html" class="extype" name="fr.hmil.scalahttp.body.StreamBody">StreamBody</a> or <a href="MultiPartBody.html" class="extype" name="fr.hmil.scalahttp.body.MultiPartBody">MultiPartBody</a>.</p><p>URLEncoded bodies are associated with the mime type &quot;application/x-www-form-urlencoded&quot;
+and look like query string parameters (eg. key=value&amp;key2=value2 ).
+</p></div></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="fr.hmil.scalahttp.body.Implicits" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Implicits"></a>
+      <a id="Implicits:Implicits"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Implicits$.html"><span class="name">Implicits</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.body.package@Implicits" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="fr.hmil.scalahttp.body.JSONBody" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="JSONBody"></a>
+      <a id="JSONBody:JSONBody"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="JSONBody$.html"><span class="name">JSONBody</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.body.package@JSONBody" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="fr.hmil.scalahttp.body.MultiPartBody" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MultiPartBody"></a>
+      <a id="MultiPartBody:MultiPartBody"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MultiPartBody$.html"><span class="name">MultiPartBody</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.body.package@MultiPartBody" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="fr.hmil.scalahttp.body.StreamBody" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StreamBody"></a>
+      <a id="StreamBody:StreamBody"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="StreamBody$.html"><span class="name">StreamBody</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.body.package@StreamBody" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="fr.hmil.scalahttp.body.StringBody" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StringBody"></a>
+      <a id="StringBody:StringBody"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="StringBody$.html"><span class="name">StringBody</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.body.package@StringBody" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="fr.hmil.scalahttp.body.URLEncodedBody" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="URLEncodedBody"></a>
+      <a id="URLEncodedBody:URLEncodedBody"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="URLEncodedBody$.html"><span class="name">URLEncodedBody</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.body.package@URLEncodedBody" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

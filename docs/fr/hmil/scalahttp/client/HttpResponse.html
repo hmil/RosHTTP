@@ -90,7 +90,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="fr.hmil.scalahttp.client.HttpResponse#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(statusCode:Int,body:String,headers:fr.hmil.scalahttp.client.HeaderMap[String]):fr.hmil.scalahttp.client.HttpResponse"></a>
+      <a id="&lt;init&gt;(statusCode:Int,rawBody:java.nio.ByteBuffer,headers:fr.hmil.scalahttp.client.HeaderMap[String]):fr.hmil.scalahttp.client.HttpResponse"></a>
       <a id="&lt;init&gt;:HttpResponse"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -98,10 +98,10 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">HttpResponse</span><span class="params">(<span name="statusCode">statusCode: <span class="extype" name="scala.Int">Int</span></span>, <span name="body">body: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="headers">headers: <a href="HeaderMap.html" class="extype" name="fr.hmil.scalahttp.client.HeaderMap">HeaderMap</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span>
+        <span class="name">HttpResponse</span><span class="params">(<span name="statusCode">statusCode: <span class="extype" name="scala.Int">Int</span></span>, <span name="rawBody">rawBody: <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span></span>, <span name="headers">headers: <a href="HeaderMap.html" class="extype" name="fr.hmil.scalahttp.client.HeaderMap">HeaderMap</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.scalahttp.client.HttpResponse@&lt;init&gt;(statusCode:Int,body:String,headers:fr.hmil.scalahttp.client.HeaderMap[String]):fr.hmil.scalahttp.client.HttpResponse" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.scalahttp.client.HttpResponse@&lt;init&gt;(statusCode:Int,rawBody:java.nio.ByteBuffer,headers:fr.hmil.scalahttp.client.HeaderMap[String]):fr.hmil.scalahttp.client.HttpResponse" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -189,7 +189,7 @@
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
         <span class="name">body</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
@@ -399,6 +399,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="fr.hmil.scalahttp.client.HttpResponse#rawBody" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="rawBody:java.nio.ByteBuffer"></a>
+      <a id="rawBody:ByteBuffer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rawBody</span><span class="result">: <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.client.HttpResponse@rawBody:java.nio.ByteBuffer" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="fr.hmil.scalahttp.client.HttpResponse#statusCode" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="statusCode:Int"></a>
       <a id="statusCode:Int"></a>

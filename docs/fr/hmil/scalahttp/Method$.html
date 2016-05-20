@@ -51,7 +51,11 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Exposes available methods as object as well as an implicit conversion
+from string to Method objects.</p><p>Because all backends do not support all methods, this library imposes a subset
+of all available HTTP Methods. Should you find a use case for this library
+with other HTTP methods, please submit an issue with your motivation.
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -147,23 +151,6 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="fr.hmil.scalahttp.Method#CONNECT" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="CONNECT:fr.hmil.scalahttp.Method"></a>
-      <a id="CONNECT:Method"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">CONNECT</span><span class="result">: <a href="Method.html" class="extype" name="fr.hmil.scalahttp.Method">Method</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#fr.hmil.scalahttp.Method$@CONNECT:fr.hmil.scalahttp.Method" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="fr.hmil.scalahttp.Method#DELETE" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DELETE:fr.hmil.scalahttp.Method"></a>
       <a id="DELETE:Method"></a>
@@ -211,6 +198,23 @@
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#fr.hmil.scalahttp.Method$@HEAD:fr.hmil.scalahttp.Method" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="fr.hmil.scalahttp.Method.Implicits" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Implicits"></a>
+      <a id="Implicits:Implicits"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Method$$Implicits$.html"><span class="name">Implicits</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#fr.hmil.scalahttp.Method$@Implicits" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -380,23 +384,6 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="fr.hmil.scalahttp.Method#fromString" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="fromString(name:String):fr.hmil.scalahttp.Method"></a>
-      <a id="fromString(String):Method"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">implicit </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">fromString</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="Method.html" class="extype" name="fr.hmil.scalahttp.Method">Method</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#fr.hmil.scalahttp.Method$@fromString(name:String):fr.hmil.scalahttp.Method" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
