@@ -8,6 +8,6 @@ import scala.scalajs.js.annotation.JSName
   */
 @js.native
 @JSName("global")
-object Global extends js.GlobalScope {
+private[scalahttp] object Global extends js.GlobalScope {
   def require[T](name: String): T = js.native
 }

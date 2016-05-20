@@ -9,7 +9,7 @@ import scala.scalajs.js.annotation.JSBracketAccess
   * @see https://nodejs.org/api/buffer.html
   */
 @js.native
-class Buffer extends js.Object {
+private[scalahttp] class Buffer extends js.Object {
   // new Buffer(array)
   // new Buffer(buffer)
   // new Buffer(arrayBuffer)
@@ -208,4 +208,3 @@ class Buffer extends js.Object {
   def writeUIntLE(value: Int, offset: Int): Int = js.native
   def writeUIntLE(value: Int, offset: Int, noAssert: Boolean): Int = js.native
 }
-

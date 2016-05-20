@@ -1,7 +1,5 @@
 package fr.hmil.scalahttp.node.http
 
-import fr.hmil.scalahttp.node.Module
-
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSName
 
@@ -14,7 +12,7 @@ import scala.scalajs.js.annotation.JSName
   * @see https://nodejs.org/api/http.html
   */
 @js.native
-trait Http extends js.Object{
+private[scalahttp] trait Http extends js.Object{
 
   /**
     * A list of the HTTP methods that are supported by the parser.
@@ -59,4 +57,4 @@ trait Http extends js.Object{
 
 @js.native
 @JSName("http")
-object Http extends Http
+private[scalahttp] object Http extends Http

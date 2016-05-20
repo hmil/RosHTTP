@@ -1,16 +1,17 @@
 package fr.hmil.scalahttp.client
 
-import fr.hmil.scalahttp.node.Modules.HttpModule
+import fr.hmil.scalahttp.JsEnvUtils
+import fr.hmil.scalahttp.body.BodyPart
 
 import scala.concurrent.Future
 
 private object HttpDriver {
 
-  def send(req: HttpRequest): Future[HttpResponse] = {
-    if (HttpModule.isAvailable) {
-      NodeDriver.send(req)
+  def send(req: HttpRequest, body: Option[BodyPart]): Future[HttpResponse] = {
+    if (JsEnvUtils.isRealBrowser) {
+      BrowserDriver.send(req, body)
     } else {
-      BrowserDriver.send(req)
+      NodeDriver.send(req, body)
     }
   }
 }

@@ -6,7 +6,7 @@ import scala.collection.mutable
 import scala.scalajs.js
 
 @js.native
-class IncomingMessage extends EventEmitter {
+private[scalahttp] class IncomingMessage extends EventEmitter {
   val headers: js.Dictionary[String] = js.native
   val httpVersion: String = js.native
   val method: String = js.native

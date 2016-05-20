@@ -5,7 +5,7 @@ import scala.scalajs.js
 /**
   * collection of helper functions for nodejs related stuff
   */
-object Helpers {
+private[scalahttp] object Helpers {
 
   /**
     * Tests whether the current environment is commonjs-like

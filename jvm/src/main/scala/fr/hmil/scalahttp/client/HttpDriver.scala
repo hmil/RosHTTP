@@ -1,19 +1,22 @@
 package fr.hmil.scalahttp.client
 
+import java.io.PrintWriter
 import java.net.{HttpURLConnection, URL}
+import java.nio.ByteBuffer
 
 import fr.hmil.scalahttp.HttpUtils
+import fr.hmil.scalahttp.body.BodyPart
+import fr.hmil.scalahttp.tools.io.IO
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.io.Source
 
 private object HttpDriver {
 
-  def send(req: HttpRequest): Future[HttpResponse] = {
+  def send(req: HttpRequest, body: Option[BodyPart]): Future[HttpResponse] = {
     concurrent.Future {
       try {
-        val connection = prepareConnection(req)
+        val connection = prepareConnection(req, body)
         readResponse(connection)
       } catch {
         case e: HttpResponseError => throw e
@@ -22,10 +25,16 @@ private object HttpDriver {
     }
   }
 
-  private def prepareConnection(req: HttpRequest): HttpURLConnection = {
+  private def prepareConnection(req: HttpRequest, body: Option[BodyPart]): HttpURLConnection = {
     val connection = new URL(req.url).openConnection().asInstanceOf[HttpURLConnection]
     req.headers.foreach(t => connection.addRequestProperty(t._1, t._2))
-
+    connection.setRequestMethod(req.method.toString)
+    body.foreach({part =>
+      connection.setDoOutput(true)
+      val os = connection.getOutputStream
+      os.write(part.content.array())
+      os.close()
+    })
     connection
   }
 
@@ -45,13 +54,13 @@ private object HttpDriver {
     if (code < 400) {
       new HttpResponse(
         code,
-        Source.fromInputStream(connection.getInputStream)(charset).mkString,
+        ByteBuffer.wrap(IO.readInputStreamToByteArray(connection.getInputStream)),
         headerMap
       )
     } else {
       throw HttpResponseError.badStatus(new HttpResponse(
         code,
-        Source.fromInputStream(connection.getErrorStream)(charset).mkString,
+        ByteBuffer.wrap(IO.readInputStreamToByteArray(connection.getErrorStream)),
         headerMap
       ))
     }

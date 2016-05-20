@@ -1,6 +1,6 @@
 package fr.hmil.scalahttp.node
 
-import fr.hmil.scalahttp.node.http.Http
+import fr.hmil.scalahttp.node.http.{Http, Https}
 
 
 /**
@@ -9,9 +9,11 @@ import fr.hmil.scalahttp.node.http.Http
   * If a browser shim is used and is accessible in the global context, it will be returned
   * and no call to require() will take place
   */
-object Modules {
+private[scalahttp] object Modules {
 
   object HttpModule extends Module("http", Http)
-  lazy val http: Http = HttpModule.api
+  object HttpsModule extends Module("https", Https)
 
+  lazy val http: Http = HttpModule.api
+  lazy val https: Https = HttpsModule.api
 }

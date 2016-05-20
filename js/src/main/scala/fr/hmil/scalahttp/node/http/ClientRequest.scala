@@ -9,7 +9,7 @@ import scala.scalajs.js
   * Complete nodejs http ClientRequest API facade
   */
 @js.native
-class ClientRequest extends EventEmitter {
+private[scalahttp] class ClientRequest extends EventEmitter {
 
   /**
     * Marks the request as aborting. Calling this will cause remaining data in
