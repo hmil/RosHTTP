@@ -226,9 +226,11 @@ see something that is missing.
 
 ## Changelog
 
+
 - Remove general purpose StringBody
 - add missing patch method
 - Make Method constructor public
+- Remove map parameters from `.withQueryParameter(s)` and `.withHeaders`
 
 **v0.2.0**
 - support request body with `post()`, `put()` and `options()`
