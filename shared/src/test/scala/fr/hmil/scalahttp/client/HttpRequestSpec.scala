@@ -153,14 +153,14 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest()
           .withQueryParameter("foo", "bar")
           .withQueryParameter("table", List("a", "b", "c"))
-          .withQueryParameter("map", Map(
+          .withQueryParameter("map",
             "d" -> "dval",
             "e" -> "e value"
-          ))
-          .withQueryParameters(Map(
+          )
+          .withQueryParameters(
             "license" -> "MIT",
             "copy" -> "© 2016"
-          ))
+          )
           .queryString.get ==>
           "foo=bar&table=a&table=b&table=c&map%5Bd%5D=dval&map%5Be%5D=e%20value&license=MIT&copy=%C2%A9%202016"
       }
@@ -296,9 +296,9 @@ object HttpRequestSpec extends TestSuite {
 
         "added in batch" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
-            .withQueryParameters(Map(
+            .withQueryParameters(
               "device" -> "neon",
-              "element" -> "argon"))
+              "element" -> "argon")
             .send()
             .map(res => {
               res.body ==> "{\"device\":\"neon\",\"element\":\"argon\"}"
@@ -307,9 +307,9 @@ object HttpRequestSpec extends TestSuite {
 
         "added in batch with illegal characters" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
-            .withQueryParameters(Map(
+            .withQueryParameters(
               " zařízení" -> "topný olej vůle potlačující",
-              "chäřac+=r&" -> "+Heizölrückstoßabdämpfung=r&"))
+              "chäřac+=r&" -> "+Heizölrückstoßabdämpfung=r&")
             .send()
             .map(res => {
               res.body ==> "{\" zařízení\":\"topný olej vůle potlačující\"," +
@@ -319,10 +319,10 @@ object HttpRequestSpec extends TestSuite {
 
         "added in sequence" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
-            .withQueryParameters(Map(
+            .withQueryParameters(
               "element" -> "argon",
               "device" -> "chair"
-            ))
+            )
             .withQueryParameter("tool", "hammer")
             .withQueryParameter("device", "neon")
             .send()
@@ -367,7 +367,7 @@ object HttpRequestSpec extends TestSuite {
           "custom" -> "foobar")
 
         val req = HttpRequest(s"$SERVER_URL/headers")
-          .withHeaders(headers)
+          .withHeaders(headers.toSeq: _*)
 
         // Test with corrected case
         req.headers ==> headers
@@ -396,15 +396,15 @@ object HttpRequestSpec extends TestSuite {
 
       "Overwrite previous value when set" - {
         val req = HttpRequest(s"$SERVER_URL/headers")
-          .withHeaders(Map(
+          .withHeaders(
             "accept" -> "text/html, application/xhtml",
             "Cache-Control" -> "max-age=0",
             "custom" -> "foobar"
-          ))
-          .withHeaders(Map(
+          )
+          .withHeaders(
             "Custom" -> "barbar",
             "Accept" -> "application/json"
-          ))
+          )
           .withHeader("cache-control", "max-age=128")
 
         req.headers ==> Map(

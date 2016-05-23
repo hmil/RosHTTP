@@ -167,8 +167,8 @@ final class HttpRequest  private (
     * @return A copy of this [[HttpRequest]] with an updated query string.
     * @see [[withQueryParameter(String,String)]]
     */
-  def withQueryParameter(key: String, values: Map[String, String]): HttpRequest =
-    withQueryParameters(values.map(p => (s"$key[${p._1}]", p._2)))
+  def withQueryParameter(key: String, values: (String, String)*): HttpRequest =
+    withQueryParameters(values.map(p => (s"$key[${p._1}]", p._2)): _*)
 
   /** Adds multiple query parameters and updates those already existing.
     *
@@ -176,7 +176,7 @@ final class HttpRequest  private (
     * @return A copy of this [[HttpRequest]] with an updated query string.
     * @see [[withQueryParameter(String,String)]]
     */
-  def withQueryParameters(parameters: Map[String, String]): HttpRequest =
+  def withQueryParameters(parameters: (String, String)*): HttpRequest =
     parameters.foldLeft(this)((acc, entry) => acc.withQueryParameter(entry._1, entry._2))
 
   /** Adds or updates a header to the current set of headers.
@@ -193,7 +193,7 @@ final class HttpRequest  private (
     * @param newHeaders The headers to add.
     * @return A copy of this [[HttpRequest]] with an updated header set.
     */
-  def withHeaders(newHeaders: Map[String, String]): HttpRequest =
+  def withHeaders(newHeaders: (String, String)*): HttpRequest =
     copy(headers = HeaderMap(headers ++ newHeaders))
 
   /** Updates request protocol, host, port, path and queryString according to a url.
@@ -267,9 +267,7 @@ final class HttpRequest  private (
     * @return A future of HttpResponse which may fail with an [[HttpNetworkError]]
     */
   def send(body: BodyPart): Future[HttpResponse] = HttpDriver.send(
-    withHeaders(Map(
-      "Content-Type" -> body.contentType
-    )),
+    withHeader("Content-Type", body.contentType),
     Some(body))
 
   /** Internal method to back public facing .withXXX methods. */
