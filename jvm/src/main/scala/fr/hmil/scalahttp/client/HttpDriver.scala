@@ -1,6 +1,5 @@
 package fr.hmil.scalahttp.client
 
-import java.io.PrintWriter
 import java.net.{HttpURLConnection, URL}
 import java.nio.ByteBuffer
 
@@ -9,15 +8,19 @@ import fr.hmil.scalahttp.body.BodyPart
 import fr.hmil.scalahttp.tools.io.IO
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.blocking
 import scala.concurrent.Future
 
 private object HttpDriver {
 
   def send(req: HttpRequest, body: Option[BodyPart]): Future[HttpResponse] = {
+
     concurrent.Future {
       try {
-        val connection = prepareConnection(req, body)
-        readResponse(connection)
+        blocking {
+          val connection = prepareConnection(req, body)
+          readResponse(connection)
+        }
       } catch {
         case e: HttpResponseError => throw e
         case e: Throwable => throw new HttpNetworkError(e)
