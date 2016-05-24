@@ -148,9 +148,9 @@ final class HttpRequest  private (
     * @param key The unescaped parameter key
     * @param values The unescaped parameter array values
     * @return A copy of this [[HttpRequest]] with an updated query string.
-    * @see [[withQueryParameter(String,String)]]
+    * @see [[withQueryArrayParameter(String,String)]]
     */
-  def withQueryParameter(key: String, values: String*): HttpRequest =
+  def withQueryArrayParameter(key: String, values: String*): HttpRequest =
     values.foldLeft(this)((acc, value) => acc.withQueryParameter(key, value))
 
   /** Adds a query map parameter or updates it if it already exists.
@@ -165,16 +165,16 @@ final class HttpRequest  private (
     * @param key The unescaped parameter key
     * @param values The unescaped parameter map values
     * @return A copy of this [[HttpRequest]] with an updated query string.
-    * @see [[withQueryParameter(String,String)]]
+    * @see [[withQueryArrayParameter(String,String)]]
     */
-  def withQueryParameter(key: String, values: (String, String)*): HttpRequest =
+  def withQueryMapParameter(key: String, values: (String, String)*): HttpRequest =
     withQueryParameters(values.map(p => (s"$key[${p._1}]", p._2)): _*)
 
   /** Adds multiple query parameters and updates those already existing.
     *
     * @param parameters A map of new parameters.
     * @return A copy of this [[HttpRequest]] with an updated query string.
-    * @see [[withQueryParameter(String,String)]]
+    * @see [[withQueryArrayParameter(String,String)]]
     */
   def withQueryParameters(parameters: (String, String)*): HttpRequest =
     parameters.foldLeft(this)((acc, entry) => acc.withQueryParameter(entry._1, entry._2))

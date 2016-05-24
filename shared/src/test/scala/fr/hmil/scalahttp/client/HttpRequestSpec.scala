@@ -152,8 +152,8 @@ object HttpRequestSpec extends TestSuite {
       "Query parameters" - {
         HttpRequest()
           .withQueryParameter("foo", "bar")
-          .withQueryParameter("table", "a", "b", "c")
-          .withQueryParameter("map",
+          .withQueryArrayParameter("table", "a", "b", "c")
+          .withQueryMapParameter("map",
             "d" -> "dval",
             "e" -> "e value"
           )
@@ -333,7 +333,7 @@ object HttpRequestSpec extends TestSuite {
 
         "as list parameter" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
-            .withQueryParameter("map", List("foo", "bar"))
+            .withQueryArrayParameter("map", "foo", "bar")
             .send()
             .map(res => {
               res.body ==> "{\"map\":[\"foo\",\"bar\"]}"

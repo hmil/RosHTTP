@@ -96,8 +96,8 @@ offers an API to add, update and delete keys in the query string.
 ```scala
 request
   .withQueryParameter("foo", "bar")
-  .withQueryParameter("table", "a", "b", "c")
-  .withQueryParameter("map",
+  .withQueryArrayParameter("table", "a", "b", "c")
+  .withQueryMapParameter("map",
     "d" -> "dval",
     "e" -> "e value"
   )
@@ -226,10 +226,10 @@ see something that is missing.
 
 ## Changelog
 
-
 - Remove general purpose StringBody
 - add missing patch method
 - Make Method constructor public
+- Disambiguate `withQueryArrayParameter` and `withQueryMapParameter`
 - Remove map parameters from `.withQueryParameter(s)` and `.withHeaders`
 
 **v0.2.0**
