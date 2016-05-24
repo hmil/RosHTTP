@@ -152,7 +152,7 @@ object HttpRequestSpec extends TestSuite {
       "Query parameters" - {
         HttpRequest()
           .withQueryParameter("foo", "bar")
-          .withQueryParameter("table", List("a", "b", "c"))
+          .withQueryParameter("table", "a", "b", "c")
           .withQueryParameter("map",
             "d" -> "dval",
             "e" -> "e value"

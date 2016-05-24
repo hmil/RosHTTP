@@ -150,7 +150,7 @@ final class HttpRequest  private (
     * @return A copy of this [[HttpRequest]] with an updated query string.
     * @see [[withQueryParameter(String,String)]]
     */
-  def withQueryParameter(key: String, values: List[String]): HttpRequest =
+  def withQueryParameter(key: String, values: String*): HttpRequest =
     values.foldLeft(this)((acc, value) => acc.withQueryParameter(key, value))
 
   /** Adds a query map parameter or updates it if it already exists.

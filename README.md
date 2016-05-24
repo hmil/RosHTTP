@@ -96,7 +96,7 @@ offers an API to add, update and delete keys in the query string.
 ```scala
 request
   .withQueryParameter("foo", "bar")
-  .withQueryParameter("table", List("a", "b", "c"))
+  .withQueryParameter("table", "a", "b", "c")
   .withQueryParameter("map",
     "d" -> "dval",
     "e" -> "e value"
