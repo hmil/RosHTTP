@@ -2,9 +2,7 @@ package fr.hmil.scalahttp.client
 
 import java.nio.ByteBuffer
 
-import fr.hmil.scalahttp.Method.Implicits._
-import fr.hmil.scalahttp.Protocol
-import fr.hmil.scalahttp.JsEnvUtils
+import fr.hmil.scalahttp.{JsEnvUtils, Method, Protocol}
 import fr.hmil.scalahttp.body.JSONBody._
 import fr.hmil.scalahttp.body.Implicits._
 import fr.hmil.scalahttp.body._
@@ -448,7 +446,7 @@ object HttpRequestSpec extends TestSuite {
       "can be set to any legal value" - {
         legalMethods.map(method =>
           HttpRequest(s"$SERVER_URL/method")
-            .withMethod(method)
+            .withMethod(Method(method))
             .send()
             .map(_.headers("X-Request-Method") ==> method)
         ).reduce((f1, f2) => f1.flatMap(_=>f2))
@@ -457,18 +455,10 @@ object HttpRequestSpec extends TestSuite {
       "ignores case and capitalizes" - {
         legalMethods.map(method =>
           HttpRequest(s"$SERVER_URL/method")
-            .withMethod(method.toLowerCase)
+            .withMethod(Method(method.toLowerCase))
             .send()
             .map(_.headers("X-Request-Method") ==> method)
         ).reduce((f1, f2) => f1.flatMap(_=>f2))
-      }
-
-      "cannot be set to an illegal value" - {
-        intercept[IllegalArgumentException] {
-          HttpRequest(SERVER_URL)
-            .withMethod("Wuf")
-          assert(false)
-        }
       }
     }
 

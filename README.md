@@ -208,9 +208,6 @@ request.post(MultiPartBody(
 ```scala
 // Set the request method to GET, POST, PUT, etc...
 request.withMethod(Method.PUT).send()
-// OR use strings directly with implicit conversions
-import fr.hmil.scalahttp.Method.Implicits._
-request.withMethod("PUT").send()
 ```
 
 ---
@@ -230,6 +227,8 @@ see something that is missing.
 ## Changelog
 
 - Remove general purpose StringBody
+- add missing patch method
+- Make Method constructor public
 
 **v0.2.0**
 - support request body with `post()`, `put()` and `options()`
