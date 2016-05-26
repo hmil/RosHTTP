@@ -188,7 +188,7 @@ import fr.hmil.scalahttp.body.Implicits._
 
 request.post(MultiPartBody(
   // The name part is sent as plain text
-  "name" -> "John",
+  "name" -> PlainTextBody("John"),
   // The skills part is a complex nested structure sent as JSON
   "skills" -> JSONObject(
     "programming" -> JSONObject(
@@ -228,6 +228,8 @@ see something that is missing.
 - The `TRACE` HTTP method is unavailable in browsers.
 
 ## Changelog
+
+- Remove general purpose StringBody
 
 **v0.2.0**
 - support request body with `post()`, `put()` and `options()`

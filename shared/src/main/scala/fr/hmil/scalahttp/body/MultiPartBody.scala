@@ -18,7 +18,7 @@ import scala.util.Random
   *              of each part.
   * @param subtype The exact multipart mime type as in `multipart/subtype`. Defaults to `form-data`.
   */
-class MultiPartBody private(parts: Map[String, BodyPart], subtype: String = "form-data") extends BodyPart {
+class MultiPartBody(parts: Map[String, BodyPart], subtype: String = "form-data") extends BodyPart {
 
   val boundary = "----" + Random.alphanumeric.take(24).mkString.toLowerCase
 
