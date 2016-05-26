@@ -10,8 +10,8 @@ class StringBody private(
     text: String
   ) extends BodyPart {
 
-  override val contentType: String = "text/plain; charset=utf-8"
-  override val content: ByteBuffer = ByteBuffer.wrap(text.getBytes("utf-8"))
+  override def contentType: String = "text/plain; charset=utf-8"
+  override def content: ByteBuffer = ByteBuffer.wrap(text.getBytes("utf-8"))
 }
 
 object StringBody {

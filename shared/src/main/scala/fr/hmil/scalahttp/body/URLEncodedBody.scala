@@ -16,9 +16,9 @@ import fr.hmil.scalahttp.CrossPlatformUtils
   */
 class URLEncodedBody private(values: Map[String, String]) extends BodyPart {
 
-  override val contentType: String = s"application/x-www-form-urlencoded"
+  override def contentType: String = s"application/x-www-form-urlencoded"
 
-  override val content: ByteBuffer = ByteBuffer.wrap(
+  override def content: ByteBuffer = ByteBuffer.wrap(
     values.map({case (name, part) =>
       CrossPlatformUtils.encodeQueryString(name) +
       "=" +

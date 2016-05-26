@@ -22,9 +22,9 @@ class MultiPartBody private(parts: Map[String, BodyPart], subtype: String = "for
 
   val boundary = "----" + Random.alphanumeric.take(24).mkString.toLowerCase
 
-  override val contentType: String = s"multipart/$subtype; boundary=$boundary"
+  override def contentType: String = s"multipart/$subtype; boundary=$boundary"
 
-  override val content: ByteBuffer = {
+  override def content: ByteBuffer = {
     ByteBuffer.wrap((
       parts.map({case (name, part) =>
         "--" + boundary + "\r\n" +
