@@ -7,7 +7,7 @@ import fr.hmil.scalahttp.Protocol
 import fr.hmil.scalahttp.JsEnvUtils
 import fr.hmil.scalahttp.body.JSONBody._
 import fr.hmil.scalahttp.body.Implicits._
-import fr.hmil.scalahttp.body.{JSONBody, MultiPartBody, StreamBody, URLEncodedBody}
+import fr.hmil.scalahttp.body._
 import utest._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -170,7 +170,7 @@ object HttpRequestSpec extends TestSuite {
       "User profile form data" - {
         HttpRequest(s"$SERVER_URL/body")
           .post(MultiPartBody(
-            "name" -> "John",
+            "name" -> PlainTextBody("John"),
             "skills" -> JSONObject(
               "programming" -> JSONObject(
                 "C" -> 3,
@@ -476,7 +476,7 @@ object HttpRequestSpec extends TestSuite {
 
       "can be POSTed with ASCII strings" - {
         HttpRequest(s"$SERVER_URL/body")
-          .post("Hello world")
+          .post(PlainTextBody("Hello world"))
           .map({ res =>
             res.body ==> "Hello world"
             res.headers("Content-Type").toLowerCase ==> "text/plain; charset=utf-8"
@@ -485,7 +485,7 @@ object HttpRequestSpec extends TestSuite {
 
       "can be POSTed with non-ascii strings" - {
         HttpRequest(s"$SERVER_URL/body")
-          .post("Heizölrückstoßabdämpfung")
+          .post(PlainTextBody("Heizölrückstoßabdämpfung"))
           .map({ res =>
             res.body ==> "Heizölrückstoßabdämpfung"
             res.headers("Content-Type").toLowerCase ==> "text/plain; charset=utf-8"
@@ -494,8 +494,8 @@ object HttpRequestSpec extends TestSuite {
 
       "can be POSTed as multipart" - {
         val part = MultiPartBody(
-          "foo" -> "bar",
-          "engine" -> "Heizölrückstoßabdämpfung"
+          "foo" -> PlainTextBody("bar"),
+          "engine" -> PlainTextBody("Heizölrückstoßabdämpfung")
         )
 
         HttpRequest(s"$SERVER_URL/body")
