@@ -96,15 +96,15 @@ offers an API to add, update and delete keys in the query string.
 ```scala
 request
   .withQueryParameter("foo", "bar")
-  .withQueryParameter("table", List("a", "b", "c"))
-  .withQueryParameter("map", Map(
+  .withQueryArrayParameter("table", "a", "b", "c")
+  .withQueryObjectParameter("map",
     "d" -> "dval",
     "e" -> "e value"
-  ))
-  .withQueryParameters(Map(
+  )
+  .withQueryParameters(
     "license" -> "MIT",
     "copy" -> "© 2016"
-  ))
+  )
   /* Query is now:
    foo=bar&table=a&table=b&table=c&map[d]=dval&map[e]=e%20value&license=MIT&copy=%C2%A9%202016
   */
@@ -118,10 +118,10 @@ request.withHeader("Accept", "text/html")
 ```
 Or multiple headers at once using `.withHeaders`
 ```scala
-request.withHeaders(Map(
+request.withHeaders(
   "Accept" -> "text/html",
   "Cookie" -> "sessionid=f00ba242cafe"
-))
+)
 ```
 
 ### Response headers
@@ -229,6 +229,8 @@ see something that is missing.
 - Remove general purpose StringBody
 - add missing patch method
 - Make Method constructor public
+- Disambiguate `withQueryArrayParameter` and `withQueryObjectParameter`
+- Remove map parameters from `.withQueryParameter(s)` and `.withHeaders`
 
 **v0.2.0**
 - support request body with `post()`, `put()` and `options()`

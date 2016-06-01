@@ -11,7 +11,7 @@ import scala.concurrent.Future
   *
   * The request is sent using  [[send]]. A request can be sent multiple times.
   * Each time yields a Future[HttpResponse] which either succeeds with an [[HttpResponse]]
-  * or fails with an [[HttpNetworkError]]
+  * or fails with an [[HttpNetworkError]] or [[HttpResponseError]]
   */
 final class HttpRequest  private (
     val method: Method,
@@ -120,7 +120,7 @@ final class HttpRequest  private (
   def withoutQueryString(): HttpRequest =
     copy(queryString = None)
 
-  /** Adds a query parameter or updates it if it already exists.
+  /** Adds a query parameter key/value pair.
     *
     * Query parameters end up in the query string as `key=value` pairs separated by ampersands.
     * Both the key and parameter are escaped to ensure proper query string format.
@@ -136,7 +136,7 @@ final class HttpRequest  private (
       "=" +
       CrossPlatformUtils.encodeQueryString(value)))
 
-  /** Adds a query array parameter or updates it if it already exists.
+  /** Adds a query array parameter.
     *
     * Although this is not part of a spec, most servers recognize bracket indices
     * in a query string as array indices or object keys.
@@ -148,12 +148,12 @@ final class HttpRequest  private (
     * @param key The unescaped parameter key
     * @param values The unescaped parameter array values
     * @return A copy of this [[HttpRequest]] with an updated query string.
-    * @see [[withQueryParameter(String,String)]]
+    * @see [[withQueryArrayParameter(String,String)]]
     */
-  def withQueryParameter(key: String, values: List[String]): HttpRequest =
+  def withQueryArrayParameter(key: String, values: Seq[String]): HttpRequest =
     values.foldLeft(this)((acc, value) => acc.withQueryParameter(key, value))
 
-  /** Adds a query map parameter or updates it if it already exists.
+  /** Adds a query map parameter.
     *
     * Although this is not part of a spec, most servers recognize bracket indices
     * in a query string as array indices or object keys.
@@ -165,18 +165,18 @@ final class HttpRequest  private (
     * @param key The unescaped parameter key
     * @param values The unescaped parameter map values
     * @return A copy of this [[HttpRequest]] with an updated query string.
-    * @see [[withQueryParameter(String,String)]]
+    * @see [[withQueryArrayParameter(String,String)]]
     */
-  def withQueryParameter(key: String, values: Map[String, String]): HttpRequest =
-    withQueryParameters(values.map(p => (s"$key[${p._1}]", p._2)))
+  def withQueryObjectParameter(key: String, values: Seq[(String, String)]): HttpRequest =
+    withQueryParameters(values.map(p => (s"$key[${p._1}]", p._2)): _*)
 
-  /** Adds multiple query parameters and updates those already existing.
+  /** Adds multiple query parameters.
     *
-    * @param parameters A map of new parameters.
+    * @param parameters A sequence of new, unescaped parameters.
     * @return A copy of this [[HttpRequest]] with an updated query string.
-    * @see [[withQueryParameter(String,String)]]
+    * @see [[withQueryArrayParameter(String,String)]]
     */
-  def withQueryParameters(parameters: Map[String, String]): HttpRequest =
+  def withQueryParameters(parameters: (String, String)*): HttpRequest =
     parameters.foldLeft(this)((acc, entry) => acc.withQueryParameter(entry._1, entry._2))
 
   /** Adds or updates a header to the current set of headers.
@@ -193,7 +193,7 @@ final class HttpRequest  private (
     * @param newHeaders The headers to add.
     * @return A copy of this [[HttpRequest]] with an updated header set.
     */
-  def withHeaders(newHeaders: Map[String, String]): HttpRequest =
+  def withHeaders(newHeaders: (String, String)*): HttpRequest =
     copy(headers = HeaderMap(headers ++ newHeaders))
 
   /** Updates request protocol, host, port, path and queryString according to a url.
@@ -220,16 +220,13 @@ final class HttpRequest  private (
   /** Sends this request.
     *
     * A request can be sent multiple times. When a request is sent, it returns a Future[HttpResponse]
-    * which either succeeds with an [[HttpResponse]] or fails with an [[HttpNetworkError]].
+    * which either succeeds with an [[HttpResponse]] or fails.
     *
     * Possible reasons for the future failing are:
-    * - A status code >= 400
-    * - A network error
+    * - A status code >= 400 ([[HttpResponseError]])
+    * - A network error ([[HttpNetworkError]])
     *
-    * Note that in some cases the response body can still be obtained after a failure
-    * through the [[HttpNetworkError]].
-    *
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]]
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
   def send(): Future[HttpResponse] = HttpDriver.send(this, None)
 
@@ -237,7 +234,7 @@ final class HttpRequest  private (
     *
     * @see [[send]]
     * @param body The body to send with the request
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]]
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
   def post(body: BodyPart): Future[HttpResponse] = withMethod(Method.POST).send(body)
 
@@ -245,7 +242,7 @@ final class HttpRequest  private (
     *
     * @see [[post]]
     * @param body The body to send with the request
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]]
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
   def put(body: BodyPart): Future[HttpResponse] = withMethod(Method.PUT).send(body)
 
@@ -253,7 +250,7 @@ final class HttpRequest  private (
     *
     * @see [[post]]
     * @param body The body to send with the request
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]]
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
   def options(body: BodyPart): Future[HttpResponse] = withMethod(Method.OPTIONS).send(body)
 
@@ -264,12 +261,10 @@ final class HttpRequest  private (
     * data with the request, you should use [[post]] without arguments.
     *
     * @param body The body to send.
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]]
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
   def send(body: BodyPart): Future[HttpResponse] = HttpDriver.send(
-    withHeaders(Map(
-      "Content-Type" -> body.contentType
-    )),
+    withHeader("Content-Type", body.contentType),
     Some(body))
 
   /** Internal method to back public facing .withXXX methods. */
