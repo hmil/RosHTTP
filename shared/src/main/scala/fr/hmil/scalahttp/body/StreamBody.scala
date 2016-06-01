@@ -23,7 +23,7 @@ class StreamBody private(
     override val contentType: String
   ) extends BodyPart {
 
-  override val content: ByteBuffer = data
+  override def content: ByteBuffer = data
 }
 
 object StreamBody {

@@ -14,7 +14,7 @@ A human-readable scala http client API compatible with:
 Add a dependency in your build.sbt:
 
 ```scala
-libraryDependencies += "fr.hmil" %%% "scala-http-client" % "0.2.0"
+libraryDependencies += "fr.hmil" %%% "scala-http-client" % "0.3.0"
 ```
 
 # Usage
@@ -96,15 +96,15 @@ offers an API to add, update and delete keys in the query string.
 ```scala
 request
   .withQueryParameter("foo", "bar")
-  .withQueryParameter("table", List("a", "b", "c"))
-  .withQueryParameter("map", Map(
+  .withQueryArrayParameter("table", "a", "b", "c")
+  .withQueryObjectParameter("map",
     "d" -> "dval",
     "e" -> "e value"
-  ))
-  .withQueryParameters(Map(
+  )
+  .withQueryParameters(
     "license" -> "MIT",
     "copy" -> "© 2016"
-  ))
+  )
   /* Query is now:
    foo=bar&table=a&table=b&table=c&map[d]=dval&map[e]=e%20value&license=MIT&copy=%C2%A9%202016
   */
@@ -118,10 +118,10 @@ request.withHeader("Accept", "text/html")
 ```
 Or multiple headers at once using `.withHeaders`
 ```scala
-request.withHeaders(Map(
+request.withHeaders(
   "Accept" -> "text/html",
   "Cookie" -> "sessionid=f00ba242cafe"
-))
+)
 ```
 
 ### Response headers
@@ -188,7 +188,7 @@ import fr.hmil.scalahttp.body.Implicits._
 
 request.post(MultiPartBody(
   // The name part is sent as plain text
-  "name" -> "John",
+  "name" -> PlainTextBody("John"),
   // The skills part is a complex nested structure sent as JSON
   "skills" -> JSONObject(
     "programming" -> JSONObject(
@@ -208,9 +208,6 @@ request.post(MultiPartBody(
 ```scala
 // Set the request method to GET, POST, PUT, etc...
 request.withMethod(Method.PUT).send()
-// OR use strings directly with implicit conversions
-import fr.hmil.scalahttp.Method.Implicits._
-request.withMethod("PUT").send()
 ```
 
 ---
@@ -228,6 +225,13 @@ see something that is missing.
 - The `TRACE` HTTP method is unavailable in browsers.
 
 ## Changelog
+
+**v0.3.0**
+- Remove general purpose StringBody
+- add missing patch method
+- Make Method constructor public
+- Disambiguate `withQueryArrayParameter` and `withQueryObjectParameter`
+- Remove map parameters from `.withQueryParameter(s)` and `.withHeaders`
 
 **v0.2.0**
 - support request body with `post()`, `put()` and `options()`

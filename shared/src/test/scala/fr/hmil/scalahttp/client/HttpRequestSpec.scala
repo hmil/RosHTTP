@@ -2,12 +2,10 @@ package fr.hmil.scalahttp.client
 
 import java.nio.ByteBuffer
 
-import fr.hmil.scalahttp.Method.Implicits._
-import fr.hmil.scalahttp.Protocol
-import fr.hmil.scalahttp.JsEnvUtils
+import fr.hmil.scalahttp.{JsEnvUtils, Method, Protocol}
 import fr.hmil.scalahttp.body.JSONBody._
 import fr.hmil.scalahttp.body.Implicits._
-import fr.hmil.scalahttp.body.{JSONBody, MultiPartBody, StreamBody, URLEncodedBody}
+import fr.hmil.scalahttp.body._
 import utest._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -154,15 +152,15 @@ object HttpRequestSpec extends TestSuite {
       "Query parameters" - {
         HttpRequest()
           .withQueryParameter("foo", "bar")
-          .withQueryParameter("table", List("a", "b", "c"))
-          .withQueryParameter("map", Map(
+          .withQueryArrayParameter("table", Seq("a", "b", "c"))
+          .withQueryObjectParameter("map", Seq(
             "d" -> "dval",
             "e" -> "e value"
           ))
-          .withQueryParameters(Map(
+          .withQueryParameters(
             "license" -> "MIT",
             "copy" -> "© 2016"
-          ))
+          )
           .queryString.get ==>
           "foo=bar&table=a&table=b&table=c&map%5Bd%5D=dval&map%5Be%5D=e%20value&license=MIT&copy=%C2%A9%202016"
       }
@@ -170,7 +168,7 @@ object HttpRequestSpec extends TestSuite {
       "User profile form data" - {
         HttpRequest(s"$SERVER_URL/body")
           .post(MultiPartBody(
-            "name" -> "John",
+            "name" -> PlainTextBody("John"),
             "skills" -> JSONObject(
               "programming" -> JSONObject(
                 "C" -> 3,
@@ -298,9 +296,9 @@ object HttpRequestSpec extends TestSuite {
 
         "added in batch" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
-            .withQueryParameters(Map(
+            .withQueryParameters(
               "device" -> "neon",
-              "element" -> "argon"))
+              "element" -> "argon")
             .send()
             .map(res => {
               res.body ==> "{\"device\":\"neon\",\"element\":\"argon\"}"
@@ -309,9 +307,9 @@ object HttpRequestSpec extends TestSuite {
 
         "added in batch with illegal characters" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
-            .withQueryParameters(Map(
+            .withQueryParameters(
               " zařízení" -> "topný olej vůle potlačující",
-              "chäřac+=r&" -> "+Heizölrückstoßabdämpfung=r&"))
+              "chäřac+=r&" -> "+Heizölrückstoßabdämpfung=r&")
             .send()
             .map(res => {
               res.body ==> "{\" zařízení\":\"topný olej vůle potlačující\"," +
@@ -321,10 +319,10 @@ object HttpRequestSpec extends TestSuite {
 
         "added in sequence" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
-            .withQueryParameters(Map(
+            .withQueryParameters(
               "element" -> "argon",
               "device" -> "chair"
-            ))
+            )
             .withQueryParameter("tool", "hammer")
             .withQueryParameter("device", "neon")
             .send()
@@ -335,7 +333,7 @@ object HttpRequestSpec extends TestSuite {
 
         "as list parameter" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
-            .withQueryParameter("map", List("foo", "bar"))
+            .withQueryArrayParameter("map", Seq("foo", "bar"))
             .send()
             .map(res => {
               res.body ==> "{\"map\":[\"foo\",\"bar\"]}"
@@ -369,7 +367,7 @@ object HttpRequestSpec extends TestSuite {
           "custom" -> "foobar")
 
         val req = HttpRequest(s"$SERVER_URL/headers")
-          .withHeaders(headers)
+          .withHeaders(headers.toSeq: _*)
 
         // Test with corrected case
         req.headers ==> headers
@@ -398,15 +396,15 @@ object HttpRequestSpec extends TestSuite {
 
       "Overwrite previous value when set" - {
         val req = HttpRequest(s"$SERVER_URL/headers")
-          .withHeaders(Map(
+          .withHeaders(
             "accept" -> "text/html, application/xhtml",
             "Cache-Control" -> "max-age=0",
             "custom" -> "foobar"
-          ))
-          .withHeaders(Map(
+          )
+          .withHeaders(
             "Custom" -> "barbar",
             "Accept" -> "application/json"
-          ))
+          )
           .withHeader("cache-control", "max-age=128")
 
         req.headers ==> Map(
@@ -448,7 +446,7 @@ object HttpRequestSpec extends TestSuite {
       "can be set to any legal value" - {
         legalMethods.map(method =>
           HttpRequest(s"$SERVER_URL/method")
-            .withMethod(method)
+            .withMethod(Method(method))
             .send()
             .map(_.headers("X-Request-Method") ==> method)
         ).reduce((f1, f2) => f1.flatMap(_=>f2))
@@ -457,18 +455,10 @@ object HttpRequestSpec extends TestSuite {
       "ignores case and capitalizes" - {
         legalMethods.map(method =>
           HttpRequest(s"$SERVER_URL/method")
-            .withMethod(method.toLowerCase)
+            .withMethod(Method(method.toLowerCase))
             .send()
             .map(_.headers("X-Request-Method") ==> method)
         ).reduce((f1, f2) => f1.flatMap(_=>f2))
-      }
-
-      "cannot be set to an illegal value" - {
-        intercept[IllegalArgumentException] {
-          HttpRequest(SERVER_URL)
-            .withMethod("Wuf")
-          assert(false)
-        }
       }
     }
 
@@ -476,7 +466,7 @@ object HttpRequestSpec extends TestSuite {
 
       "can be POSTed with ASCII strings" - {
         HttpRequest(s"$SERVER_URL/body")
-          .post("Hello world")
+          .post(PlainTextBody("Hello world"))
           .map({ res =>
             res.body ==> "Hello world"
             res.headers("Content-Type").toLowerCase ==> "text/plain; charset=utf-8"
@@ -485,7 +475,7 @@ object HttpRequestSpec extends TestSuite {
 
       "can be POSTed with non-ascii strings" - {
         HttpRequest(s"$SERVER_URL/body")
-          .post("Heizölrückstoßabdämpfung")
+          .post(PlainTextBody("Heizölrückstoßabdämpfung"))
           .map({ res =>
             res.body ==> "Heizölrückstoßabdämpfung"
             res.headers("Content-Type").toLowerCase ==> "text/plain; charset=utf-8"
@@ -494,8 +484,8 @@ object HttpRequestSpec extends TestSuite {
 
       "can be POSTed as multipart" - {
         val part = MultiPartBody(
-          "foo" -> "bar",
-          "engine" -> "Heizölrückstoßabdämpfung"
+          "foo" -> PlainTextBody("bar"),
+          "engine" -> PlainTextBody("Heizölrückstoßabdämpfung")
         )
 
         HttpRequest(s"$SERVER_URL/body")
