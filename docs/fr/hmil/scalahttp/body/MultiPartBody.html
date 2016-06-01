@@ -93,7 +93,28 @@ to occur within a body part, it would mess up the whole body. In practice, the o
 
       <div id="template">
         <div id="allMembers">
-        
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="fr.hmil.scalahttp.body.MultiPartBody#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="&lt;init&gt;(parts:Map[String,fr.hmil.scalahttp.body.BodyPart],subtype:String):fr.hmil.scalahttp.body.MultiPartBody"></a>
+      <a id="&lt;init&gt;:MultiPartBody"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">MultiPartBody</span><span class="params">(<span name="parts">parts: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="BodyPart.html" class="extype" name="fr.hmil.scalahttp.body.BodyPart">BodyPart</a>]</span>, <span name="subtype">subtype: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;form-data&quot;</span></span>)</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.body.MultiPartBody@&lt;init&gt;(parts:Map[String,fr.hmil.scalahttp.body.BodyPart],subtype:String):fr.hmil.scalahttp.body.MultiPartBody" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">parts</dt><dd class="cmt"><p>The pieces of body. The key in the map is used as <code>name</code> for the <code>Content-Disposition</code> header
+             of each part.</p></dd><dt class="param">subtype</dt><dd class="cmt"><p>The exact multipart mime type as in <code>multipart/subtype</code>. Defaults to <code>form-data</code>.</p></dd></dl></div>
+    </li></ol>
+            </div>
 
         
 
@@ -215,7 +236,7 @@ to occur within a body part, it would mess up the whole body. In practice, the o
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">content</span><span class="result">: <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span></span>
@@ -232,7 +253,7 @@ to occur within a body part, it would mess up the whole body. In practice, the o
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">contentType</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>

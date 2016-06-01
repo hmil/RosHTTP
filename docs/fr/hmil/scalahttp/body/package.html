@@ -122,6 +122,23 @@ the <a href="StreamBody.html" class="extype" name="fr.hmil.scalahttp.body.Stream
 For simple key/value pairs, use <a href="URLEncodedBody.html" class="extype" name="fr.hmil.scalahttp.body.URLEncodedBody">URLEncodedBody</a> instead.</p><p><b>Safety consideration:</b> A random boundary is generated to separate parts. If the boundary was
 to occur within a body part, it would mess up the whole body. In practice, the odds are extremely small though.
 </p></div></div>
+    </li><li name="fr.hmil.scalahttp.body.PlainTextBody" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PlainTextBodyextendsBodyPart"></a>
+      <a id="PlainTextBody:PlainTextBody"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="PlainTextBody.html"><span class="name">PlainTextBody</span></a><span class="result"> extends <a href="BodyPart.html" class="extype" name="fr.hmil.scalahttp.body.BodyPart">BodyPart</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.body.package@PlainTextBodyextendsBodyPart" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Plain text body sent as <code>text/plain</code> mime type.</p>
     </li><li name="fr.hmil.scalahttp.body.StreamBody" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="StreamBodyextendsBodyPart"></a>
       <a id="StreamBody:StreamBody"></a>
@@ -147,24 +164,6 @@ with the binary file.
 When possible, send a <code>Content-Length</code> header along with an octet-stream body. It may allow the receiver
 end to better handle the loading.</p><p>A stream body is sent with the content-type application/octet-stream.
 </p></div></div>
-    </li><li name="fr.hmil.scalahttp.body.StringBody" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="StringBodyextendsBodyPart"></a>
-      <a id="StringBody:StringBody"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="StringBody.html"><span class="name">StringBody</span></a><span class="result"> extends <a href="BodyPart.html" class="extype" name="fr.hmil.scalahttp.body.BodyPart">BodyPart</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.scalahttp.body.package@StringBodyextendsBodyPart" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">A simple UTF-8 encoded string body
-</p>
     </li><li name="fr.hmil.scalahttp.body.URLEncodedBody" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="URLEncodedBodyextendsBodyPart"></a>
       <a id="URLEncodedBody:URLEncodedBody"></a>
@@ -243,6 +242,23 @@ and look like query string parameters (eg. key=value&amp;key2=value2 ).
       </a>
     </span>
       
+    </li><li name="fr.hmil.scalahttp.body.PlainTextBody" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PlainTextBody"></a>
+      <a id="PlainTextBody:PlainTextBody"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="PlainTextBody$.html"><span class="name">PlainTextBody</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.scalahttp.body.package@PlainTextBody" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="fr.hmil.scalahttp.body.StreamBody" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StreamBody"></a>
       <a id="StreamBody:StreamBody"></a>
@@ -256,23 +272,6 @@ and look like query string parameters (eg. key=value&amp;key2=value2 ).
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#fr.hmil.scalahttp.body.package@StreamBody" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="fr.hmil.scalahttp.body.StringBody" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="StringBody"></a>
-      <a id="StringBody:StringBody"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="StringBody$.html"><span class="name">StringBody</span></a>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.scalahttp.body.package@StringBody" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
