@@ -97,7 +97,7 @@ offers an API to add, update and delete keys in the query string.
 request
   .withQueryParameter("foo", "bar")
   .withQueryArrayParameter("table", "a", "b", "c")
-  .withQueryMapParameter("map",
+  .withQueryObjectParameter("map",
     "d" -> "dval",
     "e" -> "e value"
   )
@@ -229,7 +229,7 @@ see something that is missing.
 - Remove general purpose StringBody
 - add missing patch method
 - Make Method constructor public
-- Disambiguate `withQueryArrayParameter` and `withQueryMapParameter`
+- Disambiguate `withQueryArrayParameter` and `withQueryObjectParameter`
 - Remove map parameters from `.withQueryParameter(s)` and `.withHeaders`
 
 **v0.2.0**

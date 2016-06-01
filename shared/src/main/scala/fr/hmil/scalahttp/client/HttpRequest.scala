@@ -150,7 +150,7 @@ final class HttpRequest  private (
     * @return A copy of this [[HttpRequest]] with an updated query string.
     * @see [[withQueryArrayParameter(String,String)]]
     */
-  def withQueryArrayParameter(key: String, values: String*): HttpRequest =
+  def withQueryArrayParameter(key: String, values: Seq[String]): HttpRequest =
     values.foldLeft(this)((acc, value) => acc.withQueryParameter(key, value))
 
   /** Adds a query map parameter.
@@ -167,7 +167,7 @@ final class HttpRequest  private (
     * @return A copy of this [[HttpRequest]] with an updated query string.
     * @see [[withQueryArrayParameter(String,String)]]
     */
-  def withQueryMapParameter(key: String, values: (String, String)*): HttpRequest =
+  def withQueryObjectParameter(key: String, values: Seq[(String, String)]): HttpRequest =
     withQueryParameters(values.map(p => (s"$key[${p._1}]", p._2)): _*)
 
   /** Adds multiple query parameters.
