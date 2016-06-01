@@ -14,7 +14,7 @@ A human-readable scala http client API compatible with:
 Add a dependency in your build.sbt:
 
 ```scala
-libraryDependencies += "fr.hmil" %%% "scala-http-client" % "0.1.0"
+libraryDependencies += "fr.hmil" %%% "scala-http-client" % "0.3.0"
 ```
 
 # Usage
@@ -226,6 +226,7 @@ see something that is missing.
 
 ## Changelog
 
+**v0.3.0**
 - Remove general purpose StringBody
 - add missing patch method
 - Make Method constructor public
