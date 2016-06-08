@@ -226,17 +226,19 @@ see something that is missing.
 
 ## Changelog
 
+- Add .withBody()
+
 **v0.3.0**
 - Remove general purpose StringBody
-- add missing patch method
+- Add missing patch method
 - Make Method constructor public
 - Disambiguate `withQueryArrayParameter` and `withQueryObjectParameter`
 - Remove map parameters from `.withQueryParameter(s)` and `.withHeaders`
 
 **v0.2.0**
-- support request body with `post()`, `put()` and `options()`
-- add `withHttpMethod()`
-- support HTTPS
+- Support request body with `post()`, `put()` and `options()`
+- Add `withHttpMethod()`
+- Support HTTPS
 
 **v0.1.0**
 - First release
