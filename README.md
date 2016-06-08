@@ -1,6 +1,6 @@
-# Scala http client
-[![Build Status](https://travis-ci.org/hmil/scala-http-client.svg?branch=master)](https://travis-ci.org/hmil/scala-http-client)
-[![Latest release](https://hmil.github.io/scala-http-client/version-badge.svg)](https://github.com/hmil/scala-http-client)
+# RösHTTP
+[![Build Status](https://travis-ci.org/hmil/RosHTTP.svg?branch=master)](https://travis-ci.org/hmil/RosHTTP)
+[![Latest release](https://hmil.github.io/RosHTTP/version-badge.svg)](https://github.com/hmil/RosHTTP)
 [![Scala.js](https://www.scala-js.org/assets/badges/scalajs-0.6.8.svg)](https://www.scala-js.org)
 
 A human-readable scala http client API compatible with:
@@ -14,18 +14,18 @@ A human-readable scala http client API compatible with:
 Add a dependency in your build.sbt:
 
 ```scala
-libraryDependencies += "fr.hmil" %%% "scala-http-client" % "0.3.0"
+libraryDependencies += "fr.hmil" %%% "roshttp" % "1.0.0"
 ```
 
 # Usage
 
 The following is a simplified usage guide. You may find useful information in
-the [API doc](http://hmil.github.io/scala-http-client/docs/index.html) too.
+the [API doc](http://hmil.github.io/RosHTTP/docs/index.html) too.
 ## Basic usage
 
 <!--- test: "Main example" -->
 ```scala
-import fr.hmil.scalahttp.client.HttpRequest
+import fr.hmil.scalahttp.HttpRequest
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /* ... */
@@ -89,7 +89,7 @@ To bypass encoding, use `.withQueryStringRaw(rawString)`.
 #### `.withQueryParameter`
 Most of the time, the query string is used to pass key/value pairs in the
 `application/x-www-form-urlencoded` format.
-[HttpRequest](http://hmil.github.io/scala-http-client/docs/index.html#fr.hmil.scalahttp.client.HttpRequest)
+[HttpRequest](http://hmil.github.io/RosHTTP/docs/index.html#fr.hmil.roshttp.HttpRequest)
 offers an API to add, update and delete keys in the query string.  
 
 <!--- test: "Query parameters" -->
@@ -212,7 +212,7 @@ request.withMethod(Method.PUT).send()
 
 ---
 
-Watch the [issues](https://github.com/hmil/scala-http-client/issues)
+Watch the [issues](https://github.com/hmil/RosHTTP/issues)
 for upcoming features. Feedback is very welcome so feel free to file an issue if you
 see something that is missing.
 
@@ -227,6 +227,11 @@ see something that is missing.
 ## Changelog
 
 - Add .withBody()
+
+**v1.0.0 - stable release**
+- Using strict SemVer from now on
+- Renamed RösHTTP
+
 
 **v0.3.0**
 - Remove general purpose StringBody

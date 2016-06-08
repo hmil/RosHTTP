@@ -1,7 +1,7 @@
 {
-  "name": "scala-http-client-test-server",
+  "name": "roshttp-test-server",
   "version": "0.0.1",
-  "description": "A testing server for scala-http-client",
+  "description": "A testing server for RösHTTP",
   "main": "index.js",
   "dependencies": {
     "body-parser": "^1.15.0",
