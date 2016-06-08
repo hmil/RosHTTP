@@ -20,7 +20,8 @@ final class HttpRequest  private (
     val port: Option[Int],
     val protocol: Protocol,
     val queryString: Option[String],
-    val headers: HeaderMap[String]) {
+    val headers: HeaderMap[String],
+    val body: Option[BodyPart]) {
 
   /** The path with the query string or just the path if there is no query string */
   val longPath = path + queryString.map(q => s"?$q").getOrElse("")
@@ -217,6 +218,11 @@ final class HttpRequest  private (
     )
   }
 
+  // TODO doc
+  def withBody(body: BodyPart): HttpRequest = {
+    withHeader("Content-Type", body.contentType).copy(body = Some(body))
+  }
+
   /** Sends this request.
     *
     * A request can be sent multiple times. When a request is sent, it returns a Future[HttpResponse]
@@ -228,7 +234,7 @@ final class HttpRequest  private (
     *
     * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
-  def send(): Future[HttpResponse] = HttpDriver.send(this, None)
+  def send(): Future[HttpResponse] = HttpDriver.send(this)
 
   /** Sends this request with the POST method and a body
     *
@@ -263,9 +269,7 @@ final class HttpRequest  private (
     * @param body The body to send.
     * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
-  def send(body: BodyPart): Future[HttpResponse] = HttpDriver.send(
-    withHeader("Content-Type", body.contentType),
-    Some(body))
+  def send(body: BodyPart): Future[HttpResponse] = withBody(body).send()
 
   /** Internal method to back public facing .withXXX methods. */
   private def copy(
@@ -275,7 +279,8 @@ final class HttpRequest  private (
       port: Option[Int]   = this.port,
       protocol: Protocol  = this.protocol,
       queryString: Option[String] = this.queryString,
-      headers: HeaderMap[String]  = this.headers
+      headers: HeaderMap[String]  = this.headers,
+      body: Option[BodyPart] = this.body
   ): HttpRequest = {
     new HttpRequest(
       method    = method,
@@ -284,7 +289,8 @@ final class HttpRequest  private (
       port      = port,
       protocol  = protocol,
       queryString = queryString,
-      headers   = headers)
+      headers   = headers,
+      body = body)
   }
 
 }
@@ -298,7 +304,8 @@ object HttpRequest {
     port = None,
     protocol = Protocol.HTTP,
     queryString = None,
-    headers = HeaderMap()
+    headers = HeaderMap(),
+    body = None
   )
 
   /** Creates a blank HTTP request.

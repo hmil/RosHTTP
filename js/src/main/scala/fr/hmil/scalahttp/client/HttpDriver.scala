@@ -7,11 +7,11 @@ import scala.concurrent.Future
 
 private object HttpDriver {
 
-  def send(req: HttpRequest, body: Option[BodyPart]): Future[HttpResponse] = {
+  def send(req: HttpRequest): Future[HttpResponse] = {
     if (JsEnvUtils.isRealBrowser) {
-      BrowserDriver.send(req, body)
+      BrowserDriver.send(req)
     } else {
-      NodeDriver.send(req, body)
+      NodeDriver.send(req)
     }
   }
 }

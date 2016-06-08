@@ -1,23 +1,18 @@
 package fr.hmil.scalahttp.client
 
-import java.nio.ByteBuffer
-
-import fr.hmil.scalahttp.{Converters, HttpUtils}
-import fr.hmil.scalahttp.body.BodyPart
+import fr.hmil.scalahttp.HttpUtils
 import org.scalajs.dom
-import org.scalajs.dom.Blob
 import org.scalajs.dom.ext.Ajax
 import org.scalajs.dom.raw.ErrorEvent
 
 import scala.concurrent.{Future, Promise}
-import scala.scalajs.js
-import scala.scalajs.js.JavaScriptException
 import scala.scalajs.js.JSConverters._
-import scala.scalajs.js.typedarray.{ArrayBuffer, TypedArrayBuffer, Uint8Array}
+import scala.scalajs.js.JavaScriptException
+import scala.scalajs.js.typedarray.{ArrayBuffer, TypedArrayBuffer}
 
 private object BrowserDriver {
 
-  def send(req: HttpRequest, body: Option[BodyPart]): Future[HttpResponse] = {
+  def send(req: HttpRequest): Future[HttpResponse] = {
     val p: Promise[HttpResponse] = Promise[HttpResponse]()
 
     val xhr = new dom.XMLHttpRequest()
@@ -50,7 +45,7 @@ private object BrowserDriver {
       }
     }
 
-    xhr.send(body.map(b => Ajax.InputData.byteBuffer2ajax(b.content)).orUndefined)
+    xhr.send(req.body.map(b => Ajax.InputData.byteBuffer2ajax(b.content)).orUndefined)
 
     p.future
   }
