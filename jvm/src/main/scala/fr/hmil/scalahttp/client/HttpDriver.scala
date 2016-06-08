@@ -10,7 +10,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.blocking
 import scala.concurrent.Future
 
-private object HttpDriver {
+private object HttpDriver extends AbstractDriver {
 
   def send(req: HttpRequest): Future[HttpResponse] = {
 

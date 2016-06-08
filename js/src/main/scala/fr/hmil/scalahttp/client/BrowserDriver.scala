@@ -10,7 +10,7 @@ import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.JavaScriptException
 import scala.scalajs.js.typedarray.{ArrayBuffer, TypedArrayBuffer}
 
-private object BrowserDriver {
+private object BrowserDriver extends AbstractDriver{
 
   def send(req: HttpRequest): Future[HttpResponse] = {
     val p: Promise[HttpResponse] = Promise[HttpResponse]()

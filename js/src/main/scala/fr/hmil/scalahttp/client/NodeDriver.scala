@@ -12,7 +12,7 @@ import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 
-private object NodeDriver {
+private object NodeDriver extends AbstractDriver{
 
   // Accumulates chunks received by the request and turns them into a ByteBuffer
   private class BufferAccumulator {

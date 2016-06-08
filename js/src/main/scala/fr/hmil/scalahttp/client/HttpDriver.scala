@@ -1,17 +1,23 @@
 package fr.hmil.scalahttp.client
 
-import fr.hmil.scalahttp.JsEnvUtils
-import fr.hmil.scalahttp.body.BodyPart
+import fr.hmil.scalahttp.node.Modules.{HttpModule, HttpsModule}
 
 import scala.concurrent.Future
 
-private object HttpDriver {
+private object HttpDriver extends AbstractDriver {
+
+  private var _driver: Option[AbstractDriver] = None
 
   def send(req: HttpRequest): Future[HttpResponse] = {
-    if (JsEnvUtils.isRealBrowser) {
-      BrowserDriver.send(req)
+    _driver.getOrElse(chooseBackend()).send(req)
+  }
+
+  private def chooseBackend(): AbstractDriver = {
+    if (HttpModule.isAvailable && HttpsModule.isAvailable) {
+      _driver = Some(NodeDriver)
     } else {
-      NodeDriver.send(req)
+      _driver = Some(BrowserDriver)
     }
+    _driver.get
   }
 }
