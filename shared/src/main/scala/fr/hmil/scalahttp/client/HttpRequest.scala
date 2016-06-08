@@ -218,7 +218,22 @@ final class HttpRequest  private (
     )
   }
 
-  // TODO doc
+  /** Attaches a body to this request and sets the Content-Type header.
+    *
+    * The body will be sent with the request regardless of other parameters once
+    * [[send()]] is invoked. Any subsequent call to [[withBody()]], [[send(BodyPart)]],
+    * [[post(BodyPart)]], [[put(BodyPart)]] or similar methods will override the request body.
+    *
+    * The Content-Type header is set to this body's content-type. It can still be manually
+    * overridden using a method of the [[withHeader()]] family.
+    *
+    * Note that the HTTP spec forbids sending data with some methods. In case you need to deal with a broken backend,
+    * this library allows you to do so anyway. **Beware that in this case, the JVM can still enforce a compliant HTTP
+    * method**.
+    *
+    * @param body
+    * @return
+    */
   def withBody(body: BodyPart): HttpRequest = {
     withHeader("Content-Type", body.contentType).copy(body = Some(body))
   }

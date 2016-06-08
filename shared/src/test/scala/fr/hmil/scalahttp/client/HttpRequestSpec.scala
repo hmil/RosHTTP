@@ -81,11 +81,12 @@ object HttpRequestSpec extends TestSuite {
   )
 
   private val legalMethods = {
-    val base = "GET" :: "POST" :: "HEAD" :: "OPTIONS" :: "PUT" :: "DELETE" :: "PATCH" :: Nil
+    val base = "GET" :: "POST" :: "HEAD" :: "OPTIONS" :: "PUT" :: "DELETE" :: Nil
     if (JsEnvUtils.isRealBrowser) {
-      // Browsers cannot send TRACE requests
-      base
+      // The jvm cannot send PATCH requests
+      "PATCH" :: base
     } else {
+      // Browsers cannot send TRACE requests
       "TRACE" :: base
     }
   }
@@ -423,7 +424,8 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest(s"$SERVER_URL/headers")
           .withBody(PlainTextBody("Hello world"))
           .withHeader("Content-Type", "text/html")
-            .send()
+          .withMethod(Method.POST)
+          .send()
           .map(res => {
             assert(res.body.contains("\"content-type\":\"text/html\""))
             assert(!res.body.contains("\"content-type\":\"text/plain\""))
@@ -469,15 +471,7 @@ object HttpRequestSpec extends TestSuite {
             .withMethod(Method(method.toLowerCase))
             .send()
             .map(_.headers("X-Request-Method") ==> method)
-        ).reduce((f1, f2) => f1.flatMap(_=>f2))
-      }
-
-      // Also tests that a body can be sent with a GET method
-      "can be set to an arbitrary method" - {
-        HttpRequest(s"$SERVER_URL/method")
-          .withMethod(Method("Custom"))
-          .send()
-          .map(_.headers("X-Request-Method") ==> "Custom")
+        ).reduce((f1, f2) => f1.flatMap(_ => f2))
       }
     }
 
