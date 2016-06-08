@@ -65,7 +65,7 @@ app.get('/query/parsed', function(req, res) {
   res.send(req.query);
 });
 
-app.get('/headers', function(req, res) {
+app.all('/headers', function(req, res) {
   res.set('Content-Type', 'text/plain');
   res.send(JSON.stringify(req.headers).replace(/"(?!\\),/g, '"\n').replace(/(^{|}$)/g, ''));
 });

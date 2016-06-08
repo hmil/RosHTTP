@@ -4,7 +4,6 @@ import java.net.{HttpURLConnection, URL}
 import java.nio.ByteBuffer
 
 import fr.hmil.scalahttp.HttpUtils
-import fr.hmil.scalahttp.body.BodyPart
 import fr.hmil.scalahttp.tools.io.IO
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -13,12 +12,12 @@ import scala.concurrent.Future
 
 private object HttpDriver {
 
-  def send(req: HttpRequest, body: Option[BodyPart]): Future[HttpResponse] = {
+  def send(req: HttpRequest): Future[HttpResponse] = {
 
     concurrent.Future {
       try {
         blocking {
-          val connection = prepareConnection(req, body)
+          val connection = prepareConnection(req)
           readResponse(connection)
         }
       } catch {
@@ -28,11 +27,11 @@ private object HttpDriver {
     }
   }
 
-  private def prepareConnection(req: HttpRequest, body: Option[BodyPart]): HttpURLConnection = {
+  private def prepareConnection(req: HttpRequest): HttpURLConnection = {
     val connection = new URL(req.url).openConnection().asInstanceOf[HttpURLConnection]
     req.headers.foreach(t => connection.addRequestProperty(t._1, t._2))
     connection.setRequestMethod(req.method.toString)
-    body.foreach({part =>
+    req.body.foreach({part =>
       connection.setDoOutput(true)
       val os = connection.getOutputStream
       os.write(part.content.array())

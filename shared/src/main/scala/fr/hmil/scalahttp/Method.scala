@@ -27,8 +27,16 @@ object Method {
   val OPTIONS = Method("OPTIONS")
   val PUT = Method("PUT")
   val DELETE = Method("DELETE")
+  /** The PATCH HTTP method does not work on the JVM */
   val PATCH = Method("PATCH")
+  /** The TRACE HTTP method does not work in the browser */
   val TRACE = Method("TRACE")
 
+  /** Creates a custom http method.
+    *
+    * Support for custom methods depends on the backend so use at your own risk!
+    *
+    * @param name method name
+    */
   def apply(name: String): Method = new Method(name)
 }
