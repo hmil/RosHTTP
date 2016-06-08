@@ -1,5 +1,5 @@
 {
-  "name": "scala-http-client-test-server",
+  "name": "roshttp-test-server",
   "version": "0.0.1",
   "dependencies": {
     "body-parser": {
