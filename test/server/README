@@ -1,4 +1,4 @@
-This folder contains a nodejs web server which is used to test scala-http-client.
+This folder contains a nodejs web server which is used to test RösHTTP.
 The server serves both a testing API and the runtime scripts required by the sbt
 scala-js test runner.
 
