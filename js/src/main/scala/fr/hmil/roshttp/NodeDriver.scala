@@ -91,7 +91,7 @@ private object NodeDriver extends AbstractDriver{
     })
 
     nodeRequest.on("error", { (s: js.Dynamic) =>
-      p.failure(new IOException(s.toString))
+      p.failure(new HttpNetworkError(new IOException(s.toString)))
       ()
     })
 
