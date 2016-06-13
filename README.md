@@ -25,7 +25,7 @@ the [API doc](http://hmil.github.io/RosHTTP/docs/index.html) too.
 
 <!--- test: "Main example" -->
 ```scala
-import fr.hmil.scalahttp.HttpRequest
+import fr.hmil.roshttp.HttpRequest
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /* ... */
@@ -141,7 +141,7 @@ A set of implicit conversions is provided in `body.Implicits` for convenience.
 
 You can `post` or `put` some data with your favorite encoding.
 ```scala
-import fr.hmil.scalahttp.body.Implicits._
+import fr.hmil.roshttp.body.Implicits._
 
 val data = URLEncodedBody(
   "answer" -> "42",
@@ -154,7 +154,7 @@ request.put(data)
 
 Create JSON requests easily using implicit conversions.
 ```scala
-import fr.hmil.scalahttp.body.Implicits._
+import fr.hmil.roshttp.body.Implicits._
 
 val data = JSONObject(
   "answer" -> 42,
@@ -168,7 +168,7 @@ request.post(data)
 To send file data you must turn a file into a ByteBuffer and then send it in a
 StreamBody. For instance, on the jvm you could do:
 ```
-import fr.hmil.scalahttp.body.Implicits._
+import fr.hmil.roshttp.body.Implicits._
 
 val bytes = Source.fromFile("icon.png")(scala.io.Codec.ISO8859).map(_.toByte).toArray
 request.post(ByteBuffer.wrap(bytes))
@@ -184,7 +184,7 @@ to send binary data with some textual data.
 The following example illustrates how you could send a form to update a user profile
 made of a variety of data types.
 ```scala
-import fr.hmil.scalahttp.body.Implicits._
+import fr.hmil.roshttp.body.Implicits._
 
 request.post(MultiPartBody(
   // The name part is sent as plain text
