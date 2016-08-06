@@ -2,47 +2,40 @@ package fr.hmil.roshttp.body
 
 import java.nio.ByteBuffer
 
-import fr.hmil.roshttp.body.JSONBody.JSONValue
+import org.json4s.ast.safe._
 
 /** Allows to send arbitrarily complex JSON data.
   *
   * @param value The JSON value to send.
   */
-class JSONBody private(value: JSONValue) extends BodyPart {
+class JSONBody private(value: JValue) extends BodyPart {
   override def contentType: String = s"application/json; charset=utf-8"
-
-  override def content: ByteBuffer = ByteBuffer.wrap(value.toString.getBytes("utf-8"))
+  override def content: ByteBuffer = {
+    ByteBuffer.wrap(JSONBody.serialize(value).getBytes("utf-8"))
+  }
 }
 
 object JSONBody {
-  trait JSONValue {
-    def toString: String
-  }
+  def apply(value: JValue): JSONBody = new JSONBody(value)
 
-  class JSONNumber(value: Number) extends JSONValue {
-    override def toString: String = value.toString
-  }
-
-  class JSONString(value: String) extends JSONValue {
-    override def toString: String = "\"" + escapeJS(value) + "\""
-  }
-
-  class JSONObject(values: Map[String, JSONValue]) extends JSONValue {
-    override def toString: String = {
+  // Homebrew serialization to be removed when json4s supports scalajs
+  // https://github.com/json4s/json4s/issues/256
+  private def serialize(v: JValue): String = v match {
+    case JNull => "null"
+    case JString(s) => "\"" + escapeJS(s) + "\""
+    case JNumber(num) => num.toString
+    case JBoolean(value) => value.toString
+    case o:JObject =>
       "{" +
-        values.map({case (name, part) =>
-          "\"" + escapeJS(name) + "\"" +
-          ":" + part
+        o.value.map({case (key, value) =>
+          "\"" + escapeJS(key) + "\"" +
+            ":" + serialize(value)
         }).mkString(",") +
-      "}"
-    }
+        "}"
+    case a:JArray =>
+      "[" + a.value.map(v => serialize(v)).mkString(",") + "]"
   }
 
-  object JSONObject {
-    def apply(values: (String, JSONValue)*): JSONObject = new JSONObject(Map(values: _*))
-  }
-
-  def apply(value: JSONValue): JSONBody = new JSONBody(value)
 
   // String escapement taken from scala-js
   private final val EscapeJSChars = "\\a\\b\\t\\n\\v\\f\\r\\\"\\\\"
