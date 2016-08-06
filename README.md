@@ -226,11 +226,11 @@ see something that is missing.
 
 ## Changelog
 
-- Add .withBody()
 
 **v1.0.0 - stable release**
 - Using strict SemVer from now on
 - Renamed RösHTTP
+- Add .withBody()
 
 
 **v0.3.0**
