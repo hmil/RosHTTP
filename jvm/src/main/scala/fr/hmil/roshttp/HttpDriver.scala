@@ -2,11 +2,9 @@ package fr.hmil.roshttp
 
 import java.net.{HttpURLConnection, URL}
 import java.nio.ByteBuffer
-
-import fr.hmil.roshttp.tools.io.IO
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, blocking}
+import monifu.reactive.Observable
 
 private object HttpDriver extends DriverTrait {
 
@@ -54,17 +52,44 @@ private object HttpDriver extends DriverTrait {
     if (code < 400) {
       new HttpResponse(
         code,
-        ByteBuffer.wrap(IO.readInputStreamToByteArray(connection.getInputStream)),
+        inputStreamToObservable(connection.getInputStream),
         headerMap
       )
     } else {
       throw HttpResponseError.badStatus(new HttpResponse(
         code,
-        ByteBuffer.wrap(Option(connection.getErrorStream)
-          .map(IO.readInputStreamToByteArray)
-          .getOrElse(Array.empty)),
+        inputStreamToObservable(connection.getErrorStream),
         headerMap
       ))
     }
+  }
+
+  // TODO: configure chunk size
+  private def inputStreamToObservable(in: java.io.InputStream, chunkSize: Int = 1024): Observable[ByteBuffer] = {
+    val iterator = new Iterator[ByteBuffer] {
+      private[this] val buffer = new Array[Byte](chunkSize)
+      private[this] var lastCount = 0
+
+      def hasNext: Boolean =
+        lastCount match {
+          case 0 =>
+            lastCount = in.read(buffer)
+            lastCount >= 0
+          case nr =>
+            nr >= 0
+        }
+
+      def next(): ByteBuffer = {
+        if (lastCount < 0)
+          throw new NoSuchElementException
+        else {
+          val result = ByteBuffer.wrap(buffer, 0, lastCount)
+          lastCount = 0
+          result
+        }
+      }
+    }
+
+    Observable.fromIterator(iterator)
   }
 }

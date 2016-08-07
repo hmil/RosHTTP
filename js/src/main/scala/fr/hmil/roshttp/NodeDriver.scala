@@ -6,41 +6,16 @@ import java.nio.ByteBuffer
 import fr.hmil.roshttp.node.Modules.{http, https}
 import fr.hmil.roshttp.node.buffer.Buffer
 import fr.hmil.roshttp.node.http.{IncomingMessage, RequestOptions}
+import monifu.reactive.Ack.{Cancel, Continue}
+import monifu.reactive.{Observable, Subscriber}
 
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
+import scala.util.{Failure, Success}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 private object NodeDriver extends DriverTrait {
-
-  // Accumulates chunks received by the request and turns them into a ByteBuffer
-  private class BufferAccumulator {
-    private var acc = List[Array[Byte]]()
-
-    def append(buf: Buffer): Unit = {
-      val length = buf.length
-      var i = 0
-      val chunk = new Array[Byte](length)
-      while(i < length) {
-        chunk(i) = buf.readInt8(i).toByte
-        i += 1
-      }
-      acc ::= chunk
-    }
-
-    def collect(): ByteBuffer = {
-      val length = acc.foldRight(0)((chunk, l) => l + chunk.length)
-      val buffer = ByteBuffer.allocate(length)
-      acc.foreach(chunk => {
-        var i = 0
-        while (i < chunk.length) {
-          buffer.put(chunk(i))
-          i += 1
-        }
-      })
-      buffer
-    }
-  }
 
   def makeRequest(req: HttpRequest, p: Promise[HttpResponse]): Unit = {
     val module = {
@@ -56,36 +31,50 @@ private object NodeDriver extends DriverTrait {
       headers = js.Dictionary(req.headers.toSeq: _*),
       path = req.longPath
     ), (message: IncomingMessage) => {
-
-      val charset = HttpUtils.charsetFromContentType(message.headers.get("content-type").orNull)
-
       if (message.statusCode >= 300 && message.statusCode < 400 && message.headers.contains("location")) {
         makeRequest(req.withURL(message.headers("location")), p)
       } else {
-        val body = new BufferAccumulator()
+        var subscribers = Set[Subscriber[ByteBuffer]]()
 
         message.on("data", { (s: js.Dynamic) =>
           val buf = s.asInstanceOf[Buffer]
-          body.append(buf)
-          ()
+          // TODO: factor out ugly function
+          val byteBuffer = ByteBuffer.allocate(buf.length)
+          var i = 0
+          while (i < buf.length) {
+            byteBuffer.put(buf.readInt8(i).toByte)
+            i += 1
+          }
+          // TODO: check Observable usage
+          subscribers.foreach(sub => sub.onNext(byteBuffer).onComplete {
+             case Success(Cancel) =>
+               subscribers -= sub
+             case Success(Continue) =>
+               ()
+             case Failure(ex) =>
+               subscribers -= sub
+               sub.onError(ex)
+           })
         })
+
+        val headers = message.headers.toMap[String, String]
 
         message.on("end", { (s: js.Dynamic) =>
-          val headers = message.headers.toMap[String, String]
-
-          val charset = HttpUtils.charsetFromContentType(headers.getOrElse("content-type", null))
-          val response = new HttpResponse(
-            message.statusCode,
-            body.collect(),
-            HeaderMap(headers))
-
-          if (message.statusCode < 400) {
-            p.success(response)
-          } else {
-            p.failure(HttpResponseError.badStatus(response))
-          }
-          ()
+          subscribers.foreach(_.onComplete())
+          subscribers = Set() // Clear the references for GC
         })
+
+        val bufferStream = new Observable[ByteBuffer] {
+          override def onSubscribe(subscriber: Subscriber[ByteBuffer]): Unit =
+            subscribers += subscriber
+        }
+
+        val response = new HttpResponse(
+          message.statusCode,
+          bufferStream,
+          HeaderMap(headers))
+
+        p.success(response)
       }
       ()
     })

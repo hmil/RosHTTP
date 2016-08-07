@@ -9,6 +9,7 @@ import fr.hmil.roshttp.body._
 import utest._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object HttpRequestSpec extends TestSuite {
 
@@ -128,7 +129,7 @@ object HttpRequestSpec extends TestSuite {
         def println(s: String) = assert(s.length > 1000)
         HttpRequest("https://schema.org/WebPage")
           .send()
-          .map(response => println(response.body))
+          .flatMap(response => response.body.map(println))
       }
 
       "Error handling" - {
@@ -209,9 +210,9 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest(SERVER_URL)
           .withPath("/redirect/temporary/echo/redirected")
           .send()
-          .map(res => {
-            res.body ==> "redirected"
-          })
+          .flatMap(_.body.map(body => {
+            body ==> "redirected"
+          }))
       }
     }
 
@@ -221,10 +222,10 @@ object HttpRequestSpec extends TestSuite {
           HttpRequest(SERVER_URL)
             .withPath(s"/status/$status")
             .send()
-            .failed.map {
+            .failed.flatMap {
             case e:HttpResponseError =>
-              statusText(e.response.statusCode) ==> e.response.body
-            case _ => assert(false)
+              e.response.body.map(_ ==> statusText(e.response.statusCode))
+            case _ => Future{assert(false)}
           }
         ).reduce((f1, f2) => f1.flatMap(_=>f2))
       }
@@ -235,17 +236,17 @@ object HttpRequestSpec extends TestSuite {
         "vanilla" - {
           HttpRequest(s"$SERVER_URL/query?Hello%20world.")
             .send()
-            .map(res => {
-              res.body ==> "Hello world."
-            })
+            .flatMap(_.body.map(body => {
+              body ==> "Hello world."
+            }))
         }
 
         "with illegal characters" - {
           HttpRequest(s"$SERVER_URL/query?Heizölrückstoßabdämpfung%20+")
             .send()
-            .map(res => {
-              res.body ==> "Heizölrückstoßabdämpfung +"
-            })
+            .flatMap(_.body.map(body => {
+              body ==> "Heizölrückstoßabdämpfung +"
+            }))
         }
       }
 
@@ -255,18 +256,18 @@ object HttpRequestSpec extends TestSuite {
           HttpRequest(s"$SERVER_URL/query")
             .withQueryString("Hello world.")
             .send()
-            .map(res => {
-              res.body ==> "Hello world."
-            })
+            .flatMap(_.body.map(body => {
+              body ==> "Hello world."
+            }))
         }
 
         "with illegal characters" - {
           HttpRequest(s"$SERVER_URL/query")
             .withQueryString("Heizölrückstoßabdämpfung %20+")
             .send()
-            .map(res => {
-              res.body ==> "Heizölrückstoßabdämpfung %20+"
-            })
+            .flatMap(_.body.map(body => {
+              body ==> "Heizölrückstoßabdämpfung %20+"
+            }))
         }
 
         "is escaped" - {
@@ -280,9 +281,9 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest(s"$SERVER_URL/query")
           .withQueryStringRaw("Heiz%C3%B6lr%C3%BCcksto%C3%9Fabd%C3%A4mpfung")
           .send()
-          .map(res => {
-            res.body ==> "Heizölrückstoßabdämpfung"
-          })
+          .flatMap(_.body.map(body => {
+            body ==> "Heizölrückstoßabdämpfung"
+          }))
       }
 
       "set in withQueryParameter" - {
@@ -290,9 +291,9 @@ object HttpRequestSpec extends TestSuite {
           HttpRequest(s"$SERVER_URL/query/parsed")
             .withQueryParameter("device", "neon")
             .send()
-            .map(res => {
-              res.body ==> "{\"device\":\"neon\"}"
-            })
+            .flatMap(_.body.map(body => {
+              body ==> "{\"device\":\"neon\"}"
+            }))
         }
 
         "added in batch" - {
@@ -301,9 +302,9 @@ object HttpRequestSpec extends TestSuite {
               "device" -> "neon",
               "element" -> "argon")
             .send()
-            .map(res => {
-              res.body ==> "{\"device\":\"neon\",\"element\":\"argon\"}"
-            })
+            .flatMap(_.body.map(body => {
+              body ==> "{\"device\":\"neon\",\"element\":\"argon\"}"
+            }))
         }
 
         "added in batch with illegal characters" - {
@@ -312,10 +313,10 @@ object HttpRequestSpec extends TestSuite {
               " zařízení" -> "topný olej vůle potlačující",
               "chäřac+=r&" -> "+Heizölrückstoßabdämpfung=r&")
             .send()
-            .map(res => {
-              res.body ==> "{\" zařízení\":\"topný olej vůle potlačující\"," +
+            .flatMap(_.body.map(body => {
+              body ==> "{\" zařízení\":\"topný olej vůle potlačující\"," +
                 "\"chäřac+=r&\":\"+Heizölrückstoßabdämpfung=r&\"}"
-            })
+            }))
         }
 
         "added in sequence" - {
@@ -327,18 +328,18 @@ object HttpRequestSpec extends TestSuite {
             .withQueryParameter("tool", "hammer")
             .withQueryParameter("device", "neon")
             .send()
-            .map(res => {
-              res.body ==> "{\"element\":\"argon\",\"device\":[\"chair\",\"neon\"],\"tool\":\"hammer\"}"
-            })
+            .flatMap(_.body.map(body => {
+              body ==> "{\"element\":\"argon\",\"device\":[\"chair\",\"neon\"],\"tool\":\"hammer\"}"
+            }))
         }
 
         "as list parameter" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
             .withQueryArrayParameter("map", Seq("foo", "bar"))
             .send()
-            .map(res => {
-              res.body ==> "{\"map\":[\"foo\",\"bar\"]}"
-            })
+            .flatMap(_.body.map(body => {
+              body ==> "{\"map\":[\"foo\",\"bar\"]}"
+            }))
         }
       }
 
@@ -373,11 +374,11 @@ object HttpRequestSpec extends TestSuite {
         // Test with corrected case
         req.headers ==> headers
 
-        req.send().map(res => {
-          assert(res.body.contains("\"accept\":\"text/html, application/xhtml\""))
-          assert(res.body.contains("\"cache-control\":\"max-age=0\""))
-          assert(res.body.contains("\"custom\":\"foobar\""))
-        })
+        req.send().flatMap(_.body.map(body => {
+          assert(body.contains("\"accept\":\"text/html, application/xhtml\""))
+          assert(body.contains("\"cache-control\":\"max-age=0\""))
+          assert(body.contains("\"custom\":\"foobar\""))
+        }))
       }
 
       "Can be set individually" - {
@@ -389,10 +390,10 @@ object HttpRequestSpec extends TestSuite {
             "cache-control" -> "max-age=0",
             "Custom" -> "foobar")
 
-        req.send().map(res => {
-          assert(res.body.contains("\"cache-control\":\"max-age=0\""))
-          assert(res.body.contains("\"custom\":\"foobar\""))
-        })
+        req.send().flatMap(_.body.map(body => {
+          assert(body.contains("\"cache-control\":\"max-age=0\""))
+          assert(body.contains("\"custom\":\"foobar\""))
+        }))
       }
 
       "Overwrite previous value when set" - {
@@ -413,11 +414,11 @@ object HttpRequestSpec extends TestSuite {
           "Custom" -> "barbar",
           "Accept" -> "application/json")
 
-        req.send().map(res => {
-          assert(res.body.contains("\"cache-control\":\"max-age=128\""))
-          assert(res.body.contains("\"custom\":\"barbar\""))
-          assert(res.body.contains("\"accept\":\"application/json\""))
-        })
+        req.send().flatMap(_.body.map(body => {
+          assert(body.contains("\"cache-control\":\"max-age=128\""))
+          assert(body.contains("\"custom\":\"barbar\""))
+          assert(body.contains("\"accept\":\"application/json\""))
+        }))
       }
 
       "Override body content-type" - {
@@ -426,10 +427,10 @@ object HttpRequestSpec extends TestSuite {
           .withHeader("Content-Type", "text/html")
           .withMethod(Method.POST)
           .send()
-          .map(res => {
-            assert(res.body.contains("\"content-type\":\"text/html\""))
-            assert(!res.body.contains("\"content-type\":\"text/plain\""))
-          })
+          .flatMap(_.body.map(body => {
+            assert(body.contains("\"content-type\":\"text/html\""))
+            assert(!body.contains("\"content-type\":\"text/plain\""))
+          }))
       }
     }
 
@@ -438,10 +439,7 @@ object HttpRequestSpec extends TestSuite {
       "can be read in the general case" - {
         HttpRequest(s"$SERVER_URL/")
           .send()
-          .map({
-            res =>
-              res.headers("X-Powered-By") ==> "Express"
-          })
+          .map(res => res.headers("X-Powered-By") ==> "Express")
       }
 
       "can be read in the error case" - {
@@ -466,14 +464,14 @@ object HttpRequestSpec extends TestSuite {
       "can be empty for 200's" - {
         HttpRequest(s"$SERVER_URL/empty_body/200")
           .send()
-          .map(response => assert(response.body == ""))
+          .map(response => response.body.map(_ ==> ""))
       }
       "can be empty for 400's" - {
         HttpRequest(s"$SERVER_URL/empty_body/400")
           .send()
           .failed.map {
           case e: HttpResponseError =>
-            assert(e.response.body == "")
+            e.response.body.map(_ ==> "")
         }
       }
     }
@@ -504,18 +502,18 @@ object HttpRequestSpec extends TestSuite {
       "can be POSTed with ASCII strings" - {
         HttpRequest(s"$SERVER_URL/body")
           .post(PlainTextBody("Hello world"))
-          .map({ res =>
-            res.body ==> "Hello world"
+          .flatMap({ res =>
             res.headers("Content-Type").toLowerCase ==> "text/plain; charset=utf-8"
+            res.body.map(_ ==> "Hello world")
           })
       }
 
       "can be POSTed with non-ascii strings" - {
         HttpRequest(s"$SERVER_URL/body")
           .post(PlainTextBody("Heizölrückstoßabdämpfung"))
-          .map({ res =>
-            res.body ==> "Heizölrückstoßabdämpfung"
+          .flatMap({ res =>
             res.headers("Content-Type").toLowerCase ==> "text/plain; charset=utf-8"
+            res.body.map(_ ==> "Heizölrückstoßabdämpfung")
           })
       }
 
@@ -527,9 +525,9 @@ object HttpRequestSpec extends TestSuite {
 
         HttpRequest(s"$SERVER_URL/body")
           .post(part)
-          .map({ res =>
-            res.body ==> "{\"foo\":\"bar\",\"engine\":\"Heizölrückstoßabdämpfung\"}"
+          .flatMap({ res =>
             res.headers("Content-Type").toLowerCase ==> s"multipart/form-data; boundary=${part.boundary}; charset=utf-8"
+            res.body.map(_ ==> "{\"foo\":\"bar\",\"engine\":\"Heizölrückstoßabdämpfung\"}")
           })
       }
 
@@ -541,9 +539,9 @@ object HttpRequestSpec extends TestSuite {
 
         HttpRequest(s"$SERVER_URL/body")
           .post(part)
-          .map({ res =>
-            res.body ==> "{\"foo\":\"bar\",\"engine\":\"Heizölrückstoßabdämpfung\"}"
+          .flatMap({ res =>
             res.headers("Content-Type").toLowerCase ==> s"application/x-www-form-urlencoded; charset=utf-8"
+            res.body.map(_ ==> "{\"foo\":\"bar\",\"engine\":\"Heizölrückstoßabdämpfung\"}")
           })
       }
 
@@ -556,10 +554,10 @@ object HttpRequestSpec extends TestSuite {
 
         HttpRequest(s"$SERVER_URL/body")
           .post(part)
-          .map({ res =>
-            res.body ==> "{\"foo\":42,\"engine\":\"Heizölrückstoßabdämpfung\"," +
-              "\"\\\"quoted'\":\"Has \\\" quotes\"}"
+          .flatMap({ res =>
             res.headers("Content-Type").toLowerCase ==> s"application/json; charset=utf-8"
+            res.body.map(_ ==> "{\"foo\":42,\"engine\":\"Heizölrückstoßabdämpfung\"," +
+              "\"\\\"quoted'\":\"Has \\\" quotes\"}")
           })
       }
 
