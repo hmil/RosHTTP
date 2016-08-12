@@ -60,7 +60,9 @@ private object HttpDriver extends DriverTrait {
     } else {
       throw HttpResponseError.badStatus(new HttpResponse(
         code,
-        ByteBuffer.wrap(IO.readInputStreamToByteArray(connection.getErrorStream)),
+        ByteBuffer.wrap(Option(connection.getErrorStream)
+          .map(IO.readInputStreamToByteArray)
+          .getOrElse(Array.empty)),
         headerMap
       ))
     }

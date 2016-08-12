@@ -86,6 +86,11 @@ app.all('/body', function(req, res) {
   }
 });
 
+app.all('/empty_body/:statusCode', function(req, res) {
+  res.set('X-Status-Code', req.params.statusCode);
+  res.status(req.params.statusCode).send('');
+});
+
 app.post('/upload/:name', function(req, res) {
   var fdata = fs.readFileSync(path.join(__dirname, "uploads", req.params.name));
 
