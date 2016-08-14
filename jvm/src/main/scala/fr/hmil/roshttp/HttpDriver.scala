@@ -8,7 +8,7 @@ import fr.hmil.roshttp.tools.io.IO
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, blocking}
 
-private object HttpDriver extends AbstractDriver {
+private object HttpDriver extends DriverTrait {
 
   def send(req: HttpRequest): Future[HttpResponse] = {
 
@@ -60,7 +60,9 @@ private object HttpDriver extends AbstractDriver {
     } else {
       throw HttpResponseError.badStatus(new HttpResponse(
         code,
-        ByteBuffer.wrap(IO.readInputStreamToByteArray(connection.getErrorStream)),
+        ByteBuffer.wrap(Option(connection.getErrorStream)
+          .map(IO.readInputStreamToByteArray)
+          .getOrElse(Array.empty)),
         headerMap
       ))
     }
