@@ -8,7 +8,7 @@ import fr.hmil.roshttp.tools.io.IO
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, blocking}
 
-private object HttpDriver extends AbstractDriver {
+private object HttpDriver extends DriverTrait {
 
   def send(req: HttpRequest): Future[HttpResponse] = {
 
