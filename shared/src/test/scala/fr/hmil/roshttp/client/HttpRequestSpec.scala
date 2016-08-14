@@ -454,6 +454,22 @@ object HttpRequestSpec extends TestSuite {
       }
     }
 
+    "Response body" - {
+      "can be empty for 200's" - {
+        HttpRequest(s"$SERVER_URL/empty_body/200")
+          .send()
+          .map(response => assert(response.body == ""))
+      }
+      "can be empty for 400's" - {
+        HttpRequest(s"$SERVER_URL/empty_body/400")
+          .send()
+          .failed.map {
+          case e: HttpResponseError =>
+            assert(e.response.body == "")
+        }
+      }
+    }
+
     "Http method" - {
 
       "can be set to any legal value" - {
