@@ -14,7 +14,7 @@ A human-readable scala http client API compatible with:
 Add a dependency in your build.sbt:
 
 ```scala
-libraryDependencies += "fr.hmil" %%% "roshttp" % "1.0.0"
+libraryDependencies += "fr.hmil" %%% "roshttp" % "1.0.1"
 ```
 
 # Usage
@@ -230,7 +230,10 @@ Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master
 
 ## Changelog
 
-**v1.0.0 - stable release**
+**v1.0.1**
+- Fix NPE when reading empty error response
+
+**v1.0.0**
 - Using [semantic versioning](http://semver.org/) from now on
 - Renamed RösHTTP
 - Add .withBody()
