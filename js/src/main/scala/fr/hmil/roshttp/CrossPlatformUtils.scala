@@ -9,7 +9,7 @@ private object CrossPlatformUtils {
     if (JsEnvUtils.isRealBrowser)
       "ISO-8859-1"
     else
-      "binary"
+      "utf-8"
   }
 
   def encodeQueryString(query: String): String =

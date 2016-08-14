@@ -57,7 +57,6 @@ private object NodeDriver extends DriverTrait {
       path = req.longPath
     ), (message: IncomingMessage) => {
 
-      val charset = HttpUtils.charsetFromContentType(message.headers.get("content-type").orNull)
 
       if (message.statusCode >= 300 && message.statusCode < 400 && message.headers.contains("location")) {
         makeRequest(req.withURL(message.headers("location")), p)
@@ -73,7 +72,6 @@ private object NodeDriver extends DriverTrait {
         message.on("end", { (s: js.Dynamic) =>
           val headers = message.headers.toMap[String, String]
 
-          val charset = HttpUtils.charsetFromContentType(headers.getOrElse("content-type", null))
           val response = new HttpResponse(
             message.statusCode,
             body.collect(),
