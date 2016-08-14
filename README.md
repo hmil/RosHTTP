@@ -14,7 +14,7 @@ A human-readable scala http client API compatible with:
 Add a dependency in your build.sbt:
 
 ```scala
-libraryDependencies += "fr.hmil" %%% "roshttp" % "1.0.0"
+libraryDependencies += "fr.hmil" %%% "roshttp" % "1.0.1"
 ```
 
 # Usage
@@ -224,14 +224,19 @@ see something that is missing.
   like a network error. See [chromium issue](https://bugs.chromium.org/p/chromium/issues/detail?id=372136).
 - The `TRACE` HTTP method does not work in browsers and `PATCH` does not work in the JVM.
 
+## Contributing
+
+Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master/CONTRIBUTING.md).
+
 ## Changelog
 
+**v1.0.1**
+- Fix NPE when reading empty error response
 
-**v1.0.0 - stable release**
-- Using strict SemVer from now on
+**v1.0.0**
+- Using [semantic versioning](http://semver.org/) from now on
 - Renamed RösHTTP
 - Add .withBody()
-
 
 **v0.3.0**
 - Remove general purpose StringBody
@@ -247,3 +252,7 @@ see something that is missing.
 
 **v0.1.0**
 - First release
+
+## License
+
+MIT
