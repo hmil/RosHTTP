@@ -75,13 +75,19 @@ private[roshttp] object IO {
 
     @tailrec
     def loop(): Unit = {
-      val size = in.read(buffer)
-      if (size > 0) {
-        out.write(buffer, 0, size)
-        loop()
-      }
+        val size = in.read(buffer)
+        if (size > 0) {
+          out.write(buffer, 0, size)
+          loop()
+        }
     }
-    loop()
+    try {
+      loop()
+    } catch {
+      // work around java quirk. See SO thread for details
+      // http://stackoverflow.com/questions/10333257/java-io-ioexception-premature-eof
+      case e:IOException if e.getMessage == "Premature EOF" => // ignore
+    }
   }
 
   /** Pipes data from `in` to `out` */

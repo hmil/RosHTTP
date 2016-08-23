@@ -35,6 +35,10 @@ app.get('/redirect/temporary/*', function(req, res) {
   res.end();
 });
 
+app.get('/raw_greeting', function(req, res) {
+  res.write("Hello world").end(); // Does not send Content-Type header
+});
+
 app.get('/redirect/permanent/*', function(req, res) {
   res.redirect(301 ,'/' + req.params[0]);
 });

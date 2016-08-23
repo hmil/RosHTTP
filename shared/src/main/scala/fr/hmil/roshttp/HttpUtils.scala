@@ -10,12 +10,12 @@ private object HttpUtils {
     */
   def charsetFromContentType(input: String): String = {
     if (input == null) {
-      "utf-8"
+      oneByteCharset
     } else {
       // From W3C spec:
       // Content-Type := type "/" subtype *[";" parameter]
       // eg: text/html; charset=UTF-8
-      input.split(';').toStream.drop(1).foldLeft(CrossPlatformUtils.oneByteCharset)((acc, s) => {
+      input.split(';').toStream.drop(1).foldLeft(oneByteCharset)((acc, s) => {
         if (s.matches("^\\s*charset=.+$")) {
           s.substring(s.indexOf("charset") + 8)
         } else {
@@ -24,4 +24,6 @@ private object HttpUtils {
       })
     }
   }
+
+  val oneByteCharset = "utf-8"
 }

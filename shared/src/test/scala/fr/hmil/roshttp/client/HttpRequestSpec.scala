@@ -452,6 +452,14 @@ object HttpRequestSpec extends TestSuite {
               e.response.headers("X-Powered-By") ==> "Express"
           }
       }
+
+      "can omit content-type" - {
+        HttpRequest(s"$SERVER_URL/raw_greeting")
+          .send()
+          .map({
+            res => res.body ==> "Hello world"
+          })
+      }
     }
 
     "Response body" - {
