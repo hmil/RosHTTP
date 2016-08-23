@@ -4,14 +4,14 @@ import org.scalajs.dom
 import org.scalajs.dom.ext.Ajax
 import org.scalajs.dom.raw.ErrorEvent
 
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.JavaScriptException
 import scala.scalajs.js.typedarray.{ArrayBuffer, TypedArrayBuffer}
 
 private object BrowserDriver extends DriverTrait {
 
-  def send(req: HttpRequest): Future[HttpResponse] = {
+  def send(req: HttpRequest)(implicit ec: ExecutionContext): Future[HttpResponse] = {
     val p: Promise[HttpResponse] = Promise[HttpResponse]()
 
     val xhr = new dom.XMLHttpRequest()

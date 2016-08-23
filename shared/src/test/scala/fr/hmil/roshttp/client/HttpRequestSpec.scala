@@ -118,7 +118,7 @@ object HttpRequestSpec extends TestSuite {
     "Meta" - {
       "The test server should be reachable" - {
         HttpRequest(SERVER_URL)
-          .send() map { s => s.statusCode ==> 200 }
+          .send map { s => s.statusCode ==> 200 }
       }
     }
 
@@ -127,13 +127,13 @@ object HttpRequestSpec extends TestSuite {
         // (But override println to avoid flooding the console)
         def println(s: String) = assert(s.length > 1000)
         HttpRequest("https://schema.org/WebPage")
-          .send()
+          .send
           .map(response => println(response.body))
       }
 
       "Error handling" - {
         HttpRequest("http://hmil.github.io/foobar")
-          .send()
+          .send
           .onFailure {
             case e:HttpResponseError =>
               s"Got a status: ${e.response.statusCode}" ==> "Got a status: 404"
@@ -147,7 +147,7 @@ object HttpRequestSpec extends TestSuite {
           .withPort(3000)
           .withPath("/query")
           .withQueryParameter("city", "London")
-          .send()
+          .send
       }
 
       "Query parameters" - {
@@ -188,7 +188,7 @@ object HttpRequestSpec extends TestSuite {
         goodStatus.map(status => {
           HttpRequest(SERVER_URL)
             .withPath(s"/status/$status")
-            .send()
+            .send
             .map({ s =>
               s.statusCode ==> status
             })
@@ -199,7 +199,7 @@ object HttpRequestSpec extends TestSuite {
         badStatus.map(status =>
           HttpRequest(SERVER_URL)
             .withPath(s"/status/$status")
-            .send()
+            .send
             .map(r => println(r.headers("X-Status-Code") + " : " + r.statusCode))
             .failed.map(_ => "success")
         ).reduce((f1, f2) => f1.flatMap(_ => f2))
@@ -208,7 +208,7 @@ object HttpRequestSpec extends TestSuite {
       "Redirects are followed" - {
         HttpRequest(SERVER_URL)
           .withPath("/redirect/temporary/echo/redirected")
-          .send()
+          .send
           .map(res => {
             res.body ==> "redirected"
           })
@@ -220,7 +220,7 @@ object HttpRequestSpec extends TestSuite {
         badStatus.map(status =>
           HttpRequest(SERVER_URL)
             .withPath(s"/status/$status")
-            .send()
+            .send
             .failed.map {
             case e:HttpResponseError =>
               statusText(e.response.statusCode) ==> e.response.body
@@ -234,7 +234,7 @@ object HttpRequestSpec extends TestSuite {
       "set in constructor" - {
         "vanilla" - {
           HttpRequest(s"$SERVER_URL/query?Hello%20world.")
-            .send()
+            .send
             .map(res => {
               res.body ==> "Hello world."
             })
@@ -242,7 +242,7 @@ object HttpRequestSpec extends TestSuite {
 
         "with illegal characters" - {
           HttpRequest(s"$SERVER_URL/query?Heizölrückstoßabdämpfung%20+")
-            .send()
+            .send
             .map(res => {
               res.body ==> "Heizölrückstoßabdämpfung +"
             })
@@ -254,7 +254,7 @@ object HttpRequestSpec extends TestSuite {
         "vanilla" - {
           HttpRequest(s"$SERVER_URL/query")
             .withQueryString("Hello world.")
-            .send()
+            .send
             .map(res => {
               res.body ==> "Hello world."
             })
@@ -263,7 +263,7 @@ object HttpRequestSpec extends TestSuite {
         "with illegal characters" - {
           HttpRequest(s"$SERVER_URL/query")
             .withQueryString("Heizölrückstoßabdämpfung %20+")
-            .send()
+            .send
             .map(res => {
               res.body ==> "Heizölrückstoßabdämpfung %20+"
             })
@@ -279,7 +279,7 @@ object HttpRequestSpec extends TestSuite {
       "set in withRawQueryString" - {
         HttpRequest(s"$SERVER_URL/query")
           .withQueryStringRaw("Heiz%C3%B6lr%C3%BCcksto%C3%9Fabd%C3%A4mpfung")
-          .send()
+          .send
           .map(res => {
             res.body ==> "Heizölrückstoßabdämpfung"
           })
@@ -289,7 +289,7 @@ object HttpRequestSpec extends TestSuite {
         "single" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
             .withQueryParameter("device", "neon")
-            .send()
+            .send
             .map(res => {
               res.body ==> "{\"device\":\"neon\"}"
             })
@@ -300,7 +300,7 @@ object HttpRequestSpec extends TestSuite {
             .withQueryParameters(
               "device" -> "neon",
               "element" -> "argon")
-            .send()
+            .send
             .map(res => {
               res.body ==> "{\"device\":\"neon\",\"element\":\"argon\"}"
             })
@@ -311,7 +311,7 @@ object HttpRequestSpec extends TestSuite {
             .withQueryParameters(
               " zařízení" -> "topný olej vůle potlačující",
               "chäřac+=r&" -> "+Heizölrückstoßabdämpfung=r&")
-            .send()
+            .send
             .map(res => {
               res.body ==> "{\" zařízení\":\"topný olej vůle potlačující\"," +
                 "\"chäřac+=r&\":\"+Heizölrückstoßabdämpfung=r&\"}"
@@ -326,7 +326,7 @@ object HttpRequestSpec extends TestSuite {
             )
             .withQueryParameter("tool", "hammer")
             .withQueryParameter("device", "neon")
-            .send()
+            .send
             .map(res => {
               res.body ==> "{\"element\":\"argon\",\"device\":[\"chair\",\"neon\"],\"tool\":\"hammer\"}"
             })
@@ -335,7 +335,7 @@ object HttpRequestSpec extends TestSuite {
         "as list parameter" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
             .withQueryArrayParameter("map", Seq("foo", "bar"))
-            .send()
+            .send
             .map(res => {
               res.body ==> "{\"map\":[\"foo\",\"bar\"]}"
             })
@@ -373,7 +373,7 @@ object HttpRequestSpec extends TestSuite {
         // Test with corrected case
         req.headers ==> headers
 
-        req.send().map(res => {
+        req.send.map(res => {
           assert(res.body.contains("\"accept\":\"text/html, application/xhtml\""))
           assert(res.body.contains("\"cache-control\":\"max-age=0\""))
           assert(res.body.contains("\"custom\":\"foobar\""))
@@ -389,7 +389,7 @@ object HttpRequestSpec extends TestSuite {
             "cache-control" -> "max-age=0",
             "Custom" -> "foobar")
 
-        req.send().map(res => {
+        req.send.map(res => {
           assert(res.body.contains("\"cache-control\":\"max-age=0\""))
           assert(res.body.contains("\"custom\":\"foobar\""))
         })
@@ -413,7 +413,7 @@ object HttpRequestSpec extends TestSuite {
           "Custom" -> "barbar",
           "Accept" -> "application/json")
 
-        req.send().map(res => {
+        req.send.map(res => {
           assert(res.body.contains("\"cache-control\":\"max-age=128\""))
           assert(res.body.contains("\"custom\":\"barbar\""))
           assert(res.body.contains("\"accept\":\"application/json\""))
@@ -425,7 +425,7 @@ object HttpRequestSpec extends TestSuite {
           .withBody(PlainTextBody("Hello world"))
           .withHeader("Content-Type", "text/html")
           .withMethod(Method.POST)
-          .send()
+          .send
           .map(res => {
             assert(res.body.contains("\"content-type\":\"text/html\""))
             assert(!res.body.contains("\"content-type\":\"text/plain\""))
@@ -437,7 +437,7 @@ object HttpRequestSpec extends TestSuite {
 
       "can be read in the general case" - {
         HttpRequest(s"$SERVER_URL/")
-          .send()
+          .send
           .map({
             res =>
               res.headers("X-Powered-By") ==> "Express"
@@ -446,7 +446,7 @@ object HttpRequestSpec extends TestSuite {
 
       "can be read in the error case" - {
         HttpRequest(s"$SERVER_URL/status/400")
-          .send()
+          .send
           .failed.map {
             case e: HttpResponseError =>
               e.response.headers("X-Powered-By") ==> "Express"
@@ -465,12 +465,12 @@ object HttpRequestSpec extends TestSuite {
     "Response body" - {
       "can be empty for 200's" - {
         HttpRequest(s"$SERVER_URL/empty_body/200")
-          .send()
+          .send
           .map(response => assert(response.body == ""))
       }
       "can be empty for 400's" - {
         HttpRequest(s"$SERVER_URL/empty_body/400")
-          .send()
+          .send
           .failed.map {
           case e: HttpResponseError =>
             assert(e.response.body == "")
@@ -484,7 +484,7 @@ object HttpRequestSpec extends TestSuite {
         legalMethods.map(method =>
           HttpRequest(s"$SERVER_URL/method")
             .withMethod(Method(method))
-            .send()
+            .send
             .map(_.headers("X-Request-Method") ==> method)
         ).reduce((f1, f2) => f1.flatMap(_=>f2))
       }
@@ -493,7 +493,7 @@ object HttpRequestSpec extends TestSuite {
         legalMethods.map(method =>
           HttpRequest(s"$SERVER_URL/method")
             .withMethod(Method(method.toLowerCase))
-            .send()
+            .send
             .map(_.headers("X-Request-Method") ==> method)
         ).reduce((f1, f2) => f1.flatMap(_ => f2))
       }
