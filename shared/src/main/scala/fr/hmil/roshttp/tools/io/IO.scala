@@ -75,11 +75,11 @@ private[roshttp] object IO {
 
     @tailrec
     def loop(): Unit = {
-        val size = in.read(buffer)
-        if (size > 0) {
-          out.write(buffer, 0, size)
-          loop()
-        }
+      val size = in.read(buffer)
+      if (size > 0) {
+        out.write(buffer, 0, size)
+        loop()
+      }
     }
     try {
       loop()
