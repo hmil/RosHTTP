@@ -248,7 +248,7 @@ final class HttpRequest  private (
     *
     * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
-  def send(implicit ec: ExecutionContext): Future[HttpResponse] = HttpDriver.send(this)
+  def send()(implicit ec: ExecutionContext): Future[HttpResponse] = HttpDriver.send(this)
 
   /** Sends this request with the POST method and a body
     *
@@ -287,7 +287,7 @@ final class HttpRequest  private (
     * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
   def send(body: BodyPart)(implicit ec: ExecutionContext): Future[HttpResponse] =
-      withBody(body).send(ec)
+      withBody(body).send()
 
   /** Internal method to back public facing .withXXX methods. */
   private def copy(
