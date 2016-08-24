@@ -3,9 +3,9 @@ package fr.hmil.roshttp.client
 import java.nio.ByteBuffer
 
 import fr.hmil.roshttp._
-import fr.hmil.roshttp.body.JSONBody._
 import fr.hmil.roshttp.body.Implicits._
 import fr.hmil.roshttp.body._
+import org.json4s.ast.safe._
 import utest._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -170,14 +170,14 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest(s"$SERVER_URL/body")
           .post(MultiPartBody(
             "name" -> PlainTextBody("John"),
-            "skills" -> JSONObject(
-              "programming" -> JSONObject(
-                "C" -> 3,
-                "PHP" -> 1,
-                "Scala" -> 5
-              ),
-              "design" -> 2
-            ),
+            "skills" -> JObject(Map(
+              "programming" -> JObject(Map(
+                "C" -> JNumber(3),
+                "PHP" -> JNumber(1),
+                "Scala" -> JNumber(5)
+              )),
+              "design" -> JNumber(2)
+            )),
             "picture" -> StreamBody(ByteBuffer.wrap(IMAGE_BYTES), "image/jpeg")
           ))
       }
@@ -548,11 +548,11 @@ object HttpRequestSpec extends TestSuite {
       }
 
       "can be POSTed as json" - {
-        val part = JSONObject(
-          "foo" -> 42,
-          "engine" -> "Heizölrückstoßabdämpfung",
-          "\"quoted'" -> "Has \" quotes"
-        )
+        val part = JObject(Map(
+          "foo" -> JNumber(42),
+          "engine" -> JString("Heizölrückstoßabdämpfung"),
+          "\"quoted'" -> JString("Has \" quotes")
+        ))
 
         HttpRequest(s"$SERVER_URL/body")
           .post(part)

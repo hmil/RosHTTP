@@ -39,6 +39,7 @@ lazy val scalaHttp = crossProject.in(file("."))
     pomIncludeRepository := { _ => false },
 
     libraryDependencies += "com.lihaoyi" %%% "utest" % "0.4.3",
+    libraryDependencies += "org.json4s" %%% "json4s-ast" % "4.0.0-M1",
 
     testFrameworks += new TestFramework("utest.runner.Framework")
   )

@@ -232,6 +232,7 @@ Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master
 
 **v2.0.0**
 
+- Change JSON AST to json4s
 - Fix bug on responses without Content-Type header
 
 **v1.0.1**
