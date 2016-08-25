@@ -12,16 +12,16 @@ private object HttpDriver extends DriverTrait {
   def send[T <: HttpResponse](req: HttpRequest, responseFactory: HttpResponseFactory[T]): Future[T] = {
 
     concurrent.Future {
-      try {
-        blocking {
+      blocking {
+        try {
           val connection = prepareConnection(req)
           readResponse(connection, responseFactory)
+        } catch {
+          case e: HttpResponseError => throw e
+          case e: Throwable => throw new HttpNetworkError(e)
         }
-      } catch {
-        case e: HttpResponseError => throw e
-        case e: Throwable => throw new HttpNetworkError(e)
       }
-    }
+    }.flatMap(f => f)
   }
 
   private def prepareConnection(req: HttpRequest): HttpURLConnection = {
@@ -38,7 +38,7 @@ private object HttpDriver extends DriverTrait {
   }
 
   private def readResponse[T <: HttpResponse](
-      connection: HttpURLConnection, responseFactory: HttpResponseFactory[T]): T = {
+      connection: HttpURLConnection, responseFactory: HttpResponseFactory[T]): Future[T] = {
     val code = connection.getResponseCode
     val headerMap = HeaderMap(Iterator.from(0)
       .map(i => (i, connection.getHeaderField(i)))
@@ -58,11 +58,11 @@ private object HttpDriver extends DriverTrait {
         headerMap
       )
     } else {
-      throw HttpResponseError.badStatus(responseFactory(
+      responseFactory(
         code,
         inputStreamToObservable(connection.getErrorStream),
         headerMap
-      ))
+      ).map(response => throw HttpResponseError.badStatus(response))
     }
   }
 

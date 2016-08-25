@@ -12,24 +12,32 @@ import scala.concurrent.duration.FiniteDuration
 /**
  * An HTTP response obtained via an [[HttpRequest]]
  */
-class SimpleHttpResponse(statusCode: Int, bodyStream: Observable[ByteBuffer], headers: HeaderMap[String])
-    extends HttpResponse(statusCode, bodyStream, headers) {
+class SimpleHttpResponse(
+    val statusCode: Int,
+    val body: String,
+    val headers: HeaderMap[String])
+  extends HttpResponse
 
-  private val charset = HttpUtils.charsetFromContentType(headers.getOrElse("content-type", null))
+object SimpleHttpResponse extends HttpResponseFactory[SimpleHttpResponse] {
+  override def apply(
+      statusCode: Int,
+      bodyStream: Observable[ByteBuffer],
+      headers: HeaderMap[String]): Future[SimpleHttpResponse] = {
 
-  val body: Future[String] = {
+    val charset = HttpUtils.charsetFromContentType(headers.getOrElse("content-type", null))
+
     bodyStream
       // TODO: configurable timeout
       .buffer(FiniteDuration(10, TimeUnit.SECONDS))
       .map(_
         // TODO: what happens if chunk cuts a multibyte character?
-        .map(b => getStringFromBuffer(b))
+        .map(b => getStringFromBuffer(b, charset))
         .foldLeft("")({ case (l, r) => l + r})
       ).asFuture
-      .map(_.get)
+      .map(body => new SimpleHttpResponse(statusCode, body.get, headers))
   }
 
-  private def getStringFromBuffer(byteBuffer: ByteBuffer): String = {
+  private def getStringFromBuffer(byteBuffer: ByteBuffer, charset: String): String = {
     if (byteBuffer.hasArray) {
       new String(byteBuffer.array(), 0, byteBuffer.limit, charset)
     } else {
@@ -38,9 +46,4 @@ class SimpleHttpResponse(statusCode: Int, bodyStream: Observable[ByteBuffer], he
       new String(tmp, charset)
     }
   }
-}
-
-object SimpleHttpResponse extends HttpResponseFactory[SimpleHttpResponse] {
-  override def apply(statusCode: Int, bodyStream: Observable[ByteBuffer], headers: HeaderMap[String]):
-    SimpleHttpResponse = new SimpleHttpResponse(statusCode, bodyStream, headers)
 }

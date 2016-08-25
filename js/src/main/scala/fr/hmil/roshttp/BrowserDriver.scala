@@ -8,7 +8,7 @@ import org.scalajs.dom
 import org.scalajs.dom.ext.Ajax
 import org.scalajs.dom.raw.ErrorEvent
 
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.scalajs.js.JSConverters._
 import scala.scalajs.js.JavaScriptException
 import scala.scalajs.js.typedarray.{ArrayBuffer, TypedArrayBuffer}
@@ -38,27 +38,30 @@ private object BrowserDriver extends DriverTrait {
         }
         val charset = HttpUtils.charsetFromContentType(headers.getOrElse("content-type", null))
         val responseBytes = TypedArrayBuffer.wrap(xhr.response.asInstanceOf[ArrayBuffer])
-        val response = factory(
-          xhr.status,
-          Observable.create[ByteBuffer] { sub =>
-            implicit val s = sub.scheduler
-            // note we must apply back-pressure
-            // when calling `onNext`
-            sub.onNext(responseBytes).onComplete {
-              case Success(Cancel) =>
-                () // do nothing
-              case Success(Continue) =>
-                sub.onComplete()
-              case Failure(ex) =>
-                sub.onError(ex)
+
+        factory(
+            xhr.status,
+            Observable.create[ByteBuffer] { sub =>
+              implicit val s = sub.scheduler
+              // note we must apply back-pressure
+              // when calling `onNext`
+              sub.onNext(responseBytes).onComplete {
+                case Success(Cancel) =>
+                  () // do nothing
+                case Success(Continue) =>
+                  sub.onComplete()
+                case Failure(ex) =>
+                  sub.onError(ex)
+              }
+            },
+            HeaderMap(headers))
+          .foreach({response =>
+            if (xhr.status >= 400) {
+              p.failure(HttpResponseError.badStatus(response))
+            } else {
+              p.success(response)
             }
-          },
-          HeaderMap(headers))
-        if (xhr.status >= 400) {
-          p.failure(HttpResponseError.badStatus(response))
-        } else {
-          p.success(response)
-        }
+          })
       }
     }
 

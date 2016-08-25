@@ -18,18 +18,18 @@ object HttpResponseError {
 
   def apply(response: HttpResponse, message: String): HttpResponseError = response match {
     case res:SimpleHttpResponse => new SimpleHttpResponseError(res, message)
-    case res:HttpStreamResponse => new StreamHttpResponseError(res, message)
+    case res:StreamedHttpResponse => new StreamHttpResponseError(res, message)
   }
 
   case class SimpleHttpResponseError(
-                                      /** The http response which triggered the error. */
-                                      response: SimpleHttpResponse,
-                                      /** An message describing the error. */
-                                      message: String)
+      /** The http response which triggered the error. */
+      response: SimpleHttpResponse,
+      /** An message describing the error. */
+      message: String)
     extends HttpResponseError(message)
   case class StreamHttpResponseError(
       /** The http response which triggered the error. */
-      response: HttpStreamResponse,
+      response: StreamedHttpResponse,
       /** An message describing the error. */
       message: String)
     extends HttpResponseError(message)

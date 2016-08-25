@@ -71,15 +71,16 @@ private object NodeDriver extends DriverTrait {
         }
 
         val response = factory(
-          message.statusCode,
-          bufferStream,
-          HeaderMap(headers))
-
-        if (message.statusCode < 400) {
-          p.success(response)
-        } else {
-          p.failure(HttpResponseError.badStatus(response))
-        }
+            message.statusCode,
+            bufferStream,
+            HeaderMap(headers))
+          .foreach({ response =>
+            if (message.statusCode < 400) {
+              p.success(response)
+            } else {
+              p.failure(HttpResponseError.badStatus(response))
+            }
+          })
       }
       ()
     })

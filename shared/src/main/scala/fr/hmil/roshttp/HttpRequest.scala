@@ -234,7 +234,7 @@ final class HttpRequest  private (
     withHeader("Content-Type", body.contentType).copy(body = Some(body))
   }
 
-  def stream(): Future[HttpStreamResponse] = HttpDriver.send(this, HttpStreamResponse)
+  def stream(): Future[StreamedHttpResponse] = HttpDriver.send(this, StreamedHttpResponse)
 
   /** Sends this request.
     *

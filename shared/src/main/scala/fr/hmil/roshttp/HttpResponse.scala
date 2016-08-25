@@ -5,7 +5,8 @@ import java.nio.ByteBuffer
 import monifu.reactive.Observable
 
 
-private[roshttp] abstract class HttpResponse(
-    val statusCode: Int,
-    val bodyStream: Observable[ByteBuffer],
-    val headers: HeaderMap[String])
+private[roshttp] trait HttpResponse {
+    val statusCode: Int
+    val body: Any
+    val headers: HeaderMap[String]
+}
