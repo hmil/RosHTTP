@@ -2,19 +2,20 @@ package fr.hmil.roshttp
 
 import java.net.{HttpURLConnection, URL}
 import java.nio.ByteBuffer
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, blocking}
 import monifu.reactive.Observable
 
 private object HttpDriver extends DriverTrait {
 
-  def send(req: HttpRequest): Future[HttpResponse] = {
+  def send[T <: HttpResponse](req: HttpRequest, responseFactory: HttpResponseFactory[T]): Future[T] = {
 
     concurrent.Future {
       try {
         blocking {
           val connection = prepareConnection(req)
-          readResponse(connection)
+          readResponse(connection, responseFactory)
         }
       } catch {
         case e: HttpResponseError => throw e
@@ -36,7 +37,8 @@ private object HttpDriver extends DriverTrait {
     connection
   }
 
-  private def readResponse(connection: HttpURLConnection): HttpResponse = {
+  private def readResponse[T <: HttpResponse](
+      connection: HttpURLConnection, responseFactory: HttpResponseFactory[T]): T = {
     val code = connection.getResponseCode
     val headerMap = HeaderMap(Iterator.from(0)
       .map(i => (i, connection.getHeaderField(i)))
@@ -50,13 +52,13 @@ private object HttpDriver extends DriverTrait {
     val charset = HttpUtils.charsetFromContentType(headerMap.getOrElse("content-type", null))
 
     if (code < 400) {
-      new HttpResponse(
+      responseFactory(
         code,
         inputStreamToObservable(connection.getInputStream),
         headerMap
       )
     } else {
-      throw HttpResponseError.badStatus(new HttpResponse(
+      throw HttpResponseError.badStatus(responseFactory(
         code,
         inputStreamToObservable(connection.getErrorStream),
         headerMap

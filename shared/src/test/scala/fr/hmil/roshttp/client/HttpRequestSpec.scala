@@ -2,6 +2,7 @@ package fr.hmil.roshttp.client
 
 import java.nio.ByteBuffer
 
+import fr.hmil.roshttp.HttpResponseError.SimpleHttpResponseError
 import fr.hmil.roshttp._
 import fr.hmil.roshttp.body.JSONBody._
 import fr.hmil.roshttp.body.Implicits._
@@ -136,7 +137,7 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest("http://hmil.github.io/foobar")
           .send()
           .onFailure {
-            case e:HttpResponseError =>
+            case e:SimpleHttpResponseError =>
               s"Got a status: ${e.response.statusCode}" ==> "Got a status: 404"
           }
       }
@@ -190,9 +191,7 @@ object HttpRequestSpec extends TestSuite {
           HttpRequest(SERVER_URL)
             .withPath(s"/status/$status")
             .send()
-            .map({ s =>
-              s.statusCode ==> status
-            })
+            .map(r => r.statusCode ==> status)
         }).reduce((f1, f2) => f1.flatMap(_ => f2))
       }
 
@@ -201,7 +200,7 @@ object HttpRequestSpec extends TestSuite {
           HttpRequest(SERVER_URL)
             .withPath(s"/status/$status")
             .send()
-            .map(r => println(r.headers("X-Status-Code") + " : " + r.statusCode))
+            .map(r => r.statusCode ==> status)
             .failed.map(_ => "success")
         ).reduce((f1, f2) => f1.flatMap(_ => f2))
       }
@@ -222,11 +221,12 @@ object HttpRequestSpec extends TestSuite {
           HttpRequest(SERVER_URL)
             .withPath(s"/status/$status")
             .send()
-            .failed.flatMap {
-            case e:HttpResponseError =>
-              e.response.body.map(_ ==> statusText(e.response.statusCode))
-            case _ => Future{assert(false)}
-          }
+            .failed
+            .flatMap {
+              case e:SimpleHttpResponseError =>
+                e.response.body.map(_ ==> statusText(e.response.statusCode))
+              case _ => Future{assert(false)}
+            }
         ).reduce((f1, f2) => f1.flatMap(_=>f2))
       }
     }
@@ -446,7 +446,7 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest(s"$SERVER_URL/status/400")
           .send()
           .failed.map {
-            case e: HttpResponseError =>
+            case e: SimpleHttpResponseError =>
               e.response.headers("X-Powered-By") ==> "Express"
           }
       }
@@ -455,7 +455,7 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest(s"$SERVER_URL/raw_greeting")
           .send()
           .map({
-            res => res.body ==> "Hello world"
+            res => res.body.map(_ ==> "Hello world")
           })
       }
     }
@@ -470,7 +470,7 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest(s"$SERVER_URL/empty_body/400")
           .send()
           .failed.map {
-          case e: HttpResponseError =>
+          case e: SimpleHttpResponseError =>
             e.response.body.map(_ ==> "")
         }
       }

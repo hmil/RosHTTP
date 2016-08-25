@@ -16,8 +16,8 @@ import scala.util.{Failure, Success}
 
 private object BrowserDriver extends DriverTrait {
 
-  def send(req: HttpRequest): Future[HttpResponse] = {
-    val p: Promise[HttpResponse] = Promise[HttpResponse]()
+  def send[T <: HttpResponse](req: HttpRequest, factory: HttpResponseFactory[T]): Future[T] = {
+    val p: Promise[T] = Promise[T]()
 
     val xhr = new dom.XMLHttpRequest()
     xhr.open(req.method.toString, req.url)
@@ -38,7 +38,7 @@ private object BrowserDriver extends DriverTrait {
         }
         val charset = HttpUtils.charsetFromContentType(headers.getOrElse("content-type", null))
         val responseBytes = TypedArrayBuffer.wrap(xhr.response.asInstanceOf[ArrayBuffer])
-        val response = new HttpResponse(
+        val response = factory(
           xhr.status,
           Observable.create[ByteBuffer] { sub =>
             implicit val s = sub.scheduler

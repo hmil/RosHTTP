@@ -8,8 +8,8 @@ private object HttpDriver extends DriverTrait {
 
   private var _driver: Option[DriverTrait] = None
 
-  def send(req: HttpRequest): Future[HttpResponse] = {
-    _driver.getOrElse(chooseBackend()).send(req)
+  def send[T <: HttpResponse](req: HttpRequest, factory: HttpResponseFactory[T]): Future[T] = {
+    _driver.getOrElse(chooseBackend()).send(req, factory)
   }
 
   private def chooseBackend(): DriverTrait = {

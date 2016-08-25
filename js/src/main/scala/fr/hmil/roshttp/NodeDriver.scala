@@ -17,7 +17,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 private object NodeDriver extends DriverTrait {
 
-  def makeRequest(req: HttpRequest, p: Promise[HttpResponse]): Unit = {
+  def makeRequest[T <: HttpResponse](req: HttpRequest, factory: HttpResponseFactory[T], p: Promise[T]): Unit = {
     val module = {
       if (req.protocol == Protocol.HTTP)
         http
@@ -32,7 +32,7 @@ private object NodeDriver extends DriverTrait {
       path = req.longPath
     ), (message: IncomingMessage) => {
       if (message.statusCode >= 300 && message.statusCode < 400 && message.headers.contains("location")) {
-        makeRequest(req.withURL(message.headers("location")), p)
+        makeRequest(req.withURL(message.headers("location")), factory, p)
       } else {
         var subscribers = Set[Subscriber[ByteBuffer]]()
 
@@ -65,16 +65,21 @@ private object NodeDriver extends DriverTrait {
         })
 
         val bufferStream = new Observable[ByteBuffer] {
-          override def onSubscribe(subscriber: Subscriber[ByteBuffer]): Unit =
+          override def onSubscribe(subscriber: Subscriber[ByteBuffer]): Unit = {
             subscribers += subscriber
+          }
         }
 
-        val response = new HttpResponse(
+        val response = factory(
           message.statusCode,
           bufferStream,
           HeaderMap(headers))
 
-        p.success(response)
+        if (message.statusCode < 400) {
+          p.success(response)
+        } else {
+          p.failure(HttpResponseError.badStatus(response))
+        }
       }
       ()
     })
@@ -91,10 +96,10 @@ private object NodeDriver extends DriverTrait {
     nodeRequest.end()
   }
 
-  def send(req: HttpRequest): Future[HttpResponse] = {
-    val p: Promise[HttpResponse] = Promise[HttpResponse]()
+  def send[T <: HttpResponse](req: HttpRequest, factory: HttpResponseFactory[T]): Future[T] = {
+    val p: Promise[T] = Promise[T]()
 
-    makeRequest(req, p)
+    makeRequest(req, factory, p)
 
     p.future
   }
