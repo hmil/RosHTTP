@@ -4,7 +4,7 @@ import java.net.URI
 
 import fr.hmil.roshttp.body.BodyPart
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 /** Builds an HTTP request.
   *
@@ -248,7 +248,7 @@ final class HttpRequest  private (
     *
     * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
-  def send(): Future[HttpResponse] = HttpDriver.send(this)
+  def send()(implicit ec: ExecutionContext): Future[HttpResponse] = HttpDriver.send(this)
 
   /** Sends this request with the POST method and a body
     *
@@ -256,7 +256,8 @@ final class HttpRequest  private (
     * @param body The body to send with the request
     * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
-  def post(body: BodyPart): Future[HttpResponse] = withMethod(Method.POST).send(body)
+  def post(body: BodyPart)(implicit ec: ExecutionContext): Future[HttpResponse] =
+      withMethod(Method.POST).send(body)
 
   /** Sends this request with the PUT method and a body
     *
@@ -264,7 +265,8 @@ final class HttpRequest  private (
     * @param body The body to send with the request
     * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
-  def put(body: BodyPart): Future[HttpResponse] = withMethod(Method.PUT).send(body)
+  def put(body: BodyPart)(implicit ec: ExecutionContext): Future[HttpResponse] =
+      withMethod(Method.PUT).send(body)
 
   /** Sends this request with the OPTIONS method and a body
     *
@@ -272,7 +274,8 @@ final class HttpRequest  private (
     * @param body The body to send with the request
     * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
-  def options(body: BodyPart): Future[HttpResponse] = withMethod(Method.OPTIONS).send(body)
+  def options(body: BodyPart)(implicit ec: ExecutionContext): Future[HttpResponse] =
+      withMethod(Method.OPTIONS).send(body)
 
   /** Sends this request with a body.
     *
@@ -283,7 +286,8 @@ final class HttpRequest  private (
     * @param body The body to send.
     * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
-  def send(body: BodyPart): Future[HttpResponse] = withBody(body).send()
+  def send(body: BodyPart)(implicit ec: ExecutionContext): Future[HttpResponse] =
+      withBody(body).send()
 
   /** Internal method to back public facing .withXXX methods. */
   private def copy(

@@ -7,7 +7,7 @@ import fr.hmil.roshttp.node.Modules.{http, https}
 import fr.hmil.roshttp.node.buffer.Buffer
 import fr.hmil.roshttp.node.http.{IncomingMessage, RequestOptions}
 
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 
@@ -102,7 +102,7 @@ private object NodeDriver extends DriverTrait {
     nodeRequest.end()
   }
 
-  def send(req: HttpRequest): Future[HttpResponse] = {
+  def send(req: HttpRequest)(implicit ec: ExecutionContext): Future[HttpResponse] = {
     val p: Promise[HttpResponse] = Promise[HttpResponse]()
 
     makeRequest(req, p)

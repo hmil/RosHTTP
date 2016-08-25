@@ -5,13 +5,11 @@ import java.nio.ByteBuffer
 
 import fr.hmil.roshttp.tools.io.IO
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Future, blocking}
+import scala.concurrent.{ExecutionContext, Future, blocking}
 
 private object HttpDriver extends DriverTrait {
 
-  def send(req: HttpRequest): Future[HttpResponse] = {
-
+  def send(req: HttpRequest)(implicit ec: ExecutionContext): Future[HttpResponse] = {
     concurrent.Future {
       try {
         blocking {

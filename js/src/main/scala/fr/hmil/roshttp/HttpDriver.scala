@@ -2,13 +2,13 @@ package fr.hmil.roshttp
 
 import fr.hmil.roshttp.node.Modules.{HttpModule, HttpsModule}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 private object HttpDriver extends DriverTrait {
 
   private var _driver: Option[DriverTrait] = None
 
-  def send(req: HttpRequest): Future[HttpResponse] = {
+  def send(req: HttpRequest)(implicit ec: ExecutionContext): Future[HttpResponse] = {
     _driver.getOrElse(chooseBackend()).send(req)
   }
 
