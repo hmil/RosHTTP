@@ -8,8 +8,8 @@ import fr.hmil.roshttp.body.JSONBody._
 import fr.hmil.roshttp.body.Implicits._
 import fr.hmil.roshttp.body._
 import utest._
-
 import monifu.concurrent.Implicits.globalScheduler
+import fr.hmil.roshttp.HttpConfig.default
 
 object HttpRequestSpec extends TestSuite {
 
@@ -116,12 +116,14 @@ object HttpRequestSpec extends TestSuite {
 
   val tests = this{
 
+
     "Meta" - {
       "The test server should be reachable" - {
         HttpRequest(SERVER_URL)
           .send() map { s => s.statusCode ==> 200 }
       }
     }
+
 
     "Examples from the readme actually work" - {
       "Main example" - {
@@ -185,6 +187,7 @@ object HttpRequestSpec extends TestSuite {
     }
 
     "General" - {
+
       "Status codes < 400 should complete the request with success" - {
         goodStatus.map(status => {
           HttpRequest(SERVER_URL)
@@ -201,7 +204,7 @@ object HttpRequestSpec extends TestSuite {
           HttpRequest(SERVER_URL)
             .withPath(s"/status/$status")
             .send()
-            .map(r => println(r.headers("X-Status-Code") + " : " + r.statusCode))
+            .map(r => r.headers("X-Status-Code") ==> r.statusCode)
             .failed.map(_ => "success")
         ).reduce((f1, f2) => f1.flatMap(_ => f2))
       }
@@ -214,6 +217,7 @@ object HttpRequestSpec extends TestSuite {
             res.body ==> "redirected"
           })
       }
+
     }
 
     "Error handling" - {
@@ -461,13 +465,37 @@ object HttpRequestSpec extends TestSuite {
           .send()
           .map(response => response.body ==> "")
       }
+
       "can be empty for 400's" - {
         HttpRequest(s"$SERVER_URL/empty_body/400")
           .send()
-          .failed.map {
+          .failed
+          .map {
             case e: SimpleHttpResponseError =>
               e.response.body ==> ""
           }
+      }
+
+      "can be chunked and recomposed" - {
+        val config = HttpConfig(streamChunkSize = 4)
+        HttpRequest(s"$SERVER_URL")(config)
+          .send()
+          .map(res => res.body ==> "Hello World!")
+      }
+
+      "can contain multibyte characters" - {
+        val payload = "12\uD83D\uDCA978"
+        HttpRequest(s"$SERVER_URL/multibyte_string")
+          .send()
+          .map(res => res.body ==> payload)
+      }
+
+      "can contain multibyte characters split by chunk boundary" - {
+        val payload = "12\uD83D\uDCA978"
+        val config = HttpConfig(streamChunkSize = 4)
+        HttpRequest(s"$SERVER_URL/multibyte_string")(config)
+          .send()
+          .map(res => res.body ==> payload)
       }
     }
 

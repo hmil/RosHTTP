@@ -20,7 +20,8 @@ final class HttpRequest  private (
     val protocol: Protocol,
     val queryString: Option[String],
     val headers: HeaderMap[String],
-    val body: Option[BodyPart]) {
+    val body: Option[BodyPart],
+    val backendConfig: HttpConfig) {
 
   /** The path with the query string or just the path if there is no query string */
   val longPath = path + queryString.map(q => s"?$q").getOrElse("")
@@ -234,7 +235,8 @@ final class HttpRequest  private (
     withHeader("Content-Type", body.contentType).copy(body = Some(body))
   }
 
-  def stream(): Future[StreamedHttpResponse] = HttpDriver.send(this, StreamedHttpResponse)
+  def stream()(implicit ec: ExecutionContext): Future[StreamedHttpResponse] =
+    HttpDriver.send(this, StreamedHttpResponse)
 
   /** Sends this request.
     *
@@ -247,7 +249,8 @@ final class HttpRequest  private (
     *
     * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
-  def send(): Future[SimpleHttpResponse] = HttpDriver.send(this, SimpleHttpResponse)
+  def send()(implicit ec: ExecutionContext): Future[SimpleHttpResponse] =
+    HttpDriver.send(this, SimpleHttpResponse)
 
   /** Sends this request with the POST method and a body
     *
@@ -255,7 +258,8 @@ final class HttpRequest  private (
     * @param body The body to send with the request
     * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
-  def post(body: BodyPart): Future[SimpleHttpResponse] = withMethod(Method.POST).send(body)
+  def post(body: BodyPart)(implicit ec: ExecutionContext): Future[SimpleHttpResponse] =
+      withMethod(Method.POST).send(body)
 
   /** Sends this request with the PUT method and a body
     *
@@ -263,7 +267,8 @@ final class HttpRequest  private (
     * @param body The body to send with the request
     * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
-  def put(body: BodyPart): Future[SimpleHttpResponse] = withMethod(Method.PUT).send(body)
+  def put(body: BodyPart)(implicit ec: ExecutionContext): Future[SimpleHttpResponse] =
+      withMethod(Method.PUT).send(body)
 
   /** Sends this request with the OPTIONS method and a body
     *
@@ -271,7 +276,8 @@ final class HttpRequest  private (
     * @param body The body to send with the request
     * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
-  def options(body: BodyPart): Future[SimpleHttpResponse] = withMethod(Method.OPTIONS).send(body)
+  def options(body: BodyPart)(implicit ec: ExecutionContext): Future[SimpleHttpResponse] =
+      withMethod(Method.OPTIONS).send(body)
 
   /** Sends this request with a body.
     *
@@ -282,7 +288,8 @@ final class HttpRequest  private (
     * @param body The body to send.
     * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
-  def send(body: BodyPart): Future[SimpleHttpResponse] = withBody(body).send()
+  def send(body: BodyPart)(implicit ec: ExecutionContext): Future[SimpleHttpResponse] =
+      withBody(body).send()
 
   /** Internal method to back public facing .withXXX methods. */
   private def copy(
@@ -293,7 +300,8 @@ final class HttpRequest  private (
       protocol: Protocol  = this.protocol,
       queryString: Option[String] = this.queryString,
       headers: HeaderMap[String]  = this.headers,
-      body: Option[BodyPart] = this.body
+      body: Option[BodyPart] = this.body,
+      backendConfig: HttpConfig = this.backendConfig
   ): HttpRequest = {
     new HttpRequest(
       method    = method,
@@ -303,14 +311,15 @@ final class HttpRequest  private (
       protocol  = protocol,
       queryString = queryString,
       headers   = headers,
-      body = body)
+      body      = body,
+      backendConfig = backendConfig)
   }
 
 }
 
 object HttpRequest {
 
-  private val default = new HttpRequest(
+  private def default(implicit backendConfig: HttpConfig) = new HttpRequest(
     method = Method.GET,
     host = null,
     path = null,
@@ -318,7 +327,8 @@ object HttpRequest {
     protocol = Protocol.HTTP,
     queryString = None,
     headers = HeaderMap(),
-    body = None
+    body = None,
+    backendConfig = backendConfig
   )
 
   /** Creates a blank HTTP request.
@@ -328,7 +338,7 @@ object HttpRequest {
     *
     * @return [[HttpRequest.default]]
     */
-  def apply(): HttpRequest = default
+  def apply()(implicit backendConfig: HttpConfig): HttpRequest = default
 
   /** Creates an [[HttpRequest]] with the provided target url.
     *
@@ -337,5 +347,6 @@ object HttpRequest {
     * @param url The target url.
     * @return An [[HttpRequest]] ready to GET the target url.
     */
-  def apply(url: String): HttpRequest = this().withURL(url)
+  def apply(url: String)(implicit backendConfig: HttpConfig = HttpConfig.default): HttpRequest
+    = this().withURL(url)
 }

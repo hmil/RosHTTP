@@ -233,6 +233,7 @@ Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master
 **v2.0.0**
 
 - Add streaming API
+- Add implicit execution context parameter
 - Fix bug on responses without Content-Type header
 
 **v1.0.1**

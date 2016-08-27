@@ -9,15 +9,15 @@ import fr.hmil.roshttp.node.http.{IncomingMessage, RequestOptions}
 import monifu.reactive.Ack.{Cancel, Continue}
 import monifu.reactive.{Observable, Subscriber}
 
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 import scala.util.{Failure, Success}
-import scala.concurrent.ExecutionContext.Implicits.global
 
 private object NodeDriver extends DriverTrait {
 
-  def makeRequest[T <: HttpResponse](req: HttpRequest, factory: HttpResponseFactory[T], p: Promise[T]): Unit = {
+  def makeRequest[T <: HttpResponse](req: HttpRequest, factory: HttpResponseFactory[T], p: Promise[T])
+      (implicit ec: ExecutionContext): Unit = {
     val module = {
       if (req.protocol == Protocol.HTTP)
         http
@@ -36,17 +36,13 @@ private object NodeDriver extends DriverTrait {
       } else {
         var subscribers = Set[Subscriber[ByteBuffer]]()
 
-        message.on("data", { (s: js.Dynamic) =>
-          val buf = s.asInstanceOf[Buffer]
-          // TODO: factor out ugly function
-          val byteBuffer = ByteBuffer.allocate(buf.length)
-          var i = 0
-          while (i < buf.length) {
-            byteBuffer.put(buf.readInt8(i).toByte)
-            i += 1
-          }
-          // TODO: check Observable usage
-          subscribers.foreach(sub => sub.onNext(byteBuffer).onComplete {
+        message.on("data", { (nodeBuffer: js.Dynamic) =>
+          val byteBuffer = byteBufferFromNodeBuffer(nodeBuffer)
+
+          // Send data to subscribers
+          subscribers.foreach(sub => sub.onNext(byteBuffer)
+            // And interprete their response
+            .onComplete {
              case Success(Cancel) =>
                subscribers -= sub
              case Success(Continue) =>
@@ -70,17 +66,17 @@ private object NodeDriver extends DriverTrait {
           }
         }
 
-        val response = factory(
+        p.completeWith(factory(
             message.statusCode,
             bufferStream,
             HeaderMap(headers))
-          .foreach({ response =>
+          .map({ response =>
             if (message.statusCode < 400) {
-              p.success(response)
+              response
             } else {
-              p.failure(HttpResponseError.badStatus(response))
+              throw HttpResponseError.badStatus(response)
             }
-          })
+          }))
       }
       ()
     })
@@ -97,12 +93,25 @@ private object NodeDriver extends DriverTrait {
     nodeRequest.end()
   }
 
-  def send[T <: HttpResponse](req: HttpRequest, factory: HttpResponseFactory[T]): Future[T] = {
+  def send[T <: HttpResponse](req: HttpRequest, factory: HttpResponseFactory[T])(implicit ec: ExecutionContext):
+      Future[T] = {
     val p: Promise[T] = Promise[T]()
 
     makeRequest(req, factory, p)
 
     p.future
+  }
+
+  private def byteBufferFromNodeBuffer(nodeBuffer: js.Any): ByteBuffer = {
+    val buf = nodeBuffer.asInstanceOf[Buffer]
+    val byteBuffer = ByteBuffer.allocate(buf.length)
+    var i = 0
+    while (i < buf.length) {
+      byteBuffer.put(buf.readInt8(i).toByte)
+      i += 1
+    }
+    byteBuffer.rewind()
+    byteBuffer
   }
 
 }

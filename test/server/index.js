@@ -53,6 +53,10 @@ app.get('/echo/:text', function(req, res) {
   res.send(req.params.text);
 });
 
+app.get('/multibyte_string', function(req, res) {
+  res.send("12\uD83D\uDCA978");
+});
+
 app.get('/query', function(req, res) {
   var url = req.url;
   var qPos = url.indexOf('?') + 1;

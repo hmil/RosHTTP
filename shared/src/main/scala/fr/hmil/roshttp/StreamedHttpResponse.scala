@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 
 import monifu.reactive.Observable
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 
 class StreamedHttpResponse(
@@ -14,7 +14,9 @@ class StreamedHttpResponse(
   extends HttpResponse
 
 object StreamedHttpResponse extends HttpResponseFactory[StreamedHttpResponse] {
-  override def apply(
-      statusCode: Int, bodyStream: Observable[ByteBuffer], headers: HeaderMap[String]): Future[StreamedHttpResponse] =
+  override def apply
+      (statusCode: Int, bodyStream: Observable[ByteBuffer], headers: HeaderMap[String])
+      (implicit ec: ExecutionContext, config: HttpConfig)
+      : Future[StreamedHttpResponse] =
     Future.successful(new StreamedHttpResponse(statusCode, bodyStream, headers))
 }

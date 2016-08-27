@@ -16,7 +16,8 @@ import scala.util.{Failure, Success}
 
 private object BrowserDriver extends DriverTrait {
 
-  def send[T <: HttpResponse](req: HttpRequest, factory: HttpResponseFactory[T]): Future[T] = {
+  def send[T <: HttpResponse](req: HttpRequest, factory: HttpResponseFactory[T])(implicit ec: ExecutionContext):
+      Future[T] = {
     val p: Promise[T] = Promise[T]()
 
     val xhr = new dom.XMLHttpRequest()
