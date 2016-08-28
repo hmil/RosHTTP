@@ -2,11 +2,16 @@ package fr.hmil.roshttp
 
 import java.nio.ByteBuffer
 
+import monifu.concurrent.Scheduler
 import monifu.reactive.Observable
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 private[roshttp] trait HttpResponseFactory[T <: HttpResponse] {
-  def apply(statusCode: Int, bodyStream: Observable[ByteBuffer], headers: HeaderMap[String])
-     (implicit ec: ExecutionContext, config: HttpConfig): Future[T]
+  def apply(
+    statusCode: Int,
+    headers: HeaderMap[String],
+    bodyStream: Observable[ByteBuffer],
+    config: BackendConfig)
+    (implicit scheduler: Scheduler): Future[T]
 }

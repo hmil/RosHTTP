@@ -3,14 +3,15 @@ package fr.hmil.roshttp
 import java.net.URI
 
 import fr.hmil.roshttp.body.BodyPart
+import monifu.concurrent.Scheduler
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 /** Builds an HTTP request.
   *
   * The request is sent using  [[send]]. A request can be sent multiple times.
   * Each time yields a Future[HttpResponse] which either succeeds with an [[HttpResponse]]
-  * or fails with an [[HttpNetworkError]] or [[HttpResponseError]]
+  * or fails with an [[HttpNetworkException]] or [[HttpResponseException]]
   */
 final class HttpRequest  private (
     val method: Method,
@@ -21,7 +22,7 @@ final class HttpRequest  private (
     val queryString: Option[String],
     val headers: HeaderMap[String],
     val body: Option[BodyPart],
-    val backendConfig: HttpConfig) {
+    val backendConfig: BackendConfig) {
 
   /** The path with the query string or just the path if there is no query string */
   val longPath = path + queryString.map(q => s"?$q").getOrElse("")
@@ -218,6 +219,13 @@ final class HttpRequest  private (
     )
   }
 
+  /**
+    * Use the provided backend configuration when executing the request
+    */
+  def withBackendConfig(backendConfig: BackendConfig): HttpRequest = {
+    copy(backendConfig = backendConfig)
+  }
+
   /** Attaches a body to this request and sets the Content-Type header.
     *
     * The body will be sent with the request regardless of other parameters once
@@ -235,7 +243,7 @@ final class HttpRequest  private (
     withHeader("Content-Type", body.contentType).copy(body = Some(body))
   }
 
-  def stream()(implicit ec: ExecutionContext): Future[StreamedHttpResponse] =
+  def stream()(implicit scheduler: Scheduler): Future[StreamedHttpResponse] =
     HttpDriver.send(this, StreamedHttpResponse)
 
   /** Sends this request.
@@ -244,39 +252,39 @@ final class HttpRequest  private (
     * which either succeeds with an [[HttpResponse]] or fails.
     *
     * Possible reasons for the future failing are:
-    * - A status code >= 400 ([[HttpResponseError]])
-    * - A network error ([[HttpNetworkError]])
+    * - A status code >= 400 ([[HttpResponseException]])
+    * - A network error ([[HttpNetworkException]])
     *
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkException]] or [[HttpResponseException]]
     */
-  def send()(implicit ec: ExecutionContext): Future[SimpleHttpResponse] =
+  def send()(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
     HttpDriver.send(this, SimpleHttpResponse)
 
   /** Sends this request with the POST method and a body
     *
     * @see [[send]]
     * @param body The body to send with the request
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkException]] or [[HttpResponseException]]
     */
-  def post(body: BodyPart)(implicit ec: ExecutionContext): Future[SimpleHttpResponse] =
+  def post(body: BodyPart)(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
       withMethod(Method.POST).send(body)
 
   /** Sends this request with the PUT method and a body
     *
     * @see [[post]]
     * @param body The body to send with the request
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkException]] or [[HttpResponseException]]
     */
-  def put(body: BodyPart)(implicit ec: ExecutionContext): Future[SimpleHttpResponse] =
+  def put(body: BodyPart)(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
       withMethod(Method.PUT).send(body)
 
   /** Sends this request with the OPTIONS method and a body
     *
     * @see [[post]]
     * @param body The body to send with the request
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkException]] or [[HttpResponseException]]
     */
-  def options(body: BodyPart)(implicit ec: ExecutionContext): Future[SimpleHttpResponse] =
+  def options(body: BodyPart)(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
       withMethod(Method.OPTIONS).send(body)
 
   /** Sends this request with a body.
@@ -286,9 +294,9 @@ final class HttpRequest  private (
     * data with the request, you should use [[post]] without arguments.
     *
     * @param body The body to send.
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkException]] or [[HttpResponseException]]
     */
-  def send(body: BodyPart)(implicit ec: ExecutionContext): Future[SimpleHttpResponse] =
+  def send(body: BodyPart)(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
       withBody(body).send()
 
   /** Internal method to back public facing .withXXX methods. */
@@ -301,7 +309,7 @@ final class HttpRequest  private (
       queryString: Option[String] = this.queryString,
       headers: HeaderMap[String]  = this.headers,
       body: Option[BodyPart] = this.body,
-      backendConfig: HttpConfig = this.backendConfig
+      backendConfig: BackendConfig = this.backendConfig
   ): HttpRequest = {
     new HttpRequest(
       method    = method,
@@ -319,7 +327,7 @@ final class HttpRequest  private (
 
 object HttpRequest {
 
-  private def default(implicit backendConfig: HttpConfig) = new HttpRequest(
+  private def default = new HttpRequest(
     method = Method.GET,
     host = null,
     path = null,
@@ -328,7 +336,7 @@ object HttpRequest {
     queryString = None,
     headers = HeaderMap(),
     body = None,
-    backendConfig = backendConfig
+    backendConfig = BackendConfig()
   )
 
   /** Creates a blank HTTP request.
@@ -338,7 +346,7 @@ object HttpRequest {
     *
     * @return [[HttpRequest.default]]
     */
-  def apply()(implicit backendConfig: HttpConfig): HttpRequest = default
+  def apply(): HttpRequest = default
 
   /** Creates an [[HttpRequest]] with the provided target url.
     *
@@ -347,6 +355,5 @@ object HttpRequest {
     * @param url The target url.
     * @return An [[HttpRequest]] ready to GET the target url.
     */
-  def apply(url: String)(implicit backendConfig: HttpConfig = HttpConfig.default): HttpRequest
-    = this().withURL(url)
+  def apply(url: String): HttpRequest = this().withURL(url)
 }

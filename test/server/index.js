@@ -53,6 +53,22 @@ app.get('/echo/:text', function(req, res) {
   res.send(req.params.text);
 });
 
+app.get('/echo_repeat/:text', function(req, res) {
+  res.set('Content-Type', 'text/plain');
+  var repeat = req.query.repeat || 1;
+  var delay = req.query.delay || 1;
+  function sendOne() {
+    res.write(req.params.text);
+    repeat--;
+    if (repeat > 0) {
+      setTimeout(sendOne, delay * 1000);
+    } else {
+      res.end();
+    }
+  }
+  sendOne();
+});
+
 app.get('/multibyte_string', function(req, res) {
   res.send("12\uD83D\uDCA978");
 });
@@ -99,7 +115,7 @@ app.all('/empty_body/:statusCode', function(req, res) {
   res.status(req.params.statusCode).send('');
 });
 
-app.post('/upload/:name', function(req, res) {
+app.post('/compare/:name', function(req, res) {
   var fdata = fs.readFileSync(path.join(__dirname, "uploads", req.params.name));
 
   if (fdata.compare(req.body) == 0) {
@@ -109,6 +125,7 @@ app.post('/upload/:name', function(req, res) {
   }
 });
 
+app.use('/uploads', express.static('uploads'));
 app.use('/runtime', express.static('runtime'));
 
 app.listen(3000, function () {

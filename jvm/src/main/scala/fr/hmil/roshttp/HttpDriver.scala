@@ -3,15 +3,15 @@ package fr.hmil.roshttp
 import java.net.{HttpURLConnection, URL}
 import java.nio.ByteBuffer
 
+import monifu.concurrent.Scheduler
 import monifu.reactive.Observable
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.{Future, blocking}
 
 
 private object HttpDriver extends DriverTrait {
 
-  def send[T <: HttpResponse](req: HttpRequest, responseFactory: HttpResponseFactory[T])(implicit ec: ExecutionContext):
+  def send[T <: HttpResponse](req: HttpRequest, responseFactory: HttpResponseFactory[T])(implicit scheduler: Scheduler):
       Future[T] = {
     concurrent.Future {
       blocking {
@@ -19,8 +19,11 @@ private object HttpDriver extends DriverTrait {
           val connection = prepareConnection(req)
           readResponse(connection, responseFactory, req.backendConfig)
         } catch {
-          case e: HttpResponseError => throw e
-          case e: Throwable => throw new HttpNetworkError(e)
+          case e: HttpResponseException => throw e
+          case e: Throwable => {
+            e.printStackTrace()
+            throw new HttpNetworkException(e)
+          }
         }
       }
     }.flatMap(f => f)
@@ -40,8 +43,8 @@ private object HttpDriver extends DriverTrait {
   }
 
   private def readResponse[T <: HttpResponse](
-      connection: HttpURLConnection, responseFactory: HttpResponseFactory[T], config: HttpConfig)
-      (implicit ec: ExecutionContext): Future[T] = {
+      connection: HttpURLConnection, responseFactory: HttpResponseFactory[T], config: BackendConfig)
+      (implicit scheduler: Scheduler): Future[T] = {
     val code = connection.getResponseCode
     val headerMap = HeaderMap(Iterator.from(0)
       .map(i => (i, connection.getHeaderField(i)))
@@ -56,17 +59,19 @@ private object HttpDriver extends DriverTrait {
     if (code < 400) {
       responseFactory(
         code,
-        inputStreamToObservable(connection.getInputStream, config.streamChunkSize),
-        headerMap
+        headerMap,
+        inputStreamToObservable(connection.getInputStream, config.maxChunkSize),
+        config
       )
     } else {
       responseFactory(
         code,
+        headerMap,
         Option(connection.getErrorStream)
-          .map(is => inputStreamToObservable(is, config.streamChunkSize))
+          .map(is => inputStreamToObservable(is, config.maxChunkSize))
           .getOrElse(Observable.from(ByteBuffer.allocate(0))),
-        headerMap
-      ).map(response => throw HttpResponseError.badStatus(response))
+        config
+      ).map(response => throw HttpResponseException.badStatus(response))
     }
   }
 

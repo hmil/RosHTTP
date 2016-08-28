@@ -2,14 +2,13 @@ package fr.hmil.roshttp.client
 
 import java.nio.ByteBuffer
 
-import fr.hmil.roshttp.HttpResponseError.SimpleHttpResponseError
+import fr.hmil.roshttp.HttpResponseException.SimpleHttpResponseException
 import fr.hmil.roshttp._
-import fr.hmil.roshttp.body.JSONBody._
 import fr.hmil.roshttp.body.Implicits._
+import fr.hmil.roshttp.body.JSONBody._
 import fr.hmil.roshttp.body._
-import utest._
 import monifu.concurrent.Implicits.globalScheduler
-import fr.hmil.roshttp.HttpConfig.default
+import utest._
 
 object HttpRequestSpec extends TestSuite {
 
@@ -138,7 +137,7 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest("http://hmil.github.io/foobar")
           .send()
           .onFailure {
-            case e:SimpleHttpResponseError =>
+            case e:SimpleHttpResponseException =>
               s"Got a status: ${e.response.statusCode}" ==> "Got a status: 404"
           }
       }
@@ -186,54 +185,160 @@ object HttpRequestSpec extends TestSuite {
       }
     }
 
-    "General" - {
+    "Responses" - {
 
-      "Status codes < 400 should complete the request with success" - {
-        goodStatus.map(status => {
+      "with status codes < 400" - {
+        "should complete the request with success" - {
+          goodStatus.map(status => {
+            HttpRequest(SERVER_URL)
+              .withPath(s"/status/$status")
+              .send()
+              .map({ s =>
+                s.statusCode ==> status
+              })
+          }).reduce((f1, f2) => f1.flatMap(_ => f2))
+        }
+      }
+
+      "with status codes >= 400" - {
+        "should complete the request with failure" - {
+          badStatus.map(status =>
+            HttpRequest(SERVER_URL)
+              .withPath(s"/status/$status")
+              .send()
+              .map(r => r.headers("X-Status-Code") ==> r.statusCode)
+              .failed.map(_ => "success")
+          ).reduce((f1, f2) => f1.flatMap(_ => f2))
+        }
+      }
+
+      "with redirects" - {
+        "follow redirects" - {
           HttpRequest(SERVER_URL)
-            .withPath(s"/status/$status")
+            .withPath("/redirect/temporary/echo/redirected")
             .send()
-            .map({ s =>
-              s.statusCode ==> status
+            .map(res => {
+              res.body ==> "redirected"
             })
-        }).reduce((f1, f2) => f1.flatMap(_ => f2))
+        }
       }
+    }
 
-      "Status codes >= 400 should complete the request with failure" - {
-        badStatus.map(status =>
-          HttpRequest(SERVER_URL)
-            .withPath(s"/status/$status")
+    "Buffered responses" - {
+      "with status code >= 400" - {
+        "should provide a response body in error handler" - {
+          badStatus.map(status =>
+            HttpRequest(SERVER_URL)
+              .withPath(s"/status/$status")
+              .send()
+              .failed.map {
+              case e: SimpleHttpResponseException =>
+                statusText(e.response.statusCode) ==> e.response.body
+              case _ => assert(false)
+            }
+          ).reduce((f1, f2) => f1.flatMap(_ => f2))
+        }
+
+        "can be empty" - {
+          HttpRequest(s"$SERVER_URL/empty_body/400")
             .send()
-            .map(r => r.headers("X-Status-Code") ==> r.statusCode)
-            .failed.map(_ => "success")
-        ).reduce((f1, f2) => f1.flatMap(_ => f2))
+            .failed
+            .map {
+              case e: SimpleHttpResponseException =>
+                e.response.body ==> ""
+            }
+        }
       }
 
-      "Redirects are followed" - {
-        HttpRequest(SERVER_URL)
-          .withPath("/redirect/temporary/echo/redirected")
+      "with status code < 400" - {
+        "can be empty" - {
+          HttpRequest(s"$SERVER_URL/empty_body/200")
+            .send()
+            .map(response => response.body ==> "")
+        }
+      }
+
+      "with body timeout" - {
+        "can recover partial data" - {
+          HttpRequest(s"$SERVER_URL/echo_repeat/farfelu")
+            .withBackendConfig(BackendConfig(bodyCollectTimeout = 1))
+            .withQueryParameters(
+              "repeat" -> "2",
+              "delay" -> "2")
+            .send()
+            .failed
+            .map {
+              case HttpTimeoutException(e: Some[HttpResponse]) =>
+                e.get.statusCode ==> 200
+                e.get.headers("Content-Type") ==> "text/plain; charset=utf-8"
+                e.get.body ==> "farfelu"
+            }
+        }
+      }
+
+      "can be chunked and recomposed" - {
+        val config = BackendConfig(streamChunkSize = 4)
+        HttpRequest(s"$SERVER_URL/echo_repeat/foo")
+          .withQueryParameters(
+            "repeat" -> "4",
+            "delay" -> "1")
+          .withBackendConfig(BackendConfig(streamChunkSize = 4))
           .send()
-          .map(res => {
-            res.body ==> "redirected"
+          .map(res => res.body ==> "foofoofoofoo")
+      }
+
+      "can contain multibyte characters" - {
+        val payload = "12\uD83D\uDCA978"
+        HttpRequest(s"$SERVER_URL/multibyte_string")
+          .send()
+          .map(res => res.body ==> payload)
+      }
+
+      "can contain multibyte characters split by chunk boundary" - {
+        val payload = "12\uD83D\uDCA978"
+        val config = BackendConfig(streamChunkSize = 4)
+        HttpRequest(s"$SERVER_URL/multibyte_string")
+          .withBackendConfig(config)
+          .send()
+          .map(res => res.body ==> payload)
+      }
+    }
+
+    "Streamed response body" - {
+      "work with a single chunk" - {
+        val greeting_bytes: ByteBuffer = ByteBuffer.wrap("Hello World!".getBytes)
+        HttpRequest(s"$SERVER_URL")
+          .stream()
+          .map({ r =>
+            // Take only the first element because the body is so short we know it will fit in one buffer
+            r.body.asFuture.map(_.get ==> greeting_bytes)
           })
       }
 
-    }
+      "fail on bad status code" - {
+        HttpRequest(SERVER_URL)
+          .withPath(s"/status/400")
+          .stream()
+          .map(r => r.headers("X-Status-Code") ==> r.statusCode)
+          .failed.map(_ => "success")
+      }
 
-    "Error handling" - {
-      "The message body can be obtained on failed requests" - {
-        badStatus.map(status =>
-          HttpRequest(SERVER_URL)
-            .withPath(s"/status/$status")
-            .send()
-            .failed.map {
-            case e:SimpleHttpResponseError =>
-              statusText(e.response.statusCode) ==> e.response.body
-            case _ => assert(false)
-          }
-        ).reduce((f1, f2) => f1.flatMap(_=>f2))
+      "chunks are capped to chunkSize config" - {
+        val config = BackendConfig(streamChunkSize = 128)
+        HttpRequest(s"$SERVER_URL/uploads/icon.png")
+          .withBackendConfig(config)
+          .stream()
+          .flatMap(_
+            .body
+            .map({buffer =>
+              assert(buffer.limit <= config.maxChunkSize)
+            })
+            .buffer(3)
+            .asFuture
+          )
       }
     }
+
 
     "Query string" - {
       "set in constructor" - {
@@ -453,49 +558,9 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest(s"$SERVER_URL/status/400")
           .send()
           .failed.map {
-            case e: SimpleHttpResponseError =>
+            case e: SimpleHttpResponseException =>
               e.response.headers("X-Powered-By") ==> "Express"
           }
-      }
-    }
-
-    "Response body" - {
-      "can be empty for 200's" - {
-        HttpRequest(s"$SERVER_URL/empty_body/200")
-          .send()
-          .map(response => response.body ==> "")
-      }
-
-      "can be empty for 400's" - {
-        HttpRequest(s"$SERVER_URL/empty_body/400")
-          .send()
-          .failed
-          .map {
-            case e: SimpleHttpResponseError =>
-              e.response.body ==> ""
-          }
-      }
-
-      "can be chunked and recomposed" - {
-        val config = HttpConfig(streamChunkSize = 4)
-        HttpRequest(s"$SERVER_URL")(config)
-          .send()
-          .map(res => res.body ==> "Hello World!")
-      }
-
-      "can contain multibyte characters" - {
-        val payload = "12\uD83D\uDCA978"
-        HttpRequest(s"$SERVER_URL/multibyte_string")
-          .send()
-          .map(res => res.body ==> payload)
-      }
-
-      "can contain multibyte characters split by chunk boundary" - {
-        val payload = "12\uD83D\uDCA978"
-        val config = HttpConfig(streamChunkSize = 4)
-        HttpRequest(s"$SERVER_URL/multibyte_string")(config)
-          .send()
-          .map(res => res.body ==> payload)
       }
     }
 
@@ -585,20 +650,8 @@ object HttpRequestSpec extends TestSuite {
       }
 
       "can post a file" - {
-        HttpRequest(s"$SERVER_URL/upload/icon.png")
+        HttpRequest(s"$SERVER_URL/compare/icon.png")
           .post(ByteBuffer.wrap(IMAGE_BYTES))
-      }
-    }
-
-    "Streamed requests" - {
-      "basic usage" - {
-        val greeting_bytes: ByteBuffer = ByteBuffer.wrap("Hello World!".getBytes)
-        HttpRequest(s"$SERVER_URL")
-          .stream()
-          .map({ r =>
-            // Take only the first element because the body is so short we know it will fit in one buffer
-            r.body.asFuture.map(_.get ==> greeting_bytes)
-          })
       }
     }
   }

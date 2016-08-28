@@ -2,21 +2,24 @@ package fr.hmil.roshttp
 
 import java.nio.ByteBuffer
 
+import monifu.concurrent.Scheduler
 import monifu.reactive.Observable
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 
 class StreamedHttpResponse(
     val statusCode: Int,
-    val body: Observable[ByteBuffer],
-    val headers: HeaderMap[String])
-  extends HttpResponse
+    val headers: HeaderMap[String],
+    val body: Observable[ByteBuffer])
+extends HttpResponse
 
 object StreamedHttpResponse extends HttpResponseFactory[StreamedHttpResponse] {
-  override def apply
-      (statusCode: Int, bodyStream: Observable[ByteBuffer], headers: HeaderMap[String])
-      (implicit ec: ExecutionContext, config: HttpConfig)
-      : Future[StreamedHttpResponse] =
-    Future.successful(new StreamedHttpResponse(statusCode, bodyStream, headers))
+  override def apply(
+      statusCode: Int,
+      headers: HeaderMap[String],
+      bodyStream: Observable[ByteBuffer],
+      config: BackendConfig)
+      (implicit scheduler: Scheduler): Future[StreamedHttpResponse] =
+    Future.successful(new StreamedHttpResponse(statusCode, headers, bodyStream))
 }

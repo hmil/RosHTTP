@@ -9,28 +9,28 @@ import java.io.IOException
   * This exception must be constructed via the companion object in order to factor out
   * error messages.
   */
-abstract class HttpResponseError private(message: String) extends IOException(message)
+abstract class HttpResponseException private(message: String) extends IOException(message)
 
-object HttpResponseError {
+object HttpResponseException {
 
-  def badStatus(response: HttpResponse): HttpResponseError =
+  def badStatus(response: HttpResponse): HttpResponseException =
     this(response, s"Server responded with status ${response.statusCode}")
 
-  def apply(response: HttpResponse, message: String): HttpResponseError = response match {
-    case res:SimpleHttpResponse => new SimpleHttpResponseError(res, message)
-    case res:StreamedHttpResponse => new StreamHttpResponseError(res, message)
+  def apply(response: HttpResponse, message: String): HttpResponseException = response match {
+    case res:SimpleHttpResponse => new SimpleHttpResponseException(res, message)
+    case res:StreamedHttpResponse => new StreamHttpResponseException(res, message)
   }
 
-  case class SimpleHttpResponseError(
+  case class SimpleHttpResponseException(
       /** The http response which triggered the error. */
       response: SimpleHttpResponse,
       /** An message describing the error. */
       message: String)
-    extends HttpResponseError(message)
-  case class StreamHttpResponseError(
+    extends HttpResponseException(message)
+  case class StreamHttpResponseException(
       /** The http response which triggered the error. */
       response: StreamedHttpResponse,
       /** An message describing the error. */
       message: String)
-    extends HttpResponseError(message)
+    extends HttpResponseException(message)
 }

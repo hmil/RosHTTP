@@ -26,7 +26,8 @@ the [API doc](http://hmil.github.io/RosHTTP/docs/index.html) too.
 <!--- test: "Main example" -->
 ```scala
 import fr.hmil.roshttp.HttpRequest
-import scala.concurrent.ExecutionContext.Implicits.global
+import monifu.concurrent.Implicits.globalScheduler
+import fr.hmil.roshttp.Implicits.defaultConfig
 
 /* ... */
 
@@ -54,8 +55,8 @@ HttpRequest("http://hmil.github.io/foobar")
 
 ## Configuring requests
 
-Every aspect of a request can be customized using `.withXXX` methods. These are
-meant to be chained, they do not modify the original request.
+Requests can be built using `.withXXX` methods. These are meant to be chained,
+they do not modify the original request.
 
 ### URI
 
@@ -232,8 +233,10 @@ Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master
 
 **v2.0.0**
 
+- Timeout errors on body
+- Rename *Error classes to *Exception
 - Add streaming API
-- Add implicit execution context parameter
+- Add implicit Scheduler parameter
 - Fix bug on responses without Content-Type header
 
 **v1.0.1**
