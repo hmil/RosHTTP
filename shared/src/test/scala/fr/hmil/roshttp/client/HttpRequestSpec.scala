@@ -247,6 +247,14 @@ object HttpRequestSpec extends TestSuite {
               res.body ==> "Heizölrückstoßabdämpfung +"
             })
         }
+
+        "with key-value pairs" - {
+          HttpRequest(s"$SERVER_URL/query/parsed?foo=bar&hello=world")
+            .send()
+            .map(res => {
+              res.body ==> "{\"foo\":\"bar\",\"hello\":\"world\"}"
+            })
+        }
       }
 
       "set in withQueryString" - {
