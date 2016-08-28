@@ -20,9 +20,9 @@ class URLEncodedBody private(values: Map[String, String]) extends BodyPart {
 
   override def content: ByteBuffer = ByteBuffer.wrap(
     values.map({case (name, part) =>
-      CrossPlatformUtils.encodeQueryString(name) +
+      CrossPlatformUtils.encodeURIComponent(name) +
       "=" +
-      CrossPlatformUtils.encodeQueryString(part)
+      CrossPlatformUtils.encodeURIComponent(part)
     }).mkString("&").getBytes("utf-8")
   )
 }

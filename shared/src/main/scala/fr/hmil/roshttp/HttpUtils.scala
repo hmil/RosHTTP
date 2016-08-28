@@ -25,5 +25,15 @@ private object HttpUtils {
     }
   }
 
+  def encodeQueryString(queryString: String): String = {
+    queryString
+      .split("&")
+      .map(_
+        .split("=")
+        .map(CrossPlatformUtils.encodeURIComponent)
+        .mkString("="))
+      .mkString("&")
+  }
+
   val oneByteCharset = "utf-8"
 }
