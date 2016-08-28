@@ -231,6 +231,7 @@ Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master
 ## Changelog
 
 - Fix bug on responses without Content-Type header
+- Detect key-value pairs during query string escapement
 
 **v1.0.1**
 - Fix NPE when reading empty error response
