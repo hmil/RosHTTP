@@ -100,7 +100,7 @@ final class HttpRequest  private (
     * @return A copy of this [[HttpRequest]] with an updated queryString
     */
   def withQueryString(queryString: String): HttpRequest =
-    copy(queryString = Some(CrossPlatformUtils.encodeQueryString(queryString)))
+    copy(queryString = Some(HttpUtils.encodeQueryString(queryString)))
 
   /** Sets the query string without escaping.
     *
@@ -134,9 +134,9 @@ final class HttpRequest  private (
   def withQueryParameter(key: String, value: String): HttpRequest =
     copy(queryString = Some(
       queryString.map(q => q + '&').getOrElse("") +
-      CrossPlatformUtils.encodeQueryString(key) +
+      CrossPlatformUtils.encodeURIComponent(key) +
       "=" +
-      CrossPlatformUtils.encodeQueryString(value)))
+      CrossPlatformUtils.encodeURIComponent(value)))
 
   /** Adds a query array parameter.
     *
@@ -212,7 +212,7 @@ final class HttpRequest  private (
     path = if (parser.getPath != null) parser.getPath else  path,
     queryString = {
         if (parser.getQuery != null)
-        Some(CrossPlatformUtils.encodeQueryString(parser.getQuery))
+        Some(HttpUtils.encodeQueryString(parser.getQuery))
         else
         queryString
       }
