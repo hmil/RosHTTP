@@ -1,4 +1,4 @@
-package fr.hmil.roshttp
+package fr.hmil.roshttp.exceptions
 
 import java.io.IOException
 

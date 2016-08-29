@@ -2,11 +2,13 @@ package fr.hmil.roshttp.client
 
 import java.nio.ByteBuffer
 
-import fr.hmil.roshttp.HttpResponseException.SimpleHttpResponseException
 import fr.hmil.roshttp._
 import fr.hmil.roshttp.body.Implicits._
 import fr.hmil.roshttp.body.JSONBody._
 import fr.hmil.roshttp.body._
+import fr.hmil.roshttp.exceptions.HttpResponseException.SimpleHttpResponseException
+import fr.hmil.roshttp.exceptions.HttpTimeoutException
+import fr.hmil.roshttp.response.HttpResponse
 import monifu.concurrent.Implicits.globalScheduler
 import utest._
 
@@ -260,24 +262,27 @@ object HttpRequestSpec extends TestSuite {
 
       "with body timeout" - {
         "can recover partial data" - {
-          HttpRequest(s"$SERVER_URL/echo_repeat/farfelu")
-            .withBackendConfig(BackendConfig(bodyCollectTimeout = 1))
-            .withQueryParameters(
-              "repeat" -> "2",
-              "delay" -> "2")
-            .send()
-            .failed
-            .map {
-              case HttpTimeoutException(e: Some[HttpResponse]) =>
-                e.get.statusCode ==> 200
-                e.get.headers("Content-Type") ==> "text/plain; charset=utf-8"
-                e.get.body ==> "farfelu"
-            }
+          if (!JsEnvUtils.isRealBrowser) {
+            HttpRequest(s"$SERVER_URL/echo_repeat/farfelu")
+              .withBackendConfig(BackendConfig(bodyCollectTimeout = 1))
+              .withQueryParameters(
+                "repeat" -> "2",
+                "delay" -> "2")
+              .send()
+              .failed
+              .map {
+                case HttpTimeoutException(e: Some[HttpResponse]) =>
+                  e.get.statusCode ==> 200
+                  e.get.headers("Content-Type") ==> "text/plain; charset=utf-8"
+                  e.get.body ==> "farfelu"
+              }
+          } else {
+            "not available in browser..."
+          }
         }
       }
 
       "can be chunked and recomposed" - {
-        val config = BackendConfig(streamChunkSize = 4)
         HttpRequest(s"$SERVER_URL/echo_repeat/foo")
           .withQueryParameters(
             "repeat" -> "4",

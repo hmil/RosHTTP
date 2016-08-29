@@ -4,9 +4,12 @@ import java.io.IOException
 import java.nio.ByteBuffer
 
 import fr.hmil.roshttp.ByteBufferChopper.Finite
+import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException}
 import fr.hmil.roshttp.node.Modules.{http, https}
 import fr.hmil.roshttp.node.buffer.Buffer
 import fr.hmil.roshttp.node.http.{IncomingMessage, RequestOptions}
+import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory}
+import fr.hmil.roshttp.util.HeaderMap
 import monifu.concurrent.Scheduler
 
 import scala.concurrent.{Future, Promise}

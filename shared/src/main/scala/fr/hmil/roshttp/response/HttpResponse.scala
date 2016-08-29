@@ -1,4 +1,6 @@
-package fr.hmil.roshttp
+package fr.hmil.roshttp.response
+
+import fr.hmil.roshttp.util.HeaderMap
 
 
 private[roshttp] trait HttpResponse {

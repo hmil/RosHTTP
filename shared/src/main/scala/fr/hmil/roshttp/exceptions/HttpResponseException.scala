@@ -1,6 +1,8 @@
-package fr.hmil.roshttp
+package fr.hmil.roshttp.exceptions
 
 import java.io.IOException
+
+import fr.hmil.roshttp.response.{HttpResponse, SimpleHttpResponse, StreamedHttpResponse}
 
 /** Exception thrown when an error occurs during an HTTP request.
   *

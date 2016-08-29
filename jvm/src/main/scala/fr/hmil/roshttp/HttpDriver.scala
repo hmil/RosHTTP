@@ -3,6 +3,9 @@ package fr.hmil.roshttp
 import java.net.{HttpURLConnection, URL}
 import java.nio.ByteBuffer
 
+import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException}
+import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory}
+import fr.hmil.roshttp.util.HeaderMap
 import monifu.concurrent.Scheduler
 import monifu.reactive.Observable
 

@@ -1,6 +1,6 @@
-package fr.hmil.roshttp
+package fr.hmil.roshttp.util
 
-import fr.hmil.roshttp.HeaderMap.CaseInsensitiveString
+import fr.hmil.roshttp.util.HeaderMap.CaseInsensitiveString
 
 import scala.collection.immutable.MapLike
 
@@ -55,7 +55,7 @@ object HeaderMap {
   /** Creates an empty HeaderMap. */
   def apply(): HeaderMap[String] = HeaderMap(Map())
 
-  /** A string whose equals and hashCode method is case insensitive. */
+  /** A string whose equals and hashCode methods are case insensitive. */
   class CaseInsensitiveString(val value: String) {
 
     override def equals(other: Any): Boolean = other match {

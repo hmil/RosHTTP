@@ -1,7 +1,9 @@
-package fr.hmil.roshttp
+package fr.hmil.roshttp.response
 
 import java.nio.ByteBuffer
 
+import fr.hmil.roshttp.BackendConfig
+import fr.hmil.roshttp.util.HeaderMap
 import monifu.concurrent.Scheduler
 import monifu.reactive.Observable
 

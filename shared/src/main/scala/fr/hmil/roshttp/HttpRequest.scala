@@ -3,6 +3,9 @@ package fr.hmil.roshttp
 import java.net.URI
 
 import fr.hmil.roshttp.body.BodyPart
+import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException}
+import fr.hmil.roshttp.response.{HttpResponse, SimpleHttpResponse, StreamedHttpResponse}
+import fr.hmil.roshttp.util.{HeaderMap, HttpUtils}
 import monifu.concurrent.Scheduler
 
 import scala.concurrent.Future

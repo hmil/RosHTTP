@@ -1,18 +1,21 @@
-package fr.hmil.roshttp
+package fr.hmil.roshttp.response
 
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 
+import fr.hmil.roshttp.BackendConfig
+import fr.hmil.roshttp.exceptions.HttpTimeoutException
+import fr.hmil.roshttp.util.{HeaderMap, HttpUtils}
 import monifu.concurrent.Scheduler
 import monifu.reactive.Ack.{Cancel, Continue}
 import monifu.reactive.{Observable, Observer}
 
 import scala.collection.mutable
-import scala.concurrent.{Future, Promise}
 import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.{Future, Promise}
 
 /**
- * An HTTP response obtained via an [[HttpRequest]]
+ * An HTTP response obtained via an [[fr.hmil.roshttp.HttpRequest]]
  */
 class SimpleHttpResponse(
     val statusCode: Int,
@@ -37,7 +40,6 @@ object SimpleHttpResponse extends HttpResponseFactory[SimpleHttpResponse] {
     val timeoutTask = scheduler.scheduleOnce(FiniteDuration(config.bodyCollectTimeout, TimeUnit.SECONDS),
       new Runnable {
         override def run(): Unit = {
-          println("Run cancelable")
           val partialBody = recomposeBody(buffers, config.maxChunkSize, charset)
           promise.failure(new HttpTimeoutException(Some(new SimpleHttpResponse(statusCode, headers, partialBody))))
           cancelled = true

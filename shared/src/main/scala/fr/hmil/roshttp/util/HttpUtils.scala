@@ -1,6 +1,8 @@
-package fr.hmil.roshttp
+package fr.hmil.roshttp.util
 
-private object HttpUtils {
+import fr.hmil.roshttp.CrossPlatformUtils
+
+private[roshttp] object HttpUtils {
 
   /**
     * Extracts the charset from a content-type header string
