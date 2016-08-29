@@ -23,10 +23,9 @@ private object HttpDriver extends DriverTrait {
           readResponse(connection, responseFactory, req.backendConfig)
         } catch {
           case e: HttpResponseException => throw e
-          case e: Throwable => {
+          case e: Throwable =>
             e.printStackTrace()
             throw new HttpNetworkException(e)
-          }
         }
       }
     }.flatMap(f => f)

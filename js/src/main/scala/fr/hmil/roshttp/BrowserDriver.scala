@@ -33,8 +33,6 @@ private object BrowserDriver extends DriverTrait {
 
     val bufferQueue = new ByteBufferQueue()
 
-    var currentPosition = 0
-
     xhr.onreadystatechange = { (e: dom.Event) =>
       if (xhr.readyState == dom.XMLHttpRequest.HEADERS_RECEIVED) {
         val headers = xhr.getAllResponseHeaders() match {
@@ -59,8 +57,6 @@ private object BrowserDriver extends DriverTrait {
               }
             })
         )
-      } else if (xhr.readyState == dom.XMLHttpRequest.LOADING) {
-        bufferQueue.push(chopChunk())
       } else if (xhr.readyState == dom.XMLHttpRequest.DONE) {
         bufferQueue.push(chopChunk())
         bufferQueue.end()
@@ -70,15 +66,14 @@ private object BrowserDriver extends DriverTrait {
     def chopChunk(): Seq[ByteBuffer] = {
       val buffer = xhr.response.asInstanceOf[ArrayBuffer]
       val buffers = ByteBufferChopper.chop(
-          new FiniteArrayBuffer(buffer, currentPosition),
+          new FiniteArrayBuffer(buffer),
           req.backendConfig.maxChunkSize,
           readChunk)
-      currentPosition = buffer.byteLength
       buffers
     }
 
     def readChunk(buffer: FiniteArrayBuffer, start: Int, length: Int): ByteBuffer = {
-      TypedArrayBuffer.wrap(buffer.buffer, start + currentPosition, length)
+      TypedArrayBuffer.wrap(buffer.buffer, start, length)
     }
 
     xhr.send(req.body.map(b => Ajax.InputData.byteBuffer2ajax(b.content)).orUndefined)
@@ -86,7 +81,7 @@ private object BrowserDriver extends DriverTrait {
     p.future
   }
 
-  private class FiniteArrayBuffer(val buffer: ArrayBuffer, currentPosition: Int) extends Finite {
-    override def length: Int = buffer.byteLength - currentPosition
+  private class FiniteArrayBuffer(val buffer: ArrayBuffer) extends Finite {
+    override def length: Int = buffer.byteLength
   }
 }

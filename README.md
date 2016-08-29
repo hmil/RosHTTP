@@ -27,7 +27,6 @@ the [API doc](http://hmil.github.io/RosHTTP/docs/index.html) too.
 ```scala
 import fr.hmil.roshttp.HttpRequest
 import monifu.concurrent.Implicits.globalScheduler
-import fr.hmil.roshttp.Implicits.defaultConfig
 
 /* ... */
 
@@ -37,9 +36,9 @@ val request = HttpRequest("https://schema.org/WebPage")
 request.send().map(response => println(response.body))
 ```
 
-When you `send()` a request, you get a `Future[HttpResponse]` which resolves to
-an HttpResponse if everything went fine or fails with an HttpException if a
-network error occurred or if a statusCode > 400 was received.
+When you `send()` a request, you get a `Future` which resolves to
+a SimpleHttpResponse if everything went fine or fails with a HttpNetworkException if a
+network error occurred or with a HttpResponseException if a statusCode > 400 was received.
 When applicable, the response body of a failed request can be read:
 
 <!--- test: "Error handling" -->
@@ -47,8 +46,13 @@ When applicable, the response body of a failed request can be read:
 HttpRequest("http://hmil.github.io/foobar")
   .send()
   .onFailure {
-    case e:HttpResponseError =>
-      s"Got a status: ${e.response.statusCode}" ==> "Got a status: 404"
+    // An HttpResponseException always provides a response
+    case e:HttpResponseException =>
+      "Got a status: ${e.response.statusCode}"
+    // An HttpTimeoutException may provide a partial response which contains
+    // response headers as well as any piece of body received before the timeout.
+    case HttpTimeoutException(partialResponse: Some[SimpleHttpResponse]) =>
+      s"Body received before timeout: ${partialResponse.get.body}"
   }
 ```
 
@@ -111,7 +115,14 @@ request
   */
 ```
 
-### Request headers
+### HTTP Method
+
+```scala
+// Set the request method to GET, POST, PUT, etc...
+request.withMethod(Method.PUT).send()
+```
+
+### Headers
 
 Set individual headers using `.withHeader`
 ```scala
@@ -125,16 +136,31 @@ request.withHeaders(
 )
 ```
 
-### Response headers
+### Backend configuration
 
-A map of response headers is available on the [[HttpResponse]] object:
+Some low-level configuration settings are available in [BackendConfig](http://hmil.github.io/RosHTTP/docs/index.html#fr.hmil.roshttp.BackendConfig).
+Each request can use a specific backend configuration using `.withBackendConfig`.
+
+example:
+```scala
+HttpRequest(url)
+  .withBackendConfig(BackendConfig(
+    // Uses stream chunks of at most 1024 bytes
+    maxChunkSize = 1024
+  ))
+  .stream()
+```
+
+## Response headers
+
+A map of response headers is available on the `HttpResponse` object:
 ```scala
 request.send().map({res =>
   println(res.headers("Set-Cookie"))
 })
 ```
 
-### Sending data
+## Sending data
 
 An HTTP request can send data wrapped in an implementation of `BodyPart`. The most common
 formats are already provided but you can create your own as well.   
@@ -164,7 +190,7 @@ val data = JSONObject(
 request.post(data)
 ```
 
-#### File upload
+### File upload
 
 To send file data you must turn a file into a ByteBuffer and then send it in a
 StreamBody. For instance, on the jvm you could do:
@@ -177,7 +203,7 @@ request.post(ByteBuffer.wrap(bytes))
 Note that the codec argument is important to read the file as-is and avoid side-effects
 due to character interpretation.
 
-#### Multipart
+### Multipart
 
 Use the `MultiPartBody` to compose request bodies arbitrarily. It allows for instance
 to send binary data with some textual data.
@@ -204,12 +230,28 @@ request.post(MultiPartBody(
 ))
 ```
 
-### HTTP Method
+## Streaming
+
+### Download streams
+
+Streaming a response is as simple as calling `.stream()` instead of `.send()`.
+`HttpRequest#stream()` returns a Future of `StreamHttpResponse`. A `StreamHttpResponse`
+is just like a `SimpleHttpResponse` except that its `body` property is an
+[Observable](https://monix.io/api/1.2/#monifu.reactive.Observable).
+The observable will spit out a stream of `ByteBuffer`s as shown in this example:
 
 ```scala
-// Set the request method to GET, POST, PUT, etc...
-request.withMethod(Method.PUT).send()
+import fr.hmil.roshttp.util.Utils._
+HttpRequest(s"$SERVER_URL")
+  .stream()
+  .map({ r =>
+    r.body.foreach(buffer => println(getStringFromBuffer(buffer, "UTF-8")))
+  })
 ```
+_Note that special care should be taken when converting chunks into strings because
+multibyte characters may span multiple chunks._
+_In general streaming is used for binary data and any reasonable quantity
+of text can safely be handled by the non-streaming API_
 
 ---
 
@@ -217,19 +259,23 @@ Watch the [issues](https://github.com/hmil/RosHTTP/issues)
 for upcoming features. Feedback is very welcome so feel free to file an issue if you
 see something that is missing.
 
-## Known limitations
+# Known limitations
 
+- Response streaming is emulated in the browser, meaning that streaming large responses in the
+  browser will consume large amounts of memory and might fail.
+  This [problem has a solution](https://github.com/hmil/RosHTTP/issues/46)
+- `bodyCollectTimeout` is ignored on Chrome.
 - Some headers cannot be set in the browser ([list](https://developer.mozilla.org/en-US/docs/Glossary/Forbidden_header_name)).
 - There is no way to avoid redirects in the browser. This is a W3C spec.
 - Chrome does not allow userspace handling of a 407 status code. It is treated
   like a network error. See [chromium issue](https://bugs.chromium.org/p/chromium/issues/detail?id=372136).
 - The `TRACE` HTTP method does not work in browsers and `PATCH` does not work in the JVM.
 
-## Contributing
+# Contributing
 
 Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master/CONTRIBUTING.md).
 
-## Changelog
+# Changelog
 
 **v2.0.0**
 
@@ -266,6 +312,6 @@ Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master
 **v0.1.0**
 - First release
 
-## License
+# License
 
 MIT

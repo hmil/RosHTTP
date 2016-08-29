@@ -4,8 +4,8 @@ import java.net.URI
 
 import fr.hmil.roshttp.body.BodyPart
 import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException}
-import fr.hmil.roshttp.response.{HttpResponse, SimpleHttpResponse, StreamedHttpResponse}
-import fr.hmil.roshttp.util.{HeaderMap, HttpUtils}
+import fr.hmil.roshttp.response.{HttpResponse, SimpleHttpResponse, StreamHttpResponse, StreamHttpResponse$}
+import fr.hmil.roshttp.util.{HeaderMap, Utils}
 import monifu.concurrent.Scheduler
 
 import scala.concurrent.Future
@@ -103,7 +103,7 @@ final class HttpRequest  private (
     * @return A copy of this [[HttpRequest]] with an updated queryString
     */
   def withQueryString(queryString: String): HttpRequest =
-    copy(queryString = Some(HttpUtils.encodeQueryString(queryString)))
+    copy(queryString = Some(Utils.encodeQueryString(queryString)))
 
   /** Sets the query string without escaping.
     *
@@ -215,7 +215,7 @@ final class HttpRequest  private (
     path = if (parser.getPath != null) parser.getPath else  path,
     queryString = {
         if (parser.getQuery != null)
-        Some(HttpUtils.encodeQueryString(parser.getQuery))
+        Some(Utils.encodeQueryString(parser.getQuery))
         else
         queryString
       }
@@ -246,8 +246,8 @@ final class HttpRequest  private (
     withHeader("Content-Type", body.contentType).copy(body = Some(body))
   }
 
-  def stream()(implicit scheduler: Scheduler): Future[StreamedHttpResponse] =
-    HttpDriver.send(this, StreamedHttpResponse)
+  def stream()(implicit scheduler: Scheduler): Future[StreamHttpResponse] =
+    HttpDriver.send(this, StreamHttpResponse)
 
   /** Sends this request.
     *

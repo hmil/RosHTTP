@@ -7,8 +7,8 @@ import fr.hmil.roshttp.body.Implicits._
 import fr.hmil.roshttp.body.JSONBody._
 import fr.hmil.roshttp.body._
 import fr.hmil.roshttp.exceptions.HttpResponseException.SimpleHttpResponseException
-import fr.hmil.roshttp.exceptions.HttpTimeoutException
-import fr.hmil.roshttp.response.HttpResponse
+import fr.hmil.roshttp.exceptions.{HttpTimeoutException, SimpleResponseTimeoutException}
+import fr.hmil.roshttp.response.{HttpResponse, SimpleHttpResponse}
 import monifu.concurrent.Implicits.globalScheduler
 import utest._
 
@@ -141,6 +141,10 @@ object HttpRequestSpec extends TestSuite {
           .onFailure {
             case e:SimpleHttpResponseException =>
               s"Got a status: ${e.response.statusCode}" ==> "Got a status: 404"
+            // An HttpTimeoutException may provide a partial response which contains
+            // response headers as well as any piece of body received before the timeout.
+            case SimpleResponseTimeoutException(partialResponse: Some[SimpleHttpResponse]) =>
+              s"Body received before timeout: ${partialResponse.get.body}"
           }
       }
 
@@ -184,6 +188,16 @@ object HttpRequestSpec extends TestSuite {
             ),
             "picture" -> StreamBody(ByteBuffer.wrap(IMAGE_BYTES), "image/jpeg")
           ))
+      }
+
+      "Download stream" - {
+        def println(s: String) = s ==> "Hello World!"
+        import fr.hmil.roshttp.util.Utils._
+        HttpRequest(s"$SERVER_URL")
+          .stream()
+          .map({ r =>
+            r.body.foreach(buffer => println(getStringFromBuffer(buffer, "UTF-8")))
+          })
       }
     }
 
@@ -271,13 +285,30 @@ object HttpRequestSpec extends TestSuite {
               .send()
               .failed
               .map {
-                case HttpTimeoutException(e: Some[HttpResponse]) =>
+                case SimpleResponseTimeoutException(e: Some[SimpleHttpResponse]) =>
                   e.get.statusCode ==> 200
                   e.get.headers("Content-Type") ==> "text/plain; charset=utf-8"
                   e.get.body ==> "farfelu"
               }
           } else {
             "not available in browser..."
+          }
+        }
+
+        "throws a timeout error" - {
+          if (JsEnvUtils.isChrome) {
+            "Doesn't work in chrome"
+          } else {
+            HttpRequest(s"$SERVER_URL/echo_repeat/farfelu")
+              .withBackendConfig(BackendConfig(bodyCollectTimeout = 1))
+              .withQueryParameters(
+                "repeat" -> "2",
+                "delay" -> "2")
+              .send()
+              .failed
+              .map {
+                case e: HttpTimeoutException => "OK"
+              }
           }
         }
       }
@@ -287,7 +318,7 @@ object HttpRequestSpec extends TestSuite {
           .withQueryParameters(
             "repeat" -> "4",
             "delay" -> "1")
-          .withBackendConfig(BackendConfig(streamChunkSize = 4))
+          .withBackendConfig(BackendConfig(maxChunkSize = 4))
           .send()
           .map(res => res.body ==> "foofoofoofoo")
       }
@@ -301,9 +332,12 @@ object HttpRequestSpec extends TestSuite {
 
       "can contain multibyte characters split by chunk boundary" - {
         val payload = "12\uD83D\uDCA978"
-        val config = BackendConfig(streamChunkSize = 4)
+        val config = BackendConfig(maxChunkSize = 4)
         HttpRequest(s"$SERVER_URL/multibyte_string")
-          .withBackendConfig(config)
+          .withBackendConfig(BackendConfig(
+            maxChunkSize = 4,
+            bodyCollectTimeout = 10
+          ))
           .send()
           .map(res => res.body ==> payload)
       }
@@ -329,7 +363,7 @@ object HttpRequestSpec extends TestSuite {
       }
 
       "chunks are capped to chunkSize config" - {
-        val config = BackendConfig(streamChunkSize = 128)
+        val config = BackendConfig(maxChunkSize = 128)
         HttpRequest(s"$SERVER_URL/uploads/icon.png")
           .withBackendConfig(config)
           .stream()

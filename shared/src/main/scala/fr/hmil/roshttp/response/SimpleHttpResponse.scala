@@ -4,8 +4,8 @@ import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
 
 import fr.hmil.roshttp.BackendConfig
-import fr.hmil.roshttp.exceptions.HttpTimeoutException
-import fr.hmil.roshttp.util.{HeaderMap, HttpUtils}
+import fr.hmil.roshttp.exceptions.SimpleResponseTimeoutException
+import fr.hmil.roshttp.util.{HeaderMap, Utils}
 import monifu.concurrent.Scheduler
 import monifu.reactive.Ack.{Cancel, Continue}
 import monifu.reactive.{Observable, Observer}
@@ -31,7 +31,7 @@ object SimpleHttpResponse extends HttpResponseFactory[SimpleHttpResponse] {
       config: BackendConfig)
       (implicit scheduler: Scheduler): Future[SimpleHttpResponse] = {
 
-    val charset = HttpUtils.charsetFromContentType(headers.getOrElse("content-type", null))
+    val charset = Utils.charsetFromContentType(headers.getOrElse("content-type", null))
 
     val promise = Promise[mutable.Queue[ByteBuffer]]()
     val buffers = mutable.Queue[ByteBuffer]()
@@ -41,7 +41,8 @@ object SimpleHttpResponse extends HttpResponseFactory[SimpleHttpResponse] {
       new Runnable {
         override def run(): Unit = {
           val partialBody = recomposeBody(buffers, config.maxChunkSize, charset)
-          promise.failure(new HttpTimeoutException(Some(new SimpleHttpResponse(statusCode, headers, partialBody))))
+          promise.failure(new SimpleResponseTimeoutException(
+            Some(new SimpleHttpResponse(statusCode, headers, partialBody))))
           cancelled = true
         }
       })
@@ -81,16 +82,6 @@ object SimpleHttpResponse extends HttpResponseFactory[SimpleHttpResponse] {
       count + chunk.limit
     })
     buffer.limit(totalBytes)
-    getStringFromBuffer(buffer, charset)
-  }
-
-  private def getStringFromBuffer(byteBuffer: ByteBuffer, charset: String): String = {
-    if (byteBuffer.hasArray) {
-      new String(byteBuffer.array(), 0, byteBuffer.limit, charset)
-    } else {
-      val tmp = new Array[Byte](byteBuffer.limit)
-      byteBuffer.get(tmp)
-      new String(tmp, charset)
-    }
+    Utils.getStringFromBuffer(buffer, charset)
   }
 }

@@ -2,7 +2,7 @@ package fr.hmil.roshttp.exceptions
 
 import java.io.IOException
 
-import fr.hmil.roshttp.response.{HttpResponse, SimpleHttpResponse, StreamedHttpResponse}
+import fr.hmil.roshttp.response.{HttpResponse, SimpleHttpResponse, StreamHttpResponse}
 
 /** Exception thrown when an error occurs during an HTTP request.
   *
@@ -20,7 +20,7 @@ object HttpResponseException {
 
   def apply(response: HttpResponse, message: String): HttpResponseException = response match {
     case res:SimpleHttpResponse => new SimpleHttpResponseException(res, message)
-    case res:StreamedHttpResponse => new StreamHttpResponseException(res, message)
+    case res:StreamHttpResponse => new StreamHttpResponseException(res, message)
   }
 
   case class SimpleHttpResponseException(
@@ -30,9 +30,9 @@ object HttpResponseException {
       message: String)
     extends HttpResponseException(message)
   case class StreamHttpResponseException(
-      /** The http response which triggered the error. */
-      response: StreamedHttpResponse,
-      /** An message describing the error. */
-      message: String)
+                                          /** The http response which triggered the error. */
+                                          response: StreamHttpResponse,
+                                          /** An message describing the error. */
+                                          message: String)
     extends HttpResponseException(message)
 }

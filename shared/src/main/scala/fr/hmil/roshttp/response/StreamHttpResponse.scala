@@ -10,18 +10,18 @@ import monifu.reactive.Observable
 import scala.concurrent.Future
 
 
-class StreamedHttpResponse(
+class StreamHttpResponse(
     val statusCode: Int,
     val headers: HeaderMap[String],
     val body: Observable[ByteBuffer])
 extends HttpResponse
 
-object StreamedHttpResponse extends HttpResponseFactory[StreamedHttpResponse] {
+object StreamHttpResponse extends HttpResponseFactory[StreamHttpResponse] {
   override def apply(
       statusCode: Int,
       headers: HeaderMap[String],
       bodyStream: Observable[ByteBuffer],
       config: BackendConfig)
-      (implicit scheduler: Scheduler): Future[StreamedHttpResponse] =
-    Future.successful(new StreamedHttpResponse(statusCode, headers, bodyStream))
+      (implicit scheduler: Scheduler): Future[StreamHttpResponse] =
+    Future.successful(new StreamHttpResponse(statusCode, headers, bodyStream))
 }
