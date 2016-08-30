@@ -6,7 +6,7 @@ import fr.hmil.roshttp.body.BodyPart
 import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException}
 import fr.hmil.roshttp.response.{HttpResponse, SimpleHttpResponse, StreamHttpResponse, StreamHttpResponse$}
 import fr.hmil.roshttp.util.{HeaderMap, Utils}
-import monifu.concurrent.Scheduler
+import monix.execution.Scheduler
 
 import scala.concurrent.Future
 

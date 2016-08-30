@@ -8,12 +8,9 @@ import fr.hmil.roshttp.body._
 import fr.hmil.roshttp.exceptions.HttpResponseException.SimpleHttpResponseException
 import fr.hmil.roshttp.exceptions.{HttpTimeoutException, SimpleResponseTimeoutException}
 import fr.hmil.roshttp.response.SimpleHttpResponse
-import monifu.concurrent.Implicits.globalScheduler
-import monifu.reactive.Ack.Continue
-import monifu.reactive.{Ack, Observable, Observer}
+import monix.execution.Scheduler.Implicits.global
+import monix.reactive.Observable
 import utest._
-
-import scala.concurrent.Future
 
 object HttpRequestSpec extends TestSuite {
 
@@ -127,7 +124,7 @@ object HttpRequestSpec extends TestSuite {
           .send() map { s => s.statusCode ==> 200 }
       }
     }
-    
+
     "Responses" - {
 
       "with status codes < 400" - {
@@ -277,7 +274,7 @@ object HttpRequestSpec extends TestSuite {
           .stream()
           .map({ r =>
             // Take only the first element because the body is so short we know it will fit in one buffer
-            r.body.asFuture.map(_.get ==> greeting_bytes)
+            r.body.firstL.map(_.get ==> greeting_bytes)
           })
       }
 
@@ -299,8 +296,8 @@ object HttpRequestSpec extends TestSuite {
             .map({buffer =>
               assert(buffer.limit <= config.maxChunkSize)
             })
-            .buffer(3)
-            .asFuture
+            .bufferTumbling(3)
+            .firstL.runAsync
           )
       }
     }
@@ -633,9 +630,9 @@ object HttpRequestSpec extends TestSuite {
           .post(
             // Splits the image bytes into chunks to create a streamed body
             StreamBody(
-              Observable.from(Seq(IMAGE_BYTES: _*)
+              Observable.fromIterable(Seq(IMAGE_BYTES: _*)
                 .grouped(12)
-                .toSeq: _*
+                .toSeq
               ).map(b => ByteBuffer.wrap(b.toArray))
             )
           )

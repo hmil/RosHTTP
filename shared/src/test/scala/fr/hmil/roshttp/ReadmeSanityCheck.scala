@@ -26,7 +26,7 @@ object ReadmeSanityCheck extends TestSuite {
       libraryDependencies += "fr.hmil" %%% "roshttp" % "1.1.0"
       
       import fr.hmil.roshttp.HttpRequest
-      import monifu.concurrent.Implicits.globalScheduler
+      import monix.execution.Scheduler.Implicits.global
       
       // Runs consistently on the jvm, in node.js and in the browser!
       val request = HttpRequest("https://schema.org/WebPage")

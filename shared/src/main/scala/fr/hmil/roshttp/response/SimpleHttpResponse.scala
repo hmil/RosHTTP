@@ -6,12 +6,11 @@ import java.util.concurrent.TimeUnit
 import fr.hmil.roshttp.BackendConfig
 import fr.hmil.roshttp.exceptions.SimpleResponseTimeoutException
 import fr.hmil.roshttp.util.{HeaderMap, Utils}
-import monifu.concurrent.Scheduler
-import monifu.reactive.Ack.{Cancel, Continue}
-import monifu.reactive.{Observable, Observer}
+import monix.execution.Ack.{Continue, Stop}
+import monix.execution.Scheduler
+import monix.reactive.{Observable, Observer}
 
 import scala.collection.mutable
-import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{Future, Promise}
 
 /**
@@ -37,7 +36,7 @@ object SimpleHttpResponse extends HttpResponseFactory[SimpleHttpResponse] {
     val buffers = mutable.Queue[ByteBuffer]()
     var cancelled = false
 
-    val timeoutTask = scheduler.scheduleOnce(FiniteDuration(config.bodyCollectTimeout, TimeUnit.SECONDS),
+    val timeoutTask = scheduler.scheduleOnce(config.bodyCollectTimeout, TimeUnit.SECONDS,
       new Runnable {
         override def run(): Unit = {
           val partialBody = recomposeBody(buffers, config.maxChunkSize, charset)
@@ -47,22 +46,24 @@ object SimpleHttpResponse extends HttpResponseFactory[SimpleHttpResponse] {
         }
       })
 
-    bodyStream.onSubscribe(new Observer[ByteBuffer] {
+    bodyStream.subscribe(new Observer[ByteBuffer] {
       def onNext(elem: ByteBuffer) = {
         if (!cancelled) {
           buffers.enqueue(elem)
           Continue
         } else {
-          Cancel
+          Stop
         }
       }
       def onComplete() = {
-        if (timeoutTask.cancel()) {
+        timeoutTask.cancel()
+        if (!cancelled) {
           promise.trySuccess(buffers)
         }
       }
       def onError(ex: Throwable) = {
-        if (timeoutTask.cancel()) {
+        timeoutTask.cancel()
+        if (!cancelled) {
           promise.tryFailure(ex)
         }
       }

@@ -3,11 +3,11 @@ package fr.hmil.roshttp.body
 import java.nio.ByteBuffer
 
 import fr.hmil.roshttp.ByteBufferQueue
-import monifu.concurrent.Scheduler
-import monifu.reactive.Ack.Continue
-import monifu.reactive.{Ack, Observable, Observer}
+import monix.execution.Ack.Continue
+import monix.execution.{Ack, Scheduler}
+import monix.reactive.{Observable, Observer}
 
-import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Random, Success}
 
 /** A body made of multiple parts.
@@ -33,13 +33,15 @@ class MultiPartBody(parts: Map[String, BodyPart], subtype: String = "form-data")
 
   override def contentType: String = s"multipart/$subtype; boundary=$boundary"
 
+  // TODO use combinations on observables
+
   override def content: Observable[ByteBuffer] = {
     val queue = new ByteBufferQueue()
 
     parts.map({ case(name, part) =>
       val localBuffer = new ByteBufferQueue()
       val p = Promise[(String, BodyPart, ByteBufferQueue)]()
-      part.content.onSubscribe(new Observer[ByteBuffer] {
+      part.content.subscribe(new Observer[ByteBuffer] {
 
         override def onError(ex: Throwable): Unit = {
           p.failure(ex)
@@ -66,7 +68,7 @@ class MultiPartBody(parts: Map[String, BodyPart], subtype: String = "form-data")
               s"Content-Type: ${part.contentType}\r\n" +
               "\r\n").getBytes("utf-8")))
 
-          buffer.observable.onSubscribe(new Observer[ByteBuffer] {
+          buffer.observable.subscribe(new Observer[ByteBuffer] {
 
             override def onError(ex: Throwable): Unit = {
               p.failure(ex)
@@ -85,13 +87,11 @@ class MultiPartBody(parts: Map[String, BodyPart], subtype: String = "form-data")
         })
       })
     }).andThen({
-      case _: Success[Unit] => {
+      case _: Success[Unit] =>
         queue.push(ByteBuffer.wrap(s"\r\n--$boundary--".getBytes("utf-8")))
         queue.end()
-      }
-      case f: Failure[Unit] => {
+      case f: Failure[Unit] =>
         queue.end()
-      }
     })
 
     queue.observable

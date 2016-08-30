@@ -3,7 +3,6 @@ package fr.hmil.roshttp.body
 import java.nio.ByteBuffer
 
 import fr.hmil.roshttp.body.JSONBody.JSONValue
-import monifu.reactive.Observable
 
 /** Allows to send arbitrarily complex JSON data.
   *

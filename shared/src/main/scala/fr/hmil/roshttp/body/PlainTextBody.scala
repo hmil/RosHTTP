@@ -2,8 +2,6 @@ package fr.hmil.roshttp.body
 
 import java.nio.ByteBuffer
 
-import monifu.reactive.Observable
-
 /** Plain text body sent as `text/plain` mime type.
   *
   * @param text The plain text to send

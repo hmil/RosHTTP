@@ -2,8 +2,10 @@ package fr.hmil.roshttp
 
 import java.nio.ByteBuffer
 
-import monifu.reactive.Ack.{Cancel, Continue}
-import monifu.reactive.{Ack, Observable, Observer, Subscriber}
+import monix.execution.{Ack, Cancelable}
+import monix.execution.Ack.{Continue, Stop}
+import monix.reactive.Observable
+import monix.reactive.observers.Subscriber
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext
@@ -14,6 +16,10 @@ private[roshttp] class ByteBufferQueue(implicit ec: ExecutionContext) {
   val bufferQueue = mutable.Queue[ByteBuffer]()
   var hasEnd = false
 
+  private val cancelable = new Cancelable {
+    override def cancel(): Unit = stop()
+  }
+
   def propagate(): Unit = subscriber.foreach({ subscriber =>
     if (bufferQueue.nonEmpty) {
       subscriber.onNext(bufferQueue.dequeue()).onComplete(handleAck)
@@ -23,7 +29,7 @@ private[roshttp] class ByteBufferQueue(implicit ec: ExecutionContext) {
   })
 
   def handleAck(ack: Try[Ack]): Unit = ack match {
-    case Success(Cancel) =>
+    case Success(Stop) =>
       subscriber = None
     case Success(Continue) =>
       if (bufferQueue.nonEmpty) {
@@ -55,7 +61,7 @@ private[roshttp] class ByteBufferQueue(implicit ec: ExecutionContext) {
   }
 
   val observable = new Observable[ByteBuffer]() {
-    override def onSubscribe(sub: Subscriber[ByteBuffer]): Unit = {
+    override def unsafeSubscribeFn(sub: Subscriber[ByteBuffer]): Cancelable = {
       if (subscriber.isDefined) {
         throw new IllegalStateException("A subscriber is already defined")
       }
@@ -63,6 +69,7 @@ private[roshttp] class ByteBufferQueue(implicit ec: ExecutionContext) {
       if (bufferQueue.nonEmpty) {
         propagate()
       }
+      cancelable
     }
   }
 

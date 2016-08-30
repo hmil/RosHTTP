@@ -67,7 +67,7 @@ private[roshttp] object IO {
   def readInputStreamToByteArray(stream: InputStream): Array[Byte] = {
     val builder = new ByteArrayOutputStream()
     pipe(stream, builder)
-    builder.toByteArray()
+    builder.toByteArray
   }
   /** Pipes data from `in` to `out` */
   def pipe(in: InputStream, out: OutputStream): Unit = {

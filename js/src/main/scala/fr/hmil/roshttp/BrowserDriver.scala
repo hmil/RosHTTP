@@ -6,9 +6,9 @@ import fr.hmil.roshttp.ByteBufferChopper.Finite
 import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException}
 import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory}
 import fr.hmil.roshttp.util.HeaderMap
-import monifu.concurrent.Scheduler
-import monifu.reactive.Ack.Continue
-import monifu.reactive.{Observable, Observer}
+import monix.execution.Ack.Continue
+import monix.execution.Scheduler
+import monix.reactive.{Observable, Observer}
 import org.scalajs.dom
 import org.scalajs.dom.ext.Ajax
 import org.scalajs.dom.raw.ErrorEvent
@@ -96,7 +96,7 @@ private object BrowserDriver extends DriverTrait {
     val promise = Promise[mutable.Queue[ByteBuffer]]()
     var bytes = 0
 
-    bodyStream.onSubscribe(new Observer[ByteBuffer] {
+    bodyStream.subscribe(new Observer[ByteBuffer] {
       def onNext(elem: ByteBuffer) = {
         bytes += elem.limit
         bufferQueue.enqueue(elem)

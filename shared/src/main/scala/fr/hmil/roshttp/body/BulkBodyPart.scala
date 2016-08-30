@@ -1,9 +1,9 @@
 package fr.hmil.roshttp.body
 import java.nio.ByteBuffer
 
-import monifu.reactive.Observable
+import monix.reactive.Observable
 
 abstract class BulkBodyPart extends BodyPart {
-  override def content: Observable[ByteBuffer] = Observable.from(contentData)
+  override def content: Observable[ByteBuffer] = Observable.eval(contentData)
   def contentData: ByteBuffer
 }

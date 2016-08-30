@@ -10,9 +10,9 @@ import fr.hmil.roshttp.node.buffer.Buffer
 import fr.hmil.roshttp.node.http.{IncomingMessage, RequestOptions}
 import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory}
 import fr.hmil.roshttp.util.HeaderMap
-import monifu.concurrent.Scheduler
-import monifu.reactive.Ack.Continue
-import monifu.reactive.{Ack, Observer}
+import monix.execution.Ack.Continue
+import monix.execution.{Ack, Scheduler}
+import monix.reactive.Observer
 
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
@@ -41,7 +41,7 @@ private object NodeDriver extends DriverTrait {
     })
     if (req.body.isDefined) {
       req.body.foreach({ part =>
-        part.content.onSubscribe(new Observer[ByteBuffer] {
+        part.content.subscribe(new Observer[ByteBuffer] {
           override def onError(ex: Throwable): Unit = nodeRequest.end()
 
           override def onComplete(): Unit = {

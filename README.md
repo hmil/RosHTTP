@@ -25,7 +25,7 @@ the [API doc](http://hmil.github.io/RosHTTP/docs/index.html) too.
 
 ```scala
 import fr.hmil.roshttp.HttpRequest
-import monifu.concurrent.Implicits.globalScheduler
+import monix.execution.Scheduler.Implicits.global
 
 // Runs consistently on the jvm, in node.js and in the browser!
 val request = HttpRequest("https://schema.org/WebPage")
@@ -242,7 +242,7 @@ request.post(MultiPartBody(
 Streaming a response is as simple as calling `.stream()` instead of `.send()`.
 `HttpRequest#stream()` returns a Future of `StreamHttpResponse`. A `StreamHttpResponse`
 is just like a `SimpleHttpResponse` except that its `body` property is an
-[Observable](https://monix.io/api/1.2/#monifu.reactive.Observable).
+[Observable](https://monix.io/api/2.0/#monix.reactive.Observable).
 The observable will spit out a stream of `ByteBuffer`s as shown in this example:
 
 ```scala
