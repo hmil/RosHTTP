@@ -8,9 +8,13 @@ import fr.hmil.roshttp.body.JSONBody._
 import fr.hmil.roshttp.body._
 import fr.hmil.roshttp.exceptions.HttpResponseException.SimpleHttpResponseException
 import fr.hmil.roshttp.exceptions.{HttpTimeoutException, SimpleResponseTimeoutException}
-import fr.hmil.roshttp.response.{HttpResponse, SimpleHttpResponse}
+import fr.hmil.roshttp.response.SimpleHttpResponse
 import monifu.concurrent.Implicits.globalScheduler
+import monifu.reactive.Ack.Continue
+import monifu.reactive.{Ack, Observable, Observer}
 import utest._
+
+import scala.concurrent.Future
 
 object HttpRequestSpec extends TestSuite {
 
@@ -173,7 +177,7 @@ object HttpRequestSpec extends TestSuite {
           .queryString.get ==>
           "foo=bar&table=a&table=b&table=c&map%5Bd%5D=dval&map%5Be%5D=e%20value&license=MIT&copy=%C2%A9%202016"
       }
-
+/*
       "User profile form data" - {
         HttpRequest(s"$SERVER_URL/body")
           .post(MultiPartBody(
@@ -189,7 +193,7 @@ object HttpRequestSpec extends TestSuite {
             "picture" -> StreamBody(ByteBuffer.wrap(IMAGE_BYTES), "image/jpeg")
           ))
       }
-
+*/
       "Download stream" - {
         def println(s: String) = s ==> "Hello World!"
         import fr.hmil.roshttp.util.Utils._

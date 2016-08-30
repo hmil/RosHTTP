@@ -10,5 +10,5 @@ object Implicits {
   implicit def floatToJSONNumber(value: Float): JSONNumber = new JSONNumber(value)
   implicit def doubleToJSONNumber(value: Double): JSONNumber = new JSONNumber(value)
   implicit def JSONObjectToJSONBody(obj: JSONObject): JSONBody = JSONBody(obj)
-  implicit def byteBufferToStreamBody(buff: ByteBuffer): StreamBody = StreamBody(buff)
+  implicit def byteBufferToStreamBody(buff: ByteBuffer): ByteBufferBody = ByteBufferBody(buff)
 }

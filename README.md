@@ -193,7 +193,7 @@ request.post(data)
 ### File upload
 
 To send file data you must turn a file into a ByteBuffer and then send it in a
-StreamBody. For instance, on the jvm you could do:
+ByteBufferBody. For instance, on the jvm you could do:
 ```
 import fr.hmil.roshttp.body.Implicits._
 
@@ -225,8 +225,8 @@ request.post(MultiPartBody(
     ),
     "design" -> 2
   ),
-  // The picture is sent using a StreamBody, assuming image_bytes is a ByteBuffer containing the image
-  "picture" -> StreamBody(image_bytes, "image/jpeg")
+  // The picture is sent using a ByteBufferBody, assuming image_bytes is a ByteBuffer containing the image
+  "picture" -> ByteBufferBody(image_bytes, "image/jpeg")
 ))
 ```
 
@@ -252,6 +252,10 @@ _Note that special care should be taken when converting chunks into strings beca
 multibyte characters may span multiple chunks._
 _In general streaming is used for binary data and any reasonable quantity
 of text can safely be handled by the non-streaming API_
+
+### Upload Streams
+
+TODO: document streams once upgraded to monix v2
 
 ---
 

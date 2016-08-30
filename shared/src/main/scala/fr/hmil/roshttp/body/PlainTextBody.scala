@@ -2,6 +2,8 @@ package fr.hmil.roshttp.body
 
 import java.nio.ByteBuffer
 
+import monifu.reactive.Observable
+
 /** Plain text body sent as `text/plain` mime type.
   *
   * @param text The plain text to send
@@ -10,10 +12,10 @@ import java.nio.ByteBuffer
 class PlainTextBody private(
     text: String,
     charset: String
-  ) extends BodyPart {
+  ) extends BulkBodyPart {
 
   override def contentType: String = "text/plain; charset=" + charset
-  override def content: ByteBuffer = ByteBuffer.wrap(text.getBytes(charset))
+  override def contentData: ByteBuffer = ByteBuffer.wrap(text.getBytes(charset))
 }
 
 object PlainTextBody {
