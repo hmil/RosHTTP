@@ -3,46 +3,23 @@ package fr.hmil.roshttp
 import java.io.IOException
 import java.nio.ByteBuffer
 
+import fr.hmil.roshttp.ByteBufferChopper.Finite
+import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException}
 import fr.hmil.roshttp.node.Modules.{http, https}
 import fr.hmil.roshttp.node.buffer.Buffer
 import fr.hmil.roshttp.node.http.{IncomingMessage, RequestOptions}
+import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory}
+import fr.hmil.roshttp.util.HeaderMap
+import monifu.concurrent.Scheduler
 
-import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
 
 private object NodeDriver extends DriverTrait {
 
-  // Accumulates chunks received by the request and turns them into a ByteBuffer
-  private class BufferAccumulator {
-    private var acc = List[Array[Byte]]()
-
-    def append(buf: Buffer): Unit = {
-      val length = buf.length
-      var i = 0
-      val chunk = new Array[Byte](length)
-      while(i < length) {
-        chunk(i) = buf.readInt8(i).toByte
-        i += 1
-      }
-      acc ::= chunk
-    }
-
-    def collect(): ByteBuffer = {
-      val length = acc.foldRight(0)((chunk, l) => l + chunk.length)
-      val buffer = ByteBuffer.allocate(length)
-      acc.foreach(chunk => {
-        var i = 0
-        while (i < chunk.length) {
-          buffer.put(chunk(i))
-          i += 1
-        }
-      })
-      buffer
-    }
-  }
-
-  def makeRequest(req: HttpRequest, p: Promise[HttpResponse]): Unit = {
+  def makeRequest[T <: HttpResponse](req: HttpRequest, factory: HttpResponseFactory[T], p: Promise[T])
+      (implicit scheduler: Scheduler): Unit = {
     val module = {
       if (req.protocol == Protocol.HTTP)
         http
@@ -55,59 +32,73 @@ private object NodeDriver extends DriverTrait {
       method = req.method.toString,
       headers = js.Dictionary(req.headers.toSeq: _*),
       path = req.longPath
-    ), (message: IncomingMessage) => {
-
-      val charset = HttpUtils.charsetFromContentType(message.headers.get("content-type").orNull)
-
-      if (message.statusCode >= 300 && message.statusCode < 400 && message.headers.contains("location")) {
-        makeRequest(req.withURL(message.headers("location")), p)
-      } else {
-        val body = new BufferAccumulator()
-
-        message.on("data", { (s: js.Dynamic) =>
-          val buf = s.asInstanceOf[Buffer]
-          body.append(buf)
-          ()
-        })
-
-        message.on("end", { (s: js.Dynamic) =>
-          val headers = message.headers.toMap[String, String]
-
-          val charset = HttpUtils.charsetFromContentType(headers.getOrElse("content-type", null))
-          val response = new HttpResponse(
-            message.statusCode,
-            body.collect(),
-            HeaderMap(headers))
-
-          if (message.statusCode < 400) {
-            p.success(response)
-          } else {
-            p.failure(HttpResponseError.badStatus(response))
-          }
-          ()
-        })
-      }
-      ()
-    })
-
+    ), handleReponse(req, factory, p)_)
     nodeRequest.on("error", { (s: js.Dynamic) =>
-      p.failure(new HttpNetworkError(new IOException(s.toString)))
+      p.failure(new HttpNetworkException(new IOException(s.toString)))
       ()
     })
-
     req.body.foreach({ part =>
       nodeRequest.write(Converters.byteBufferToNodeBuffer(part.content))
     })
-
     nodeRequest.end()
   }
 
-  def send(req: HttpRequest)(implicit ec: ExecutionContext): Future[HttpResponse] = {
-    val p: Promise[HttpResponse] = Promise[HttpResponse]()
+  def handleReponse[T <: HttpResponse](req:HttpRequest, factory: HttpResponseFactory[T], p: Promise[T])
+        (message: IncomingMessage)(implicit scheduler: Scheduler): Unit = {
+    if (message.statusCode >= 300 && message.statusCode < 400 && message.headers.contains("location")) {
+      makeRequest(req.withURL(message.headers("location")), factory, p)
+    } else {
+      val headers = message.headers.toMap[String, String]
+      val bufferQueue = new ByteBufferQueue()
 
-    makeRequest(req, p)
+      message.on("data", { (nodeBuffer: js.Dynamic) =>
+        bufferQueue.push(byteBufferFromNodeBuffer(nodeBuffer, req.backendConfig.maxChunkSize))
+      })
+      message.on("end", { (s: js.Dynamic) =>
+        bufferQueue.end()
+      })
 
+      p.completeWith(factory(
+        message.statusCode,
+        HeaderMap(headers),
+        bufferQueue.observable,
+        req.backendConfig)
+        .map({ response =>
+          if (message.statusCode < 400) {
+            response
+          } else {
+            throw HttpResponseException.badStatus(response)
+          }
+        }))
+    }
+    ()
+  }
+
+  def send[T <: HttpResponse](req: HttpRequest, factory: HttpResponseFactory[T])(implicit scheduler: Scheduler):
+      Future[T] = {
+    val p: Promise[T] = Promise[T]()
+    makeRequest(req, factory, p)
     p.future
+  }
+
+  private def byteBufferFromNodeBuffer(nodeBuffer: js.Any, maxChunkSize: Int): Seq[ByteBuffer] = {
+    val buffer = nodeBuffer.asInstanceOf[Buffer]
+    ByteBufferChopper.chop(new FiniteBuffer(buffer), maxChunkSize, readChunk)
+  }
+
+  private def readChunk(buffer: FiniteBuffer, start: Int, length: Int): ByteBuffer = {
+    val byteBuffer = ByteBuffer.allocate(length)
+    var i = 0
+    while (i < length) {
+      byteBuffer.put(buffer.buffer.readInt8(start + i).toByte)
+      i += 1
+    }
+    byteBuffer.rewind()
+    byteBuffer
+  }
+
+  private class FiniteBuffer(val buffer: Buffer) extends Finite {
+    override def length: Int = buffer.length
   }
 
 }

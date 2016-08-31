@@ -1,6 +1,10 @@
-package fr.hmil.roshttp
+package fr.hmil.roshttp.util
 
-private object HttpUtils {
+import java.nio.ByteBuffer
+
+import fr.hmil.roshttp.CrossPlatformUtils
+
+object Utils {
 
   /**
     * Extracts the charset from a content-type header string
@@ -25,15 +29,28 @@ private object HttpUtils {
     }
   }
 
+  /** urlencodes a query string by preserving key-value pairs. */
   def encodeQueryString(queryString: String): String = {
     queryString
       .split("&")
       .map(_
         .split("=")
-        .map(CrossPlatformUtils.encodeURIComponent)
+        .map(encodeURIComponent)
         .mkString("="))
       .mkString("&")
   }
 
-  val oneByteCharset = "utf-8"
+  def encodeURIComponent(input: String): String = CrossPlatformUtils.encodeURIComponent(input)
+
+  def getStringFromBuffer(byteBuffer: ByteBuffer, charset: String): String = {
+    if (byteBuffer.hasArray) {
+      new String(byteBuffer.array(), 0, byteBuffer.limit, charset)
+    } else {
+      val tmp = new Array[Byte](byteBuffer.limit)
+      byteBuffer.get(tmp)
+      new String(tmp, charset)
+    }
+  }
+
+  private val oneByteCharset = "utf-8"
 }

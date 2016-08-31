@@ -3,12 +3,14 @@ package fr.hmil.roshttp.client
 import java.nio.ByteBuffer
 
 import fr.hmil.roshttp._
-import fr.hmil.roshttp.body.JSONBody._
 import fr.hmil.roshttp.body.Implicits._
+import fr.hmil.roshttp.body.JSONBody._
 import fr.hmil.roshttp.body._
+import fr.hmil.roshttp.exceptions.HttpResponseException.SimpleHttpResponseException
+import fr.hmil.roshttp.exceptions.{HttpTimeoutException, SimpleResponseTimeoutException}
+import fr.hmil.roshttp.response.{HttpResponse, SimpleHttpResponse}
+import monifu.concurrent.Implicits.globalScheduler
 import utest._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object HttpRequestSpec extends TestSuite {
 
@@ -115,12 +117,14 @@ object HttpRequestSpec extends TestSuite {
 
   val tests = this{
 
+
     "Meta" - {
       "The test server should be reachable" - {
         HttpRequest(SERVER_URL)
           .send() map { s => s.statusCode ==> 200 }
       }
     }
+
 
     "Examples from the readme actually work" - {
       "Main example" - {
@@ -135,8 +139,12 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest("http://hmil.github.io/foobar")
           .send()
           .onFailure {
-            case e:HttpResponseError =>
+            case e:SimpleHttpResponseException =>
               s"Got a status: ${e.response.statusCode}" ==> "Got a status: 404"
+            // An HttpTimeoutException may provide a partial response which contains
+            // response headers as well as any piece of body received before the timeout.
+            case SimpleResponseTimeoutException(partialResponse: Some[SimpleHttpResponse]) =>
+              s"Body received before timeout: ${partialResponse.get.body}"
           }
       }
 
@@ -181,54 +189,195 @@ object HttpRequestSpec extends TestSuite {
             "picture" -> StreamBody(ByteBuffer.wrap(IMAGE_BYTES), "image/jpeg")
           ))
       }
-    }
 
-    "General" - {
-      "Status codes < 400 should complete the request with success" - {
-        goodStatus.map(status => {
-          HttpRequest(SERVER_URL)
-            .withPath(s"/status/$status")
-            .send()
-            .map({ s =>
-              s.statusCode ==> status
-            })
-        }).reduce((f1, f2) => f1.flatMap(_ => f2))
-      }
-
-      "Status codes >= 400 should complete the request with failure" - {
-        badStatus.map(status =>
-          HttpRequest(SERVER_URL)
-            .withPath(s"/status/$status")
-            .send()
-            .map(r => println(r.headers("X-Status-Code") + " : " + r.statusCode))
-            .failed.map(_ => "success")
-        ).reduce((f1, f2) => f1.flatMap(_ => f2))
-      }
-
-      "Redirects are followed" - {
-        HttpRequest(SERVER_URL)
-          .withPath("/redirect/temporary/echo/redirected")
-          .send()
-          .map(res => {
-            res.body ==> "redirected"
+      "Download stream" - {
+        def println(s: String) = s ==> "Hello World!"
+        import fr.hmil.roshttp.util.Utils._
+        HttpRequest(s"$SERVER_URL")
+          .stream()
+          .map({ r =>
+            r.body.foreach(buffer => println(getStringFromBuffer(buffer, "UTF-8")))
           })
       }
     }
 
-    "Error handling" - {
-      "The message body can be obtained on failed requests" - {
-        badStatus.map(status =>
+    "Responses" - {
+
+      "with status codes < 400" - {
+        "should complete the request with success" - {
+          goodStatus.map(status => {
+            HttpRequest(SERVER_URL)
+              .withPath(s"/status/$status")
+              .send()
+              .map({ s =>
+                s.statusCode ==> status
+              })
+          }).reduce((f1, f2) => f1.flatMap(_ => f2))
+        }
+      }
+
+      "with status codes >= 400" - {
+        "should complete the request with failure" - {
+          badStatus.map(status =>
+            HttpRequest(SERVER_URL)
+              .withPath(s"/status/$status")
+              .send()
+              .map(r => r.headers("X-Status-Code") ==> r.statusCode)
+              .failed.map(_ => "success")
+          ).reduce((f1, f2) => f1.flatMap(_ => f2))
+        }
+      }
+
+      "with redirects" - {
+        "follow redirects" - {
           HttpRequest(SERVER_URL)
-            .withPath(s"/status/$status")
+            .withPath("/redirect/temporary/echo/redirected")
             .send()
-            .failed.map {
-            case e:HttpResponseError =>
-              statusText(e.response.statusCode) ==> e.response.body
-            case _ => assert(false)
-          }
-        ).reduce((f1, f2) => f1.flatMap(_=>f2))
+            .map(res => {
+              res.body ==> "redirected"
+            })
+        }
       }
     }
+
+    "Buffered responses" - {
+      "with status code >= 400" - {
+        "should provide a response body in error handler" - {
+          badStatus.map(status =>
+            HttpRequest(SERVER_URL)
+              .withPath(s"/status/$status")
+              .send()
+              .failed.map {
+              case e: SimpleHttpResponseException =>
+                statusText(e.response.statusCode) ==> e.response.body
+              case _ => assert(false)
+            }
+          ).reduce((f1, f2) => f1.flatMap(_ => f2))
+        }
+
+        "can be empty" - {
+          HttpRequest(s"$SERVER_URL/empty_body/400")
+            .send()
+            .failed
+            .map {
+              case e: SimpleHttpResponseException =>
+                e.response.body ==> ""
+            }
+        }
+      }
+
+      "with status code < 400" - {
+        "can be empty" - {
+          HttpRequest(s"$SERVER_URL/empty_body/200")
+            .send()
+            .map(response => response.body ==> "")
+        }
+      }
+
+      "with body timeout" - {
+        "can recover partial data" - {
+          if (!JsEnvUtils.isRealBrowser) {
+            HttpRequest(s"$SERVER_URL/echo_repeat/farfelu")
+              .withBackendConfig(BackendConfig(bodyCollectTimeout = 1))
+              .withQueryParameters(
+                "repeat" -> "2",
+                "delay" -> "2")
+              .send()
+              .failed
+              .map {
+                case SimpleResponseTimeoutException(e: Some[SimpleHttpResponse]) =>
+                  e.get.statusCode ==> 200
+                  e.get.headers("Content-Type") ==> "text/plain; charset=utf-8"
+                  e.get.body ==> "farfelu"
+              }
+          } else {
+            "not available in browser..."
+          }
+        }
+
+        "throws a timeout error" - {
+          if (JsEnvUtils.isChrome) {
+            "Doesn't work in chrome"
+          } else {
+            HttpRequest(s"$SERVER_URL/echo_repeat/farfelu")
+              .withBackendConfig(BackendConfig(bodyCollectTimeout = 1))
+              .withQueryParameters(
+                "repeat" -> "2",
+                "delay" -> "2")
+              .send()
+              .failed
+              .map {
+                case e: HttpTimeoutException => "OK"
+              }
+          }
+        }
+      }
+
+      "can be chunked and recomposed" - {
+        HttpRequest(s"$SERVER_URL/echo_repeat/foo")
+          .withQueryParameters(
+            "repeat" -> "4",
+            "delay" -> "1")
+          .withBackendConfig(BackendConfig(maxChunkSize = 4))
+          .send()
+          .map(res => res.body ==> "foofoofoofoo")
+      }
+
+      "can contain multibyte characters" - {
+        val payload = "12\uD83D\uDCA978"
+        HttpRequest(s"$SERVER_URL/multibyte_string")
+          .send()
+          .map(res => res.body ==> payload)
+      }
+
+      "can contain multibyte characters split by chunk boundary" - {
+        val payload = "12\uD83D\uDCA978"
+        val config = BackendConfig(maxChunkSize = 4)
+        HttpRequest(s"$SERVER_URL/multibyte_string")
+          .withBackendConfig(BackendConfig(
+            maxChunkSize = 4,
+            bodyCollectTimeout = 10
+          ))
+          .send()
+          .map(res => res.body ==> payload)
+      }
+    }
+
+    "Streamed response body" - {
+      "work with a single chunk" - {
+        val greeting_bytes: ByteBuffer = ByteBuffer.wrap("Hello World!".getBytes)
+        HttpRequest(s"$SERVER_URL")
+          .stream()
+          .map({ r =>
+            // Take only the first element because the body is so short we know it will fit in one buffer
+            r.body.asFuture.map(_.get ==> greeting_bytes)
+          })
+      }
+
+      "fail on bad status code" - {
+        HttpRequest(SERVER_URL)
+          .withPath(s"/status/400")
+          .stream()
+          .map(r => r.headers("X-Status-Code") ==> r.statusCode)
+          .failed.map(_ => "success")
+      }
+
+      "chunks are capped to chunkSize config" - {
+        val config = BackendConfig(maxChunkSize = 128)
+        HttpRequest(s"$SERVER_URL/uploads/icon.png")
+          .withBackendConfig(config)
+          .stream()
+          .flatMap(_
+            .body
+            .map({buffer =>
+              assert(buffer.limit <= config.maxChunkSize)
+            })
+            .buffer(3)
+            .asFuture
+          )
+      }
+    }
+
 
     "Query string" - {
       "set in constructor" - {
@@ -456,33 +605,9 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest(s"$SERVER_URL/status/400")
           .send()
           .failed.map {
-            case e: HttpResponseError =>
+            case e: SimpleHttpResponseException =>
               e.response.headers("X-Powered-By") ==> "Express"
           }
-      }
-
-      "can omit content-type" - {
-        HttpRequest(s"$SERVER_URL/raw_greeting")
-          .send()
-          .map({
-            res => res.body ==> "Hello world"
-          })
-      }
-    }
-
-    "Response body" - {
-      "can be empty for 200's" - {
-        HttpRequest(s"$SERVER_URL/empty_body/200")
-          .send()
-          .map(response => assert(response.body == ""))
-      }
-      "can be empty for 400's" - {
-        HttpRequest(s"$SERVER_URL/empty_body/400")
-          .send()
-          .failed.map {
-          case e: HttpResponseError =>
-            assert(e.response.body == "")
-        }
       }
     }
 
@@ -572,7 +697,7 @@ object HttpRequestSpec extends TestSuite {
       }
 
       "can post a file" - {
-        HttpRequest(s"$SERVER_URL/upload/icon.png")
+        HttpRequest(s"$SERVER_URL/compare/icon.png")
           .post(ByteBuffer.wrap(IMAGE_BYTES))
       }
     }

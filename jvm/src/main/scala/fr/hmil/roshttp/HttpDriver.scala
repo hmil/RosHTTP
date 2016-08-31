@@ -3,24 +3,32 @@ package fr.hmil.roshttp
 import java.net.{HttpURLConnection, URL}
 import java.nio.ByteBuffer
 
-import fr.hmil.roshttp.tools.io.IO
+import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException}
+import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory}
+import fr.hmil.roshttp.util.HeaderMap
+import monifu.concurrent.Scheduler
+import monifu.reactive.Observable
 
-import scala.concurrent.{ExecutionContext, Future, blocking}
+import scala.concurrent.{Future, blocking}
+
 
 private object HttpDriver extends DriverTrait {
 
-  def send(req: HttpRequest)(implicit ec: ExecutionContext): Future[HttpResponse] = {
+  def send[T <: HttpResponse](req: HttpRequest, responseFactory: HttpResponseFactory[T])(implicit scheduler: Scheduler):
+      Future[T] = {
     concurrent.Future {
-      try {
-        blocking {
+      blocking {
+        try {
           val connection = prepareConnection(req)
-          readResponse(connection)
+          readResponse(connection, responseFactory, req.backendConfig)
+        } catch {
+          case e: HttpResponseException => throw e
+          case e: Throwable =>
+            e.printStackTrace()
+            throw new HttpNetworkException(e)
         }
-      } catch {
-        case e: HttpResponseError => throw e
-        case e: Throwable => throw new HttpNetworkError(e)
       }
-    }
+    }.flatMap(f => f)
   }
 
   private def prepareConnection(req: HttpRequest): HttpURLConnection = {
@@ -36,7 +44,9 @@ private object HttpDriver extends DriverTrait {
     connection
   }
 
-  private def readResponse(connection: HttpURLConnection): HttpResponse = {
+  private def readResponse[T <: HttpResponse](
+      connection: HttpURLConnection, responseFactory: HttpResponseFactory[T], config: BackendConfig)
+      (implicit scheduler: Scheduler): Future[T] = {
     val code = connection.getResponseCode
     val headerMap = HeaderMap(Iterator.from(0)
       .map(i => (i, connection.getHeaderField(i)))
@@ -47,22 +57,52 @@ private object HttpDriver extends DriverTrait {
           case key => Some((key, t._2.mkString.trim))
         }
       }).toMap[String, String])
-    val charset = HttpUtils.charsetFromContentType(headerMap.getOrElse("content-type", null))
 
     if (code < 400) {
-      new HttpResponse(
+      responseFactory(
         code,
-        ByteBuffer.wrap(IO.readInputStreamToByteArray(connection.getInputStream)),
-        headerMap
+        headerMap,
+        inputStreamToObservable(connection.getInputStream, config.maxChunkSize),
+        config
       )
     } else {
-      throw HttpResponseError.badStatus(new HttpResponse(
+      responseFactory(
         code,
-        ByteBuffer.wrap(Option(connection.getErrorStream)
-          .map(IO.readInputStreamToByteArray)
-          .getOrElse(Array.empty)),
-        headerMap
-      ))
+        headerMap,
+        Option(connection.getErrorStream)
+          .map(is => inputStreamToObservable(is, config.maxChunkSize))
+          .getOrElse(Observable.from(ByteBuffer.allocate(0))),
+        config
+      ).map(response => throw HttpResponseException.badStatus(response))
     }
+  }
+
+  private def inputStreamToObservable(in: java.io.InputStream, chunkSize: Int): Observable[ByteBuffer] = {
+    val iterator = new Iterator[ByteBuffer] {
+      private[this] var buffer: Array[Byte] = null
+      private[this] var lastCount = 0
+
+      def hasNext: Boolean =
+        lastCount match {
+          case 0 =>
+            buffer = new Array[Byte](chunkSize)
+            lastCount = in.read(buffer)
+            lastCount >= 0
+          case nr =>
+            nr >= 0
+        }
+
+      def next(): ByteBuffer = {
+        if (lastCount < 0)
+          throw new NoSuchElementException
+        else {
+          val result = ByteBuffer.wrap(buffer, 0, lastCount)
+          lastCount = 0
+          result
+        }
+      }
+    }
+
+    Observable.fromIterator(iterator)
   }
 }

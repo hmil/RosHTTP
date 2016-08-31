@@ -1,6 +1,6 @@
-package fr.hmil.roshttp
+package fr.hmil.roshttp.util
 
-import fr.hmil.roshttp.HeaderMap.CaseInsensitiveString
+import fr.hmil.roshttp.util.HeaderMap.CaseInsensitiveString
 
 import scala.collection.immutable.MapLike
 
@@ -15,34 +15,33 @@ import scala.collection.immutable.MapLike
   * interface which is nice to use. It is however not *exactly* a map because
   * different keys can map to the same value if they are case-insensitive equivalent.
   *
-  * @param _map Internal case insensitive map
   * @tparam B Required for MapLike implementation. Should always be set to String.
   */
-class HeaderMap[B >: String] private(val _map: Map[CaseInsensitiveString, B] = Map())
+class HeaderMap[B >: String] private(map: Map[CaseInsensitiveString, B] = Map())
   extends Map[String, B]
   with MapLike[String, B, HeaderMap[B]] {
 
   override def empty: HeaderMap[B] = new HeaderMap(Map())
 
   override def get(key: String): Option[B] = {
-    _map.get(new CaseInsensitiveString(key))
+    map.get(new CaseInsensitiveString(key))
   }
 
   override def iterator: Iterator[(String, B)] = {
-    _map.map({ t => (t._1.value, t._2)}).iterator
+    map.map({ t => (t._1.value, t._2)}).iterator
   }
 
   override def +[B1 >: B](kv: (String, B1)): Map[String, B1] = {
     val key = new CaseInsensitiveString(kv._1)
-    new HeaderMap[B1](_map - key + (key -> kv._2))
+    new HeaderMap[B1](map - key + (key -> kv._2))
   }
 
   override def -(key: String): HeaderMap[B] = {
-    new HeaderMap[B](_map - new CaseInsensitiveString(key))
+    new HeaderMap[B](map - new CaseInsensitiveString(key))
   }
 
   override def toString: String = {
-    _map.map({t => t._1 + ": " + t._2}).mkString("\n")
+    map.map({ t => t._1 + ": " + t._2}).mkString("\n")
   }
 }
 
@@ -56,7 +55,7 @@ object HeaderMap {
   /** Creates an empty HeaderMap. */
   def apply(): HeaderMap[String] = HeaderMap(Map())
 
-  /** A string whose equals and hashCode method is case insensitive. */
+  /** A string whose equals and hashCode methods are case insensitive. */
   class CaseInsensitiveString(val value: String) {
 
     override def equals(other: Any): Boolean = other match {

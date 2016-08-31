@@ -3,14 +3,18 @@ package fr.hmil.roshttp
 import java.net.URI
 
 import fr.hmil.roshttp.body.BodyPart
+import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException}
+import fr.hmil.roshttp.response.{HttpResponse, SimpleHttpResponse, StreamHttpResponse, StreamHttpResponse$}
+import fr.hmil.roshttp.util.{HeaderMap, Utils}
+import monifu.concurrent.Scheduler
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 /** Builds an HTTP request.
   *
   * The request is sent using  [[send]]. A request can be sent multiple times.
   * Each time yields a Future[HttpResponse] which either succeeds with an [[HttpResponse]]
-  * or fails with an [[HttpNetworkError]] or [[HttpResponseError]]
+  * or fails with an [[HttpNetworkException]] or [[HttpResponseException]]
   */
 final class HttpRequest  private (
     val method: Method,
@@ -20,7 +24,8 @@ final class HttpRequest  private (
     val protocol: Protocol,
     val queryString: Option[String],
     val headers: HeaderMap[String],
-    val body: Option[BodyPart]) {
+    val body: Option[BodyPart],
+    val backendConfig: BackendConfig) {
 
   /** The path with the query string or just the path if there is no query string */
   val longPath = path + queryString.map(q => s"?$q").getOrElse("")
@@ -98,7 +103,7 @@ final class HttpRequest  private (
     * @return A copy of this [[HttpRequest]] with an updated queryString
     */
   def withQueryString(queryString: String): HttpRequest =
-    copy(queryString = Some(HttpUtils.encodeQueryString(queryString)))
+    copy(queryString = Some(Utils.encodeQueryString(queryString)))
 
   /** Sets the query string without escaping.
     *
@@ -210,11 +215,18 @@ final class HttpRequest  private (
     path = if (parser.getPath != null) parser.getPath else  path,
     queryString = {
         if (parser.getQuery != null)
-        Some(HttpUtils.encodeQueryString(parser.getQuery))
+        Some(Utils.encodeQueryString(parser.getQuery))
         else
         queryString
       }
     )
+  }
+
+  /**
+    * Use the provided backend configuration when executing the request
+    */
+  def withBackendConfig(backendConfig: BackendConfig): HttpRequest = {
+    copy(backendConfig = backendConfig)
   }
 
   /** Attaches a body to this request and sets the Content-Type header.
@@ -229,13 +241,13 @@ final class HttpRequest  private (
     * Note that the HTTP spec forbids sending data with some methods. In case you need to deal with a broken backend,
     * this library allows you to do so anyway. **Beware that in this case, the JVM can still enforce a compliant HTTP
     * method**.
-    *
-    * @param body
-    * @return
     */
   def withBody(body: BodyPart): HttpRequest = {
     withHeader("Content-Type", body.contentType).copy(body = Some(body))
   }
+
+  def stream()(implicit scheduler: Scheduler): Future[StreamHttpResponse] =
+    HttpDriver.send(this, StreamHttpResponse)
 
   /** Sends this request.
     *
@@ -243,38 +255,39 @@ final class HttpRequest  private (
     * which either succeeds with an [[HttpResponse]] or fails.
     *
     * Possible reasons for the future failing are:
-    * - A status code >= 400 ([[HttpResponseError]])
-    * - A network error ([[HttpNetworkError]])
+    * - A status code >= 400 ([[HttpResponseException]])
+    * - A network error ([[HttpNetworkException]])
     *
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkException]] or [[HttpResponseException]]
     */
-  def send()(implicit ec: ExecutionContext): Future[HttpResponse] = HttpDriver.send(this)
+  def send()(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
+    HttpDriver.send(this, SimpleHttpResponse)
 
   /** Sends this request with the POST method and a body
     *
     * @see [[send]]
     * @param body The body to send with the request
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkException]] or [[HttpResponseException]]
     */
-  def post(body: BodyPart)(implicit ec: ExecutionContext): Future[HttpResponse] =
+  def post(body: BodyPart)(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
       withMethod(Method.POST).send(body)
 
   /** Sends this request with the PUT method and a body
     *
     * @see [[post]]
     * @param body The body to send with the request
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkException]] or [[HttpResponseException]]
     */
-  def put(body: BodyPart)(implicit ec: ExecutionContext): Future[HttpResponse] =
+  def put(body: BodyPart)(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
       withMethod(Method.PUT).send(body)
 
   /** Sends this request with the OPTIONS method and a body
     *
     * @see [[post]]
     * @param body The body to send with the request
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkException]] or [[HttpResponseException]]
     */
-  def options(body: BodyPart)(implicit ec: ExecutionContext): Future[HttpResponse] =
+  def options(body: BodyPart)(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
       withMethod(Method.OPTIONS).send(body)
 
   /** Sends this request with a body.
@@ -284,9 +297,9 @@ final class HttpRequest  private (
     * data with the request, you should use [[post]] without arguments.
     *
     * @param body The body to send.
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
+    * @return A future of HttpResponse which may fail with an [[HttpNetworkException]] or [[HttpResponseException]]
     */
-  def send(body: BodyPart)(implicit ec: ExecutionContext): Future[HttpResponse] =
+  def send(body: BodyPart)(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
       withBody(body).send()
 
   /** Internal method to back public facing .withXXX methods. */
@@ -298,7 +311,8 @@ final class HttpRequest  private (
       protocol: Protocol  = this.protocol,
       queryString: Option[String] = this.queryString,
       headers: HeaderMap[String]  = this.headers,
-      body: Option[BodyPart] = this.body
+      body: Option[BodyPart] = this.body,
+      backendConfig: BackendConfig = this.backendConfig
   ): HttpRequest = {
     new HttpRequest(
       method    = method,
@@ -308,14 +322,15 @@ final class HttpRequest  private (
       protocol  = protocol,
       queryString = queryString,
       headers   = headers,
-      body = body)
+      body      = body,
+      backendConfig = backendConfig)
   }
 
 }
 
 object HttpRequest {
 
-  private val default = new HttpRequest(
+  private def default = new HttpRequest(
     method = Method.GET,
     host = null,
     path = null,
@@ -323,7 +338,8 @@ object HttpRequest {
     protocol = Protocol.HTTP,
     queryString = None,
     headers = HeaderMap(),
-    body = None
+    body = None,
+    backendConfig = BackendConfig()
   )
 
   /** Creates a blank HTTP request.
