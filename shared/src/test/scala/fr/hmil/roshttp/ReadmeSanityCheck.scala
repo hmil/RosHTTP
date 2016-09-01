@@ -61,7 +61,7 @@ object ReadmeSanityCheck extends TestSuite {
       
       request
         .withQueryParameter("foo", "bar")
-        .withQueryArrayParameter("table", Seq("a", "b", "c"))
+        .withQuerySeqParameter("table", Seq("a", "b", "c"))
         .withQueryObjectParameter("map", Seq(
           "d" -> "dval",
           "e" -> "e value"

@@ -100,7 +100,7 @@ offers an API to add, update and delete keys in the query string.
 ```scala
 request
   .withQueryParameter("foo", "bar")
-  .withQueryArrayParameter("table", Seq("a", "b", "c"))
+  .withQuerySeqParameter("table", Seq("a", "b", "c"))
   .withQueryObjectParameter("map", Seq(
     "d" -> "dval",
     "e" -> "e value"
@@ -284,6 +284,7 @@ Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master
 
 **v2.0.0**
 
+- Renamed withQueryArrayParameter to withQuerySeqParameter
 - Timeout errors on body
 - Rename *Error classes to *Exception
 - Add streaming API
