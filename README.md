@@ -97,7 +97,6 @@ Most of the time, the query string is used to pass key/value pairs in the
 [HttpRequest](http://hmil.github.io/RosHTTP/docs/index.html#fr.hmil.roshttp.HttpRequest)
 offers an API to add, update and delete keys in the query string.  
 
-<!--- test: "Query parameters" -->
 ```scala
 request
   .withQueryParameter("foo", "bar")
@@ -194,15 +193,14 @@ request.post(jsonData)
 
 ### File upload
 
-To send file data you must turn a file into a ByteBuffer and then send it in a
-StreamBody. For instance, on the jvm you could do:
+Once you have a file's byte array, wrap it in a ByteBuffer to send it as a StreamBody.
 ```scala
 import java.nio.ByteBuffer
-import scala.io.Source
 import fr.hmil.roshttp.body.StreamBody
 
-val bytes = Source.fromFile("test/resources/icon.png")(scala.io.Codec.ISO8859).map(_.toByte)
-val buffer = ByteBuffer.wrap(bytes.toArray)
+val buffer = ByteBuffer.wrap(
+        List[Byte](0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x0a)
+        .toArray)
 request.post(StreamBody(buffer))
 ```
 Note that the codec argument is important to read the file as-is and avoid side-effects
