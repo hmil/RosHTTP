@@ -153,24 +153,21 @@ final class HttpRequest  private (
     * @param key The unescaped parameter key
     * @param values The unescaped parameter array values
     * @return A copy of this [[HttpRequest]] with an updated query string.
-    * @see [[withQueryArrayParameter(String,String)]]
     */
-  def withQueryArrayParameter(key: String, values: Seq[String]): HttpRequest =
+  def withQuerySeqParameter(key: String, values: Seq[String]): HttpRequest =
     values.foldLeft(this)((acc, value) => acc.withQueryParameter(key, value))
 
-  /** Adds a query map parameter.
+  /** Adds an object made of key/value pairs to the query string.
     *
     * Although this is not part of a spec, most servers recognize bracket indices
-    * in a query string as array indices or object keys.
+    * in a query string as object keys. The same key can appear multiple times as
+    * some server will interpret this as multiple elements in an array for that key.
     *
     * example: ?obj[foo]=bar&obj[baz]=42
-    *
-    * This method formats map values according to the above example.
     *
     * @param key The unescaped parameter key
     * @param values The unescaped parameter map values
     * @return A copy of this [[HttpRequest]] with an updated query string.
-    * @see [[withQueryArrayParameter(String,String)]]
     */
   def withQueryObjectParameter(key: String, values: Seq[(String, String)]): HttpRequest =
     withQueryParameters(values.map(p => (s"$key[${p._1}]", p._2)): _*)
@@ -179,7 +176,6 @@ final class HttpRequest  private (
     *
     * @param parameters A sequence of new, unescaped parameters.
     * @return A copy of this [[HttpRequest]] with an updated query string.
-    * @see [[withQueryArrayParameter(String,String)]]
     */
   def withQueryParameters(parameters: (String, String)*): HttpRequest =
     parameters.foldLeft(this)((acc, entry) => acc.withQueryParameter(entry._1, entry._2))
