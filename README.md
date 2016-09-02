@@ -27,8 +27,6 @@ the [API doc](http://hmil.github.io/RosHTTP/docs/index.html) too.
 import fr.hmil.roshttp.HttpRequest
 import monifu.concurrent.Implicits.globalScheduler
 
-/* ... */
-
 // Runs consistently on the jvm, in node.js and in the browser!
 val request = HttpRequest("https://schema.org/WebPage")
 
