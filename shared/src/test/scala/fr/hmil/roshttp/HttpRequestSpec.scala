@@ -627,6 +627,19 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest(s"$SERVER_URL/compare/icon.png")
           .post(ByteBufferBody(ByteBuffer.wrap(IMAGE_BYTES)))
       }
+
+      "can post a stream" - {
+        HttpRequest(s"$SERVER_URL/compare/icon.png")
+          .post(
+            // Splits the image bytes into chunks to create a streamed body
+            StreamBody(
+              Observable.from(Seq(IMAGE_BYTES: _*)
+                .grouped(12)
+                .toSeq: _*
+              ).map(b => ByteBuffer.wrap(b.toArray))
+            )
+          )
+      }
     }
   }
 }

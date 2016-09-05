@@ -4,13 +4,12 @@ import java.nio.ByteBuffer
 
 import monifu.reactive.Observable
 
-class StreamBody private(val data: Observable[ByteBuffer]) extends BodyPart {
-
-    override def contentType: String = s"application/x-www-form-urlencoded"
-
-    override def content: Observable[ByteBuffer] = data
-}
+class StreamBody private(
+    override val content: Observable[ByteBuffer],
+    override val contentType: String
+) extends BodyPart
 
 object StreamBody {
-    def apply(data: Observable[ByteBuffer]): StreamBody = new StreamBody(data)
+    def apply(data: Observable[ByteBuffer], contentType: String = "application/octet-stream"): StreamBody =
+        new StreamBody(data, contentType)
 }
