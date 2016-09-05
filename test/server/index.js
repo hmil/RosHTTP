@@ -116,7 +116,7 @@ app.all('/empty_body/:statusCode', function(req, res) {
 });
 
 app.post('/compare/:name', function(req, res) {
-  var fdata = fs.readFileSync(path.join(__dirname, "uploads", req.params.name));
+  var fdata = fs.readFileSync(path.join(__dirname, "../resources", req.params.name));
 
   if (fdata.compare(req.body) == 0) {
     res.status(200).send('Ok');
@@ -125,7 +125,7 @@ app.post('/compare/:name', function(req, res) {
   }
 });
 
-app.use('/uploads', express.static('uploads'));
+app.use('/resources', express.static('../resources'));
 app.use('/runtime', express.static('runtime'));
 
 app.listen(3000, function () {

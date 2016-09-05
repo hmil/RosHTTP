@@ -1,8 +1,7 @@
-package fr.hmil.roshttp.client
+package fr.hmil.roshttp
 
 import java.nio.ByteBuffer
 
-import fr.hmil.roshttp._
 import fr.hmil.roshttp.body.Implicits._
 import fr.hmil.roshttp.body.JSONBody._
 import fr.hmil.roshttp.body._
@@ -128,83 +127,7 @@ object HttpRequestSpec extends TestSuite {
           .send() map { s => s.statusCode ==> 200 }
       }
     }
-
-
-    "Examples from the readme actually work" - {
-      "Main example" - {
-        // (But override println to avoid flooding the console)
-        def println(s: String) = assert(s.length > 1000)
-        HttpRequest("https://schema.org/WebPage")
-          .send()
-          .map(response => println(response.body))
-      }
-
-      "Error handling" - {
-        HttpRequest("http://hmil.github.io/foobar")
-          .send()
-          .onFailure {
-            case e:SimpleHttpResponseException =>
-              s"Got a status: ${e.response.statusCode}" ==> "Got a status: 404"
-            // An HttpTimeoutException may provide a partial response which contains
-            // response headers as well as any piece of body received before the timeout.
-            case SimpleResponseTimeoutException(partialResponse: Some[SimpleHttpResponse]) =>
-              s"Body received before timeout: ${partialResponse.get.body}"
-          }
-      }
-
-      "Composite URI" - {
-        HttpRequest()
-          .withProtocol(Protocol.HTTP)
-          .withHost("localhost")
-          .withPort(3000)
-          .withPath("/query")
-          .withQueryParameter("city", "London")
-          .send()
-      }
-
-      "Query parameters" - {
-        HttpRequest()
-          .withQueryParameter("foo", "bar")
-          .withQueryArrayParameter("table", Seq("a", "b", "c"))
-          .withQueryObjectParameter("map", Seq(
-            "d" -> "dval",
-            "e" -> "e value"
-          ))
-          .withQueryParameters(
-            "license" -> "MIT",
-            "copy" -> "© 2016"
-          )
-          .queryString.get ==>
-          "foo=bar&table=a&table=b&table=c&map%5Bd%5D=dval&map%5Be%5D=e%20value&license=MIT&copy=%C2%A9%202016"
-      }
-/*
-      "User profile form data" - {
-        HttpRequest(s"$SERVER_URL/body")
-          .post(MultiPartBody(
-            "name" -> PlainTextBody("John"),
-            "skills" -> JSONObject(
-              "programming" -> JSONObject(
-                "C" -> 3,
-                "PHP" -> 1,
-                "Scala" -> 5
-              ),
-              "design" -> 2
-            ),
-            "picture" -> StreamBody(ByteBuffer.wrap(IMAGE_BYTES), "image/jpeg")
-          ))
-      }
-*/
-      "Download stream" - {
-        def println(s: String) = s ==> "Hello World!"
-        import fr.hmil.roshttp.util.Utils._
-        HttpRequest(s"$SERVER_URL")
-          .stream()
-          .map({ r =>
-            r.body.foreach(buffer => println(getStringFromBuffer(buffer, "UTF-8")))
-          })
-      }
-    }
-
+    
     "Responses" - {
 
       "with status codes < 400" - {
@@ -368,7 +291,7 @@ object HttpRequestSpec extends TestSuite {
 
       "chunks are capped to chunkSize config" - {
         val config = BackendConfig(maxChunkSize = 128)
-        HttpRequest(s"$SERVER_URL/uploads/icon.png")
+        HttpRequest(s"$SERVER_URL/resources/icon.png")
           .withBackendConfig(config)
           .stream()
           .flatMap(_
@@ -495,7 +418,7 @@ object HttpRequestSpec extends TestSuite {
 
         "as list parameter" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
-            .withQueryArrayParameter("map", Seq("foo", "bar"))
+            .withQuerySeqParameter("map", Seq("foo", "bar"))
             .send()
             .map(res => {
               res.body ==> "{\"map\":[\"foo\",\"bar\"]}"
@@ -702,7 +625,7 @@ object HttpRequestSpec extends TestSuite {
 
       "can post a file" - {
         HttpRequest(s"$SERVER_URL/compare/icon.png")
-          .post(ByteBuffer.wrap(IMAGE_BYTES))
+          .post(ByteBufferBody(ByteBuffer.wrap(IMAGE_BYTES)))
       }
     }
   }

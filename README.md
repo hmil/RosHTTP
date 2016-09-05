@@ -23,12 +23,9 @@ The following is a simplified usage guide. You may find useful information in
 the [API doc](http://hmil.github.io/RosHTTP/docs/index.html) too.
 ## Basic usage
 
-<!--- test: "Main example" -->
 ```scala
 import fr.hmil.roshttp.HttpRequest
 import monifu.concurrent.Implicits.globalScheduler
-
-/* ... */
 
 // Runs consistently on the jvm, in node.js and in the browser!
 val request = HttpRequest("https://schema.org/WebPage")
@@ -38,20 +35,20 @@ request.send().map(response => println(response.body))
 
 When you `send()` a request, you get a `Future` which resolves to
 a SimpleHttpResponse if everything went fine or fails with a HttpNetworkException if a
-network error occurred or with a HttpResponseException if a statusCode > 400 was received.
+network error occurred or with a HttpResponseException if a statusCode >= 400 was received.
 When applicable, the response body of a failed request can be read:
 
-<!--- test: "Error handling" -->
 ```scala
+import fr.hmil.roshttp.exceptions._
+import fr.hmil.roshttp.response.SimpleHttpResponse
+
 HttpRequest("http://hmil.github.io/foobar")
   .send()
   .onFailure {
     // An HttpResponseException always provides a response
     case e:HttpResponseException =>
       "Got a status: ${e.response.statusCode}"
-    // An HttpTimeoutException may provide a partial response which contains
-    // response headers as well as any piece of body received before the timeout.
-    case HttpTimeoutException(partialResponse: Some[SimpleHttpResponse]) =>
+    case SimpleResponseTimeoutException(partialResponse: Some[SimpleHttpResponse]) =>
       s"Body received before timeout: ${partialResponse.get.body}"
   }
 ```
@@ -59,19 +56,20 @@ HttpRequest("http://hmil.github.io/foobar")
 
 ## Configuring requests
 
-Requests can be built using `.withXXX` methods. These are meant to be chained,
-they do not modify the original request.
+[HttpRequests](http://hmil.github.io/RosHTTP/docs/index.html#fr.hmil.roshttp.HttpRequest)
+are immutable objects. They expose methods named `.withXXX` which can be used to
+create more complex requests.
 
 ### URI
 
+The URI can be passed as argument of the request constructor or `.withURI`.
 The URI can be built using `.withProtocol`, `.withHost`, `.withPort`,
 `.withPath`, and `.withQuery...`. The latter is a bit more complex and
 is detailed below.
 
-<!--- test: "Composite URI" -->
 ```scala
 HttpRequest()
-  .withProtocol("HTTP")
+  .withProtocol(Protocol.HTTP)
   .withHost("localhost")
   .withPort(3000)
   .withPath("/weather")
@@ -97,15 +95,14 @@ Most of the time, the query string is used to pass key/value pairs in the
 [HttpRequest](http://hmil.github.io/RosHTTP/docs/index.html#fr.hmil.roshttp.HttpRequest)
 offers an API to add, update and delete keys in the query string.  
 
-<!--- test: "Query parameters" -->
 ```scala
 request
   .withQueryParameter("foo", "bar")
-  .withQueryArrayParameter("table", "a", "b", "c")
-  .withQueryObjectParameter("map",
+  .withQuerySeqParameter("table", Seq("a", "b", "c"))
+  .withQueryObjectParameter("map", Seq(
     "d" -> "dval",
     "e" -> "e value"
-  )
+  ))
   .withQueryParameters(
     "license" -> "MIT",
     "copy" -> "© 2016"
@@ -143,7 +140,7 @@ Each request can use a specific backend configuration using `.withBackendConfig`
 
 example:
 ```scala
-HttpRequest(url)
+HttpRequest("long.source.of/data")
   .withBackendConfig(BackendConfig(
     // Uses stream chunks of at most 1024 bytes
     maxChunkSize = 1024
@@ -169,36 +166,41 @@ A set of implicit conversions is provided in `body.Implicits` for convenience.
 You can `post` or `put` some data with your favorite encoding.
 ```scala
 import fr.hmil.roshttp.body.Implicits._
+import fr.hmil.roshttp.body.URLEncodedBody
 
-val data = URLEncodedBody(
+val urlEncodedData = URLEncodedBody(
   "answer" -> "42",
   "platform" -> "jvm"
 )
-request.post(data)
+request.post(urlEncodedData)
 // or
-request.put(data)
+request.put(urlEncodedData)
 ```
 
 Create JSON requests easily using implicit conversions.
 ```scala
 import fr.hmil.roshttp.body.Implicits._
+import fr.hmil.roshttp.body.JSONBody._
 
-val data = JSONObject(
+val jsonData = JSONObject(
   "answer" -> 42,
   "platform" -> "node"
 )
-request.post(data)
+request.post(jsonData)
 ```
 
 ### File upload
 
 To send file data you must turn a file into a ByteBuffer and then send it in a
 ByteBufferBody. For instance, on the jvm you could do:
-```
-import fr.hmil.roshttp.body.Implicits._
+```scala
+import java.nio.ByteBuffer
+import fr.hmil.roshttp.body.ByteBufferBody
 
-val bytes = Source.fromFile("icon.png")(scala.io.Codec.ISO8859).map(_.toByte).toArray
-request.post(ByteBuffer.wrap(bytes))
+val buffer = ByteBuffer.wrap(
+        List[Byte](0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x0a)
+        .toArray)
+request.post(ByteBufferBody(buffer))
 ```
 Note that the codec argument is important to read the file as-is and avoid side-effects
 due to character interpretation.
@@ -212,6 +214,8 @@ The following example illustrates how you could send a form to update a user pro
 made of a variety of data types.
 ```scala
 import fr.hmil.roshttp.body.Implicits._
+import fr.hmil.roshttp.body.JSONBody._
+import fr.hmil.roshttp.body._
 
 request.post(MultiPartBody(
   // The name part is sent as plain text
@@ -225,8 +229,9 @@ request.post(MultiPartBody(
     ),
     "design" -> 2
   ),
-  // The picture is sent using a ByteBufferBody, assuming image_bytes is a ByteBuffer containing the image
-  "picture" -> ByteBufferBody(image_bytes, "image/jpeg")
+  // The picture is sent using a ByteBufferBody, assuming buffer is a ByteBuffer
+  // containing the image data
+  "picture" -> ByteBufferBody(buffer, "image/jpeg")
 ))
 ```
 
@@ -242,7 +247,7 @@ The observable will spit out a stream of `ByteBuffer`s as shown in this example:
 
 ```scala
 import fr.hmil.roshttp.util.Utils._
-HttpRequest(s"$SERVER_URL")
+HttpRequest("my.streaming.source/")
   .stream()
   .map({ r =>
     r.body.foreach(buffer => println(getStringFromBuffer(buffer, "UTF-8")))
@@ -283,6 +288,7 @@ Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master
 
 **v2.0.0**
 
+- Renamed withQueryArrayParameter to withQuerySeqParameter
 - Timeout errors on body
 - Rename *Error classes to *Exception
 - Add streaming API
