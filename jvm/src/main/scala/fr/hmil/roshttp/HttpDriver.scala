@@ -3,45 +3,64 @@ package fr.hmil.roshttp
 import java.net.{HttpURLConnection, URL}
 import java.nio.ByteBuffer
 
+import scala.util.Success
 import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException}
 import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory}
 import fr.hmil.roshttp.util.HeaderMap
 import monifu.concurrent.Scheduler
-import monifu.reactive.Observable
+import monifu.reactive.Ack.Continue
+import monifu.reactive.{Ack, Observable, Observer}
 
-import scala.concurrent.{Future, blocking}
+import scala.concurrent.{Future, Promise, blocking}
 
 
 private object HttpDriver extends DriverTrait {
 
-  def send[T <: HttpResponse](req: HttpRequest, responseFactory: HttpResponseFactory[T])(implicit scheduler: Scheduler):
-      Future[T] = {
-    concurrent.Future {
-      blocking {
-        try {
-          val connection = prepareConnection(req)
-          readResponse(connection, responseFactory, req.backendConfig)
-        } catch {
-          case e: HttpResponseException => throw e
-          case e: Throwable =>
-            e.printStackTrace()
-            throw new HttpNetworkException(e)
-        }
-      }
-    }.flatMap(f => f)
+  def send[T <: HttpResponse]
+      (req: HttpRequest, responseFactory: HttpResponseFactory[T])
+      (implicit scheduler: Scheduler): Future[T] = {
+    sendRequest(req).flatMap({connection => readResponse(connection, responseFactory, req.backendConfig)})
   }
 
-  private def prepareConnection(req: HttpRequest): HttpURLConnection = {
+  private def sendRequest(req: HttpRequest)(implicit scheduler: Scheduler): Future[HttpURLConnection] = {
+    val p = Promise[HttpURLConnection]()
     val connection = new URL(req.url).openConnection().asInstanceOf[HttpURLConnection]
     req.headers.foreach(t => connection.addRequestProperty(t._1, t._2))
     connection.setRequestMethod(req.method.toString)
-    req.body.foreach({part =>
-      connection.setDoOutput(true)
-      val os = connection.getOutputStream
-      os.write(part.content.array())
-      os.close()
-    })
-    connection
+    if (req.body.isDefined) {
+      req.body.foreach({ part =>
+        connection.setDoOutput(true)
+        val os = connection.getOutputStream
+        // TODO: unchecked buffer.array() (+ test edge case where a buffer is not backed by array)
+        // todo setXXXStreamingMode
+        part.content.onSubscribe(new Observer[ByteBuffer] {
+
+          override def onError(ex: Throwable): Unit = {
+            os.close()
+            p.success(connection)
+          }
+
+          override def onComplete(): Unit = {
+            os.close()
+            p.success(connection)
+          }
+
+          override def onNext(buffer: ByteBuffer): Future[Ack] = {
+            if (buffer.hasArray) {
+              os.write(buffer.array().view(0, buffer.limit).toArray)
+            } else {
+              val tmp = new Array[Byte](buffer.limit)
+              buffer.get(tmp)
+              os.write(tmp)
+            }
+            Continue
+          }
+        })
+      })
+    } else {
+      p.success(connection)
+    }
+    p.future
   }
 
   private def readResponse[T <: HttpResponse](
@@ -58,28 +77,39 @@ private object HttpDriver extends DriverTrait {
         }
       }).toMap[String, String])
 
-    if (code < 400) {
-      responseFactory(
-        code,
-        headerMap,
-        inputStreamToObservable(connection.getInputStream, config.maxChunkSize),
-        config
-      )
-    } else {
-      responseFactory(
-        code,
-        headerMap,
-        Option(connection.getErrorStream)
-          .map(is => inputStreamToObservable(is, config.maxChunkSize))
-          .getOrElse(Observable.from(ByteBuffer.allocate(0))),
-        config
-      ).map(response => throw HttpResponseException.badStatus(response))
-    }
+    Future {
+      blocking {
+        try {
+          if (code < 400) {
+            responseFactory(
+              code,
+              headerMap,
+              inputStreamToObservable(connection.getInputStream, config.maxChunkSize),
+              config
+            )
+          } else {
+            responseFactory(
+              code,
+              headerMap,
+              Option(connection.getErrorStream)
+                .map(is => inputStreamToObservable(is, config.maxChunkSize))
+                .getOrElse(Observable.from(ByteBuffer.allocate(0))),
+              config
+            ).map(response => throw HttpResponseException.badStatus(response))
+          }
+        } catch {
+          case e: HttpResponseException => throw e
+          case e: Throwable =>
+            e.printStackTrace()
+            throw new HttpNetworkException(e)
+        }
+      }
+    }.flatMap(f => f)
   }
 
   private def inputStreamToObservable(in: java.io.InputStream, chunkSize: Int): Observable[ByteBuffer] = {
     val iterator = new Iterator[ByteBuffer] {
-      private[this] var buffer: Array[Byte] = null
+      private[this] var buffer: Array[Byte] = _
       private[this] var lastCount = 0
 
       def hasNext: Boolean =

@@ -3,18 +3,24 @@ package fr.hmil.roshttp
 import java.nio.ByteBuffer
 
 import monifu.reactive.Ack.{Cancel, Continue}
-import monifu.reactive.{Ack, Observable, Subscriber}
+import monifu.reactive.{Ack, Observable, Observer, Subscriber}
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
-class ByteBufferQueue(implicit ec: ExecutionContext) {
+private[roshttp] class ByteBufferQueue(implicit ec: ExecutionContext) {
   var subscriber: Option[Subscriber[ByteBuffer]] = None
   val bufferQueue = mutable.Queue[ByteBuffer]()
   var hasEnd = false
 
-  def propagate(): Unit = subscriber.foreach(_.onNext(bufferQueue.dequeue()).onComplete(handleAck))
+  def propagate(): Unit = subscriber.foreach({ subscriber =>
+    if (bufferQueue.nonEmpty) {
+      subscriber.onNext(bufferQueue.dequeue()).onComplete(handleAck)
+    } else if (hasEnd) {
+      stop()
+    }
+  })
 
   def handleAck(ack: Try[Ack]): Unit = ack match {
     case Success(Cancel) =>
@@ -30,11 +36,15 @@ class ByteBufferQueue(implicit ec: ExecutionContext) {
       subscriber.foreach(_.onError(ex))
   }
 
-  def push(byteBuffer: Seq[ByteBuffer]): Unit = {
-    bufferQueue.enqueue(byteBuffer:_*)
+  def push(buffers: Seq[ByteBuffer]): Unit = {
+    bufferQueue.enqueue(buffers:_*)
     if (bufferQueue.nonEmpty) {
       subscriber.foreach(_ => propagate())
     }
+  }
+
+  def push(buffer: ByteBuffer): Unit = {
+    push(Seq(buffer))
   }
 
   def end(): Unit = {

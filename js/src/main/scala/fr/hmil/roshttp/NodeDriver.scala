@@ -11,6 +11,8 @@ import fr.hmil.roshttp.node.http.{IncomingMessage, RequestOptions}
 import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory}
 import fr.hmil.roshttp.util.HeaderMap
 import monifu.concurrent.Scheduler
+import monifu.reactive.Ack.Continue
+import monifu.reactive.{Ack, Observer}
 
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
@@ -32,18 +34,32 @@ private object NodeDriver extends DriverTrait {
       method = req.method.toString,
       headers = js.Dictionary(req.headers.toSeq: _*),
       path = req.longPath
-    ), handleReponse(req, factory, p)_)
+    ), handleResponse(req, factory, p)_)
     nodeRequest.on("error", { (s: js.Dynamic) =>
       p.failure(new HttpNetworkException(new IOException(s.toString)))
       ()
     })
-    req.body.foreach({ part =>
-      nodeRequest.write(Converters.byteBufferToNodeBuffer(part.content))
-    })
-    nodeRequest.end()
+    if (req.body.isDefined) {
+      req.body.foreach({ part =>
+        part.content.onSubscribe(new Observer[ByteBuffer] {
+          override def onError(ex: Throwable): Unit = nodeRequest.end()
+
+          override def onComplete(): Unit = {
+            nodeRequest.end()
+          }
+
+          override def onNext(elem: ByteBuffer): Future[Ack] = {
+            nodeRequest.write(Converters.byteBufferToNodeBuffer(elem))
+            Continue
+          }
+        })
+      })
+    } else {
+      nodeRequest.end()
+    }
   }
 
-  def handleReponse[T <: HttpResponse](req:HttpRequest, factory: HttpResponseFactory[T], p: Promise[T])
+  def handleResponse[T <: HttpResponse](req:HttpRequest, factory: HttpResponseFactory[T], p: Promise[T])
         (message: IncomingMessage)(implicit scheduler: Scheduler): Unit = {
     if (message.statusCode >= 300 && message.statusCode < 400 && message.headers.contains("location")) {
       makeRequest(req.withURL(message.headers("location")), factory, p)

@@ -191,15 +191,16 @@ request.post(jsonData)
 
 ### File upload
 
-Once you have a file's byte array, wrap it in a ByteBuffer to send it as a StreamBody.
+To send file data you must turn a file into a ByteBuffer and then send it in a
+ByteBufferBody. For instance, on the jvm you could do:
 ```scala
 import java.nio.ByteBuffer
-import fr.hmil.roshttp.body.StreamBody
+import fr.hmil.roshttp.body.ByteBufferBody
 
 val buffer = ByteBuffer.wrap(
         List[Byte](0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x0a)
         .toArray)
-request.post(StreamBody(buffer))
+request.post(ByteBufferBody(buffer))
 ```
 Note that the codec argument is important to read the file as-is and avoid side-effects
 due to character interpretation.
@@ -228,8 +229,9 @@ request.post(MultiPartBody(
     ),
     "design" -> 2
   ),
-  // The picture is sent using a StreamBody
-  "picture" -> StreamBody(buffer, "image/jpeg")
+  // The picture is sent using a ByteBufferBody, assuming buffer is a ByteBuffer
+  // containing the image data
+  "picture" -> ByteBufferBody(buffer, "image/jpeg")
 ))
 ```
 
@@ -255,6 +257,10 @@ _Note that special care should be taken when converting chunks into strings beca
 multibyte characters may span multiple chunks._
 _In general streaming is used for binary data and any reasonable quantity
 of text can safely be handled by the non-streaming API_
+
+### Upload Streams
+
+TODO: document streams once upgraded to monix v2
 
 ---
 

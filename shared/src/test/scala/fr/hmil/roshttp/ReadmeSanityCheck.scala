@@ -28,8 +28,6 @@ object ReadmeSanityCheck extends TestSuite {
       import fr.hmil.roshttp.HttpRequest
       import monifu.concurrent.Implicits.globalScheduler
       
-      /* ... */
-      
       // Runs consistently on the jvm, in node.js and in the browser!
       val request = HttpRequest("https://schema.org/WebPage")
       
@@ -116,12 +114,12 @@ object ReadmeSanityCheck extends TestSuite {
       request.post(jsonData)
       
       import java.nio.ByteBuffer
-      import fr.hmil.roshttp.body.StreamBody
+      import fr.hmil.roshttp.body.ByteBufferBody
       
       val buffer = ByteBuffer.wrap(
               List[Byte](0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x0a)
               .toArray)
-      request.post(StreamBody(buffer))
+      request.post(ByteBufferBody(buffer))
       
       import fr.hmil.roshttp.body.Implicits._
       import fr.hmil.roshttp.body.JSONBody._
@@ -139,8 +137,9 @@ object ReadmeSanityCheck extends TestSuite {
           ),
           "design" -> 2
         ),
-        // The picture is sent using a StreamBody
-        "picture" -> StreamBody(buffer, "image/jpeg")
+        // The picture is sent using a ByteBufferBody, assuming buffer is a ByteBuffer
+        // containing the image data
+        "picture" -> ByteBufferBody(buffer, "image/jpeg")
       ))
       
       import fr.hmil.roshttp.util.Utils._

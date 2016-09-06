@@ -41,7 +41,7 @@ object SimpleHttpResponse extends HttpResponseFactory[SimpleHttpResponse] {
       new Runnable {
         override def run(): Unit = {
           val partialBody = recomposeBody(buffers, config.maxChunkSize, charset)
-          promise.failure(new SimpleResponseTimeoutException(
+          promise.failure(SimpleResponseTimeoutException(
             Some(new SimpleHttpResponse(statusCode, headers, partialBody))))
           cancelled = true
         }

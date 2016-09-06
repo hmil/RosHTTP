@@ -9,7 +9,11 @@ import fr.hmil.roshttp.exceptions.HttpResponseException.SimpleHttpResponseExcept
 import fr.hmil.roshttp.exceptions.{HttpTimeoutException, SimpleResponseTimeoutException}
 import fr.hmil.roshttp.response.SimpleHttpResponse
 import monifu.concurrent.Implicits.globalScheduler
+import monifu.reactive.Ack.Continue
+import monifu.reactive.{Ack, Observable, Observer}
 import utest._
+
+import scala.concurrent.Future
 
 object HttpRequestSpec extends TestSuite {
 
@@ -621,7 +625,20 @@ object HttpRequestSpec extends TestSuite {
 
       "can post a file" - {
         HttpRequest(s"$SERVER_URL/compare/icon.png")
-          .post(StreamBody(ByteBuffer.wrap(IMAGE_BYTES)))
+          .post(ByteBufferBody(ByteBuffer.wrap(IMAGE_BYTES)))
+      }
+
+      "can post a stream" - {
+        HttpRequest(s"$SERVER_URL/compare/icon.png")
+          .post(
+            // Splits the image bytes into chunks to create a streamed body
+            StreamBody(
+              Observable.from(Seq(IMAGE_BYTES: _*)
+                .grouped(12)
+                .toSeq: _*
+              ).map(b => ByteBuffer.wrap(b.toArray))
+            )
+          )
       }
     }
   }
