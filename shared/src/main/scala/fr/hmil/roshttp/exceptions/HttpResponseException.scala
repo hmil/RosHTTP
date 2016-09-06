@@ -19,8 +19,8 @@ object HttpResponseException {
     this(response, s"Server responded with status ${response.statusCode}")
 
   def apply(response: HttpResponse, message: String): HttpResponseException = response match {
-    case res:SimpleHttpResponse => new SimpleHttpResponseException(res, message)
-    case res:StreamHttpResponse => new StreamHttpResponseException(res, message)
+    case res:SimpleHttpResponse => SimpleHttpResponseException(res, message)
+    case res:StreamHttpResponse => StreamHttpResponseException(res, message)
   }
 
   case class SimpleHttpResponseException(
@@ -30,9 +30,9 @@ object HttpResponseException {
       message: String)
     extends HttpResponseException(message)
   case class StreamHttpResponseException(
-                                          /** The http response which triggered the error. */
-                                          response: StreamHttpResponse,
-                                          /** An message describing the error. */
-                                          message: String)
+      /** The http response which triggered the error. */
+      response: StreamHttpResponse,
+      /** An message describing the error. */
+      message: String)
     extends HttpResponseException(message)
 }

@@ -4,7 +4,7 @@ import java.io.IOException
 import java.nio.ByteBuffer
 
 import fr.hmil.roshttp.ByteBufferChopper.Finite
-import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException}
+import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException, UploadStreamException}
 import fr.hmil.roshttp.node.Modules.{http, https}
 import fr.hmil.roshttp.node.buffer.Buffer
 import fr.hmil.roshttp.node.http.{IncomingMessage, RequestOptions}
@@ -36,13 +36,16 @@ private object NodeDriver extends DriverTrait {
       path = req.longPath
     ), handleResponse(req, factory, p)_)
     nodeRequest.on("error", { (s: js.Dynamic) =>
-      p.failure(new HttpNetworkException(new IOException(s.toString)))
+      p.tryFailure(new HttpNetworkException(new IOException(s.toString)))
       ()
     })
     if (req.body.isDefined) {
       req.body.foreach({ part =>
         part.content.subscribe(new Observer[ByteBuffer] {
-          override def onError(ex: Throwable): Unit = nodeRequest.end()
+          override def onError(ex: Throwable): Unit = {
+            p.tryFailure(new UploadStreamException(ex))
+            nodeRequest.abort()
+          }
 
           override def onComplete(): Unit = {
             nodeRequest.end()

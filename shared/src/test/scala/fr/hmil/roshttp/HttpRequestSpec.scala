@@ -6,9 +6,10 @@ import fr.hmil.roshttp.body.Implicits._
 import fr.hmil.roshttp.body.JSONBody._
 import fr.hmil.roshttp.body._
 import fr.hmil.roshttp.exceptions.HttpResponseException.SimpleHttpResponseException
-import fr.hmil.roshttp.exceptions.{HttpTimeoutException, SimpleResponseTimeoutException}
+import fr.hmil.roshttp.exceptions.{HttpTimeoutException, SimpleResponseTimeoutException, UploadStreamException}
 import fr.hmil.roshttp.response.SimpleHttpResponse
 import monix.execution.Scheduler.Implicits.global
+import monix.execution.schedulers.TestScheduler.Task
 import monix.reactive.Observable
 import utest._
 
@@ -624,8 +625,10 @@ object HttpRequestSpec extends TestSuite {
         HttpRequest(s"$SERVER_URL/compare/icon.png")
           .post(ByteBufferBody(ByteBuffer.wrap(IMAGE_BYTES)))
       }
+    }
 
-      "can post a stream" - {
+    "Streamed request body" - {
+      "is properly sent" - {
         HttpRequest(s"$SERVER_URL/compare/icon.png")
           .post(
             // Splits the image bytes into chunks to create a streamed body
@@ -636,6 +639,19 @@ object HttpRequestSpec extends TestSuite {
               ).map(b => ByteBuffer.wrap(b.toArray))
             )
           )
+      }
+
+      "with error is properly handled" - {
+        HttpRequest(s"$SERVER_URL/does_not_exist")
+          .post(StreamBody(
+              Observable.fromStateAction({ i: Int =>
+                if (i == 0) throw new Exception("Stream error")
+                (ByteBuffer.allocate(1), i - 1)
+              })(3)
+            ))
+            .recover({
+              case e:UploadStreamException => e
+            })
       }
     }
   }

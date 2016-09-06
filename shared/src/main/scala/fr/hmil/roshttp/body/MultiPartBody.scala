@@ -2,13 +2,10 @@ package fr.hmil.roshttp.body
 
 import java.nio.ByteBuffer
 
-import fr.hmil.roshttp.ByteBufferQueue
-import monix.execution.Ack.Continue
-import monix.execution.{Ack, Scheduler}
-import monix.reactive.{Observable, Observer}
+import monix.execution.Scheduler
+import monix.reactive.Observable
 
-import scala.concurrent.{Future, Promise}
-import scala.util.{Failure, Random, Success}
+import scala.util.Random
 
 /** A body made of multiple parts.
   *
@@ -29,72 +26,24 @@ class MultiPartBody(parts: Map[String, BodyPart], subtype: String = "form-data")
 
   val boundary = "----" + Random.alphanumeric.take(24).mkString.toLowerCase
 
-  private val LINE_BREAK = ByteBuffer.wrap(Array[Byte](13, 10))
-
   override def contentType: String = s"multipart/$subtype; boundary=$boundary"
 
-  // TODO use combinations on observables
-
   override def content: Observable[ByteBuffer] = {
-    val queue = new ByteBufferQueue()
-
-    parts.map({ case(name, part) =>
-      val localBuffer = new ByteBufferQueue()
-      val p = Promise[(String, BodyPart, ByteBufferQueue)]()
-      part.content.subscribe(new Observer[ByteBuffer] {
-
-        override def onError(ex: Throwable): Unit = {
-          p.failure(ex)
-        }
-
-        override def onComplete(): Unit = {
-          p.success((name, part, localBuffer))
-        }
-
-        override def onNext(buffer: ByteBuffer): Future[Ack] = {
-          localBuffer.push(buffer)
-          Continue
-        }
-      })
-      p.future
-    }).foldLeft(Future.successful(()))({(acc, f) =>
-
-      acc.flatMap({ _ =>
-        f.map({ case (name, part, buffer) =>
-          val p = Promise[Unit]
-          queue.push(ByteBuffer.wrap(
-            ("\r\n--" + boundary + "\r\n" +
-              "Content-Disposition: form-data; name=\"" + name + "\"\r\n" +
-              s"Content-Type: ${part.contentType}\r\n" +
-              "\r\n").getBytes("utf-8")))
-
-          buffer.observable.subscribe(new Observer[ByteBuffer] {
-
-            override def onError(ex: Throwable): Unit = {
-              p.failure(ex)
-            }
-
-            override def onComplete(): Unit = {
-              p.success(())
-            }
-
-            override def onNext(buffer: ByteBuffer): Future[Ack] = {
-              queue.push(buffer)
-              Continue
-            }
-          })
-          p.future
-        })
-      })
-    }).andThen({
-      case _: Success[Unit] =>
-        queue.push(ByteBuffer.wrap(s"\r\n--$boundary--".getBytes("utf-8")))
-        queue.end()
-      case f: Failure[Unit] =>
-        queue.end()
-    })
-
-    queue.observable
+    parts.
+      // Prepend multipart encapsulation boundary and body part headers to
+      // each body part.
+      map({ case (name, part) =>
+        ByteBuffer.wrap(
+          ("\r\n--" + boundary + "\r\n" +
+            "Content-Disposition: form-data; name=\"" + name + "\"\r\n" +
+            s"Content-Type: ${part.contentType}\r\n" +
+            "\r\n").getBytes("utf-8")
+        ) +: part.content
+      }).
+      // Join body parts
+      reduceLeft((acc, elem) => acc ++ elem).
+      // Append the closing boundary
+      :+(ByteBuffer.wrap(s"\r\n--$boundary--".getBytes("utf-8")))
   }
 }
 

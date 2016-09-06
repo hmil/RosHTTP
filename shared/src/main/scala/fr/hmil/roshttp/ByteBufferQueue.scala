@@ -43,6 +43,7 @@ private[roshttp] class ByteBufferQueue(implicit ec: ExecutionContext) {
   }
 
   def push(buffers: Seq[ByteBuffer]): Unit = {
+    if (hasEnd) throw new IllegalStateException("Trying to push new data to an ended buffer queue")
     bufferQueue.enqueue(buffers:_*)
     if (bufferQueue.nonEmpty) {
       subscriber.foreach(_ => propagate())
@@ -68,6 +69,8 @@ private[roshttp] class ByteBufferQueue(implicit ec: ExecutionContext) {
       subscriber = Some(sub)
       if (bufferQueue.nonEmpty) {
         propagate()
+      } else if (hasEnd) {
+        stop()
       }
       cancelable
     }
@@ -75,6 +78,5 @@ private[roshttp] class ByteBufferQueue(implicit ec: ExecutionContext) {
 
   private def stop(): Unit = {
     subscriber.foreach(_.onComplete())
-    subscriber = None
   }
 }

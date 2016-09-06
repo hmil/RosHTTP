@@ -6,12 +6,12 @@ import java.util.concurrent.TimeUnit
 import fr.hmil.roshttp.BackendConfig
 import fr.hmil.roshttp.exceptions.SimpleResponseTimeoutException
 import fr.hmil.roshttp.util.{HeaderMap, Utils}
-import monix.execution.Ack.{Continue, Stop}
 import monix.execution.Scheduler
-import monix.reactive.{Observable, Observer}
+import monix.reactive.Observable
 
 import scala.collection.mutable
 import scala.concurrent.{Future, Promise}
+import scala.util.Success
 
 /**
  * An HTTP response obtained via an [[fr.hmil.roshttp.HttpRequest]]
@@ -31,48 +31,34 @@ object SimpleHttpResponse extends HttpResponseFactory[SimpleHttpResponse] {
       (implicit scheduler: Scheduler): Future[SimpleHttpResponse] = {
 
     val charset = Utils.charsetFromContentType(headers.getOrElse("content-type", null))
-
-    val promise = Promise[mutable.Queue[ByteBuffer]]()
     val buffers = mutable.Queue[ByteBuffer]()
-    var cancelled = false
+    val promise = Promise[SimpleHttpResponse]()
+
+    val streamCollector = bodyStream.
+      foreach(elem => buffers.enqueue(elem)).
+      map({_ =>
+        val body = recomposeBody(buffers, config.maxChunkSize, charset)
+        new SimpleHttpResponse(statusCode, headers, body)
+      })
+
 
     val timeoutTask = scheduler.scheduleOnce(config.bodyCollectTimeout, TimeUnit.SECONDS,
       new Runnable {
         override def run(): Unit = {
           val partialBody = recomposeBody(buffers, config.maxChunkSize, charset)
           promise.failure(SimpleResponseTimeoutException(
-            Some(new SimpleHttpResponse(statusCode, headers, partialBody))))
-          cancelled = true
+              Some(new SimpleHttpResponse(statusCode, headers, partialBody))))
+          streamCollector.cancel()
         }
       })
 
-    bodyStream.subscribe(new Observer[ByteBuffer] {
-      def onNext(elem: ByteBuffer) = {
-        if (!cancelled) {
-          buffers.enqueue(elem)
-          Continue
-        } else {
-          Stop
-        }
-      }
-      def onComplete() = {
+    streamCollector.onComplete({
+      case res:Success[SimpleHttpResponse] =>
         timeoutTask.cancel()
-        if (!cancelled) {
-          promise.trySuccess(buffers)
-        }
-      }
-      def onError(ex: Throwable) = {
-        timeoutTask.cancel()
-        if (!cancelled) {
-          promise.tryFailure(ex)
-        }
-      }
+        promise.trySuccess(res.value)
     })
 
-    promise.future.map({ chunks =>
-      val body = recomposeBody(chunks, config.maxChunkSize, charset)
-      new SimpleHttpResponse(statusCode, headers, body)
-    })
+    promise.future
   }
 
   private def recomposeBody(seq: mutable.Queue[ByteBuffer], maxChunkSize: Int, charset: String): String = {
