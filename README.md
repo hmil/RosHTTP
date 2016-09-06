@@ -72,8 +72,10 @@ The URI can be built using `.withProtocol`, `.withHost`, `.withPort`,
 is detailed below.
 
 ```scala
+import fr.hmil.roshttp.Protocol.HTTP
+
 HttpRequest()
-  .withProtocol(Protocol.HTTP)
+  .withProtocol(HTTP)
   .withHost("localhost")
   .withPort(3000)
   .withPath("/weather")
@@ -119,8 +121,9 @@ request
 ### HTTP Method
 
 ```scala
-// Set the request method to GET, POST, PUT, etc...
-request.withMethod(Method.PUT).send()
+import fr.hmil.roshttp.Method.PUT
+
+request.withMethod(PUT).send()
 ```
 
 ### Headers
@@ -144,6 +147,8 @@ Each request can use a specific backend configuration using `.withBackendConfig`
 
 example:
 ```scala
+import fr.hmil.roshttp.BackendConfig
+
 HttpRequest("long.source.of/data")
   .withBackendConfig(BackendConfig(
     // Uses stream chunks of at most 1024 bytes
@@ -251,6 +256,7 @@ The observable will spit out a stream of `ByteBuffer`s as shown in this example:
 
 ```scala
 import fr.hmil.roshttp.util.Utils._
+
 HttpRequest("http://my.stream.source.com/")
   .stream()
   .map({ r =>
@@ -267,8 +273,10 @@ of text can safely be handled by the non-streaming API._
 There is no shortcut method such as `.post` to get a streaming response. You can
 still achieve that by using the constructor methods as shown below:
 ```scala
+import fr.hmil.roshttp.Method.POST
+
 request
-  .withMethod(Method.POST)
+  .withMethod(POST)
   .withBody(PlainTextBody("My upload data"))
   .stream()
   // The response will be streamed
