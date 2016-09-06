@@ -153,7 +153,7 @@ object ReadmeSanityCheck extends TestSuite {
       
       import fr.hmil.roshttp.util.Utils._
       
-      HttpRequest("http://my.stream.source.com/")
+      request
         .stream()
         .map({ r =>
           r.body.foreach(buffer => println(getStringFromBuffer(buffer, "UTF-8")))
@@ -173,7 +173,7 @@ object ReadmeSanityCheck extends TestSuite {
       
       // On the JVM:
       // val inputStream = new java.io.FileInputStream("video.avi")
-      HttpRequest("http://my.stream.consumer.com/")
+      request
         .post(inputStream)
         .onComplete({
           case _:Success[SimpleHttpResponse] => println("Data successfully uploaded")

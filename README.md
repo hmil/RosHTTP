@@ -257,7 +257,7 @@ The observable will spit out a stream of `ByteBuffer`s as shown in this example:
 ```scala
 import fr.hmil.roshttp.util.Utils._
 
-HttpRequest("http://my.stream.source.com/")
+request
   .stream()
   .map({ r =>
     r.body.foreach(buffer => println(getStringFromBuffer(buffer, "UTF-8")))
@@ -299,7 +299,7 @@ import fr.hmil.roshttp.body.Implicits._
 
 // On the JVM:
 // val inputStream = new java.io.FileInputStream("video.avi")
-HttpRequest("http://my.stream.consumer.com/")
+request
   .post(inputStream)
   .onComplete({
     case _:Success[SimpleHttpResponse] => println("Data successfully uploaded")
