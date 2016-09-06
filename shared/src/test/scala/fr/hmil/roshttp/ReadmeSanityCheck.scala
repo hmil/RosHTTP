@@ -27,14 +27,18 @@ object ReadmeSanityCheck extends TestSuite {
       
       import fr.hmil.roshttp.HttpRequest
       import monix.execution.Scheduler.Implicits.global
+      import scala.util.{Failure, Success}
+      import fr.hmil.roshttp.response.SimpleHttpResponse
       
       // Runs consistently on the jvm, in node.js and in the browser!
       val request = HttpRequest("https://schema.org/WebPage")
       
-      request.send().map(response => println(response.body))
+      request.send().onComplete({
+          case res:Success[SimpleHttpResponse] => println(res.get.body)
+          case e: Failure[SimpleHttpResponse] => e.exception.printStackTrace()
+        })
       
       import fr.hmil.roshttp.exceptions._
-      import fr.hmil.roshttp.response.SimpleHttpResponse
       
       HttpRequest("http://hmil.github.io/foobar")
         .send()
@@ -143,10 +147,29 @@ object ReadmeSanityCheck extends TestSuite {
       ))
       
       import fr.hmil.roshttp.util.Utils._
-      HttpRequest("my.streaming.source/")
+      HttpRequest("http://my.stream.source.com/")
         .stream()
         .map({ r =>
           r.body.foreach(buffer => println(getStringFromBuffer(buffer, "UTF-8")))
+        })
+      
+      request
+        .withMethod(Method.POST)
+        .withBody(PlainTextBody("My upload data"))
+        .stream()
+        // The response will be streamed
+      
+      val inputStream = new java.io.ByteArrayInputStream(new Array[Byte](1))
+      
+      import fr.hmil.roshttp.body.Implicits._
+      
+      // On the JVM:
+      // val inputStream = new java.io.FileInputStream("video.avi")
+      HttpRequest("http://my.stream.consumer.com/")
+        .post(inputStream)
+        .onComplete({
+          case _:Success[SimpleHttpResponse] => println("Data successfully uploaded")
+          case _:Failure[SimpleHttpResponse] => println("Error: Could not upload stream")
         })
   
       "Success"
