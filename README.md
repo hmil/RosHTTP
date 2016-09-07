@@ -25,12 +25,17 @@ the [API doc](http://hmil.github.io/RosHTTP/docs/index.html) too.
 
 ```scala
 import fr.hmil.roshttp.HttpRequest
-import monifu.concurrent.Implicits.globalScheduler
+import monix.execution.Scheduler.Implicits.global
+import scala.util.{Failure, Success}
+import fr.hmil.roshttp.response.SimpleHttpResponse
 
 // Runs consistently on the jvm, in node.js and in the browser!
 val request = HttpRequest("https://schema.org/WebPage")
 
-request.send().map(response => println(response.body))
+request.send().onComplete({
+    case res:Success[SimpleHttpResponse] => println(res.get.body)
+    case e: Failure[SimpleHttpResponse] => e.exception.printStackTrace()
+  })
 ```
 
 When you `send()` a request, you get a `Future` which resolves to
@@ -40,7 +45,6 @@ When applicable, the response body of a failed request can be read:
 
 ```scala
 import fr.hmil.roshttp.exceptions._
-import fr.hmil.roshttp.response.SimpleHttpResponse
 
 HttpRequest("http://hmil.github.io/foobar")
   .send()
@@ -68,8 +72,10 @@ The URI can be built using `.withProtocol`, `.withHost`, `.withPort`,
 is detailed below.
 
 ```scala
+import fr.hmil.roshttp.Protocol.HTTP
+
 HttpRequest()
-  .withProtocol(Protocol.HTTP)
+  .withProtocol(HTTP)
   .withHost("localhost")
   .withPort(3000)
   .withPath("/weather")
@@ -115,8 +121,9 @@ request
 ### HTTP Method
 
 ```scala
-// Set the request method to GET, POST, PUT, etc...
-request.withMethod(Method.PUT).send()
+import fr.hmil.roshttp.Method.PUT
+
+request.withMethod(PUT).send()
 ```
 
 ### Headers
@@ -140,6 +147,8 @@ Each request can use a specific backend configuration using `.withBackendConfig`
 
 example:
 ```scala
+import fr.hmil.roshttp.BackendConfig
+
 HttpRequest("long.source.of/data")
   .withBackendConfig(BackendConfig(
     // Uses stream chunks of at most 1024 bytes
@@ -242,12 +251,13 @@ request.post(MultiPartBody(
 Streaming a response is as simple as calling `.stream()` instead of `.send()`.
 `HttpRequest#stream()` returns a Future of `StreamHttpResponse`. A `StreamHttpResponse`
 is just like a `SimpleHttpResponse` except that its `body` property is an
-[Observable](https://monix.io/api/1.2/#monifu.reactive.Observable).
+[Observable](https://monix.io/api/2.0/#monix.reactive.Observable).
 The observable will spit out a stream of `ByteBuffer`s as shown in this example:
 
 ```scala
 import fr.hmil.roshttp.util.Utils._
-HttpRequest("my.streaming.source/")
+
+request
   .stream()
   .map({ r =>
     r.body.foreach(buffer => println(getStringFromBuffer(buffer, "UTF-8")))
@@ -256,11 +266,46 @@ HttpRequest("my.streaming.source/")
 _Note that special care should be taken when converting chunks into strings because
 multibyte characters may span multiple chunks._
 _In general streaming is used for binary data and any reasonable quantity
-of text can safely be handled by the non-streaming API_
+of text can safely be handled by the non-streaming API._
+
+#### HTTP methods
+
+There is no shortcut method such as `.post` to get a streaming response. You can
+still achieve that by using the constructor methods as shown below:
+```scala
+import fr.hmil.roshttp.Method.POST
+
+request
+  .withMethod(POST)
+  .withBody(PlainTextBody("My upload data"))
+  .stream()
+  // The response will be streamed
+```
 
 ### Upload Streams
 
-TODO: document streams once upgraded to monix v2
+There are cases where you want to upload some very large data with minimal memory
+consumption. We've got you covered! The [StreamBody](TODO: doc link) takes an
+[Observable](https://monix.io/api/2.0/#monix.reactive.Observable)[ByteBuffer]
+and streams its contents to the server. You can also pass an InputStream directly
+using RösHTTP's implicit converters:
+<!-- Defining an inputStream for the tests
+```scala
+val inputStream = new java.io.ByteArrayInputStream(new Array[Byte](1))
+```
+-->
+```scala
+import fr.hmil.roshttp.body.Implicits._
+
+// On the JVM:
+// val inputStream = new java.io.FileInputStream("video.avi")
+request
+  .post(inputStream)
+  .onComplete({
+    case _:Success[SimpleHttpResponse] => println("Data successfully uploaded")
+    case _:Failure[SimpleHttpResponse] => println("Error: Could not upload stream")
+  })
+```
 
 ---
 
@@ -270,8 +315,8 @@ see something that is missing.
 
 # Known limitations
 
-- Response streaming is emulated in the browser, meaning that streaming large responses in the
-  browser will consume large amounts of memory and might fail.
+- Streaming is emulated in the browser, meaning that streaming large request or
+  response payloads in the browser will consume large amounts of memory and might fail.
   This [problem has a solution](https://github.com/hmil/RosHTTP/issues/46)
 - `bodyCollectTimeout` is ignored on Chrome.
 - Some headers cannot be set in the browser ([list](https://developer.mozilla.org/en-US/docs/Glossary/Forbidden_header_name)).

@@ -4,15 +4,15 @@ import java.io.IOException
 import java.nio.ByteBuffer
 
 import fr.hmil.roshttp.ByteBufferChopper.Finite
-import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException}
+import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException, UploadStreamException}
 import fr.hmil.roshttp.node.Modules.{http, https}
 import fr.hmil.roshttp.node.buffer.Buffer
 import fr.hmil.roshttp.node.http.{IncomingMessage, RequestOptions}
 import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory}
 import fr.hmil.roshttp.util.HeaderMap
-import monifu.concurrent.Scheduler
-import monifu.reactive.Ack.Continue
-import monifu.reactive.{Ack, Observer}
+import monix.execution.Ack.Continue
+import monix.execution.{Ack, Scheduler}
+import monix.reactive.Observer
 
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
@@ -36,13 +36,16 @@ private object NodeDriver extends DriverTrait {
       path = req.longPath
     ), handleResponse(req, factory, p)_)
     nodeRequest.on("error", { (s: js.Dynamic) =>
-      p.failure(new HttpNetworkException(new IOException(s.toString)))
+      p.tryFailure(new HttpNetworkException(new IOException(s.toString)))
       ()
     })
     if (req.body.isDefined) {
       req.body.foreach({ part =>
-        part.content.onSubscribe(new Observer[ByteBuffer] {
-          override def onError(ex: Throwable): Unit = nodeRequest.end()
+        part.content.subscribe(new Observer[ByteBuffer] {
+          override def onError(ex: Throwable): Unit = {
+            p.tryFailure(new UploadStreamException(ex))
+            nodeRequest.abort()
+          }
 
           override def onComplete(): Unit = {
             nodeRequest.end()

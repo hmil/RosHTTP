@@ -3,12 +3,12 @@ package fr.hmil.roshttp
 import java.nio.ByteBuffer
 
 import fr.hmil.roshttp.ByteBufferChopper.Finite
-import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException}
+import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException, UploadStreamException}
 import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory}
 import fr.hmil.roshttp.util.HeaderMap
-import monifu.concurrent.Scheduler
-import monifu.reactive.Ack.Continue
-import monifu.reactive.{Observable, Observer}
+import monix.execution.Ack.Continue
+import monix.execution.{Ack, Scheduler}
+import monix.reactive.{Observable, Observer}
 import org.scalajs.dom
 import org.scalajs.dom.ext.Ajax
 import org.scalajs.dom.raw.ErrorEvent
@@ -93,29 +93,24 @@ private object BrowserDriver extends DriverTrait {
 
   private def bufferBody(bodyStream: Observable[ByteBuffer])(implicit scheduler: Scheduler): Future[ByteBuffer] = {
     val bufferQueue = mutable.Queue[ByteBuffer]()
-    val promise = Promise[mutable.Queue[ByteBuffer]]()
     var bytes = 0
+    val p = Promise[ByteBuffer]()
 
-    bodyStream.onSubscribe(new Observer[ByteBuffer] {
-      def onNext(elem: ByteBuffer) = {
+    bodyStream.subscribe(new Observer[ByteBuffer] {
+      override def onError(ex: Throwable): Unit = p.failure(new UploadStreamException(ex))
+
+      override def onComplete(): Unit = p.success(recomposeBody(bufferQueue, bytes))
+
+      override def onNext(elem: ByteBuffer): Future[Ack] = {
         bytes += elem.limit
         bufferQueue.enqueue(elem)
-        Continue
-      }
-
-      def onComplete() = {
-        promise.trySuccess(bufferQueue)
-      }
-
-      def onError(ex: Throwable) = {
-        promise.tryFailure(ex)
+        Future.successful(Continue)
       }
     })
 
-    promise.future.map(chunks => recomposeBody(chunks, bytes))
+    p.future
   }
 
-  // TODO: factor that with SimpleHttpResponse code
   private def recomposeBody(seq: mutable.Queue[ByteBuffer], bytes: Int): ByteBuffer = {
     // Allocate maximum expected body length
     val buffer = ByteBuffer.allocate(bytes)

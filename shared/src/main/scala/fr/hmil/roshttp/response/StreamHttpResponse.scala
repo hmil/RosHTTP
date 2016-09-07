@@ -4,8 +4,8 @@ import java.nio.ByteBuffer
 
 import fr.hmil.roshttp.BackendConfig
 import fr.hmil.roshttp.util.HeaderMap
-import monifu.concurrent.Scheduler
-import monifu.reactive.Observable
+import monix.execution.Scheduler
+import monix.reactive.Observable
 
 import scala.concurrent.Future
 

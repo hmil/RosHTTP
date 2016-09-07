@@ -3,13 +3,12 @@ package fr.hmil.roshttp
 import java.net.{HttpURLConnection, URL}
 import java.nio.ByteBuffer
 
-import scala.util.Success
-import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException}
+import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException, UploadStreamException}
 import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory}
 import fr.hmil.roshttp.util.HeaderMap
-import monifu.concurrent.Scheduler
-import monifu.reactive.Ack.Continue
-import monifu.reactive.{Ack, Observable, Observer}
+import monix.execution.Ack.Continue
+import monix.execution.{Ack, Scheduler}
+import monix.reactive.{Observable, Observer}
 
 import scala.concurrent.{Future, Promise, blocking}
 
@@ -19,7 +18,9 @@ private object HttpDriver extends DriverTrait {
   def send[T <: HttpResponse]
       (req: HttpRequest, responseFactory: HttpResponseFactory[T])
       (implicit scheduler: Scheduler): Future[T] = {
-    sendRequest(req).flatMap({connection => readResponse(connection, responseFactory, req.backendConfig)})
+
+    sendRequest(req).flatMap({ connection =>
+        readResponse(connection, responseFactory, req.backendConfig)})
   }
 
   private def sendRequest(req: HttpRequest)(implicit scheduler: Scheduler): Future[HttpURLConnection] = {
@@ -33,11 +34,12 @@ private object HttpDriver extends DriverTrait {
         val os = connection.getOutputStream
         // TODO: unchecked buffer.array() (+ test edge case where a buffer is not backed by array)
         // todo setXXXStreamingMode
-        part.content.onSubscribe(new Observer[ByteBuffer] {
+
+        part.content.subscribe(new Observer[ByteBuffer] {
 
           override def onError(ex: Throwable): Unit = {
             os.close()
-            p.success(connection)
+            p.failure(new UploadStreamException(ex))
           }
 
           override def onComplete(): Unit = {
@@ -93,7 +95,7 @@ private object HttpDriver extends DriverTrait {
               headerMap,
               Option(connection.getErrorStream)
                 .map(is => inputStreamToObservable(is, config.maxChunkSize))
-                .getOrElse(Observable.from(ByteBuffer.allocate(0))),
+                .getOrElse(Observable.eval(ByteBuffer.allocate(0))),
               config
             ).map(response => throw HttpResponseException.badStatus(response))
           }

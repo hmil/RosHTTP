@@ -2,8 +2,6 @@ package fr.hmil.roshttp.body
 
 import java.nio.ByteBuffer
 
-import monifu.reactive.Observable
-
 /** A body containing raw binary data
   *
   * <b>Usage:</b> Stream bodies are used to send arbitrary binary data such as

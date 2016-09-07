@@ -2,7 +2,7 @@ package fr.hmil.roshttp.body
 
 import java.nio.ByteBuffer
 
-import monifu.reactive.Observable
+import monix.reactive.Observable
 
 class StreamBody private(
     override val content: Observable[ByteBuffer],

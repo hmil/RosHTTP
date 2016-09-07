@@ -7,8 +7,7 @@ import java.io.IOException
   * This exception can occur because of network issues.
   */
 class HttpNetworkException(message: String = null, cause: Throwable = null) extends
-  IOException(HttpNetworkException.defaultMessage(message, cause), cause) {
-
+    IOException(HttpNetworkException.defaultMessage(message, cause), cause) {
   def this(cause: Throwable) = this(null, cause)
 }
 
