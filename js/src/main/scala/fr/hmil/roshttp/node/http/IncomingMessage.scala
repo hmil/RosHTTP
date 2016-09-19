@@ -18,4 +18,7 @@ private[roshttp] class IncomingMessage extends EventEmitter {
   // message.socket -- not facaded here
   val trailers: js.Dictionary[String] = js.native
   val url: String = js.native
+
+  def pause(): Unit = js.native
+  def resume(): Unit = js.native
 }

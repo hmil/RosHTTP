@@ -12,7 +12,7 @@ class BackendConfig private(
 
 object BackendConfig {
   def apply(
-     maxChunkSize: Int = 4096,
+     maxChunkSize: Int = 8192,
      bodyCollectTimeout: Int = 10
    ): BackendConfig = new BackendConfig(
     maxChunkSize = maxChunkSize,

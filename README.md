@@ -34,29 +34,9 @@ val request = HttpRequest("https://schema.org/WebPage")
 
 request.send().onComplete({
     case res:Success[SimpleHttpResponse] => println(res.get.body)
-    case e: Failure[SimpleHttpResponse] => e.exception.printStackTrace()
+    case e: Failure[SimpleHttpResponse] => println("Huston, we got a problem!")
   })
 ```
-
-When you `send()` a request, you get a `Future` which resolves to
-a SimpleHttpResponse if everything went fine or fails with a HttpNetworkException if a
-network error occurred or with a HttpResponseException if a statusCode >= 400 was received.
-When applicable, the response body of a failed request can be read:
-
-```scala
-import fr.hmil.roshttp.exceptions._
-
-HttpRequest("http://hmil.github.io/foobar")
-  .send()
-  .onFailure {
-    // An HttpResponseException always provides a response
-    case e:HttpResponseException =>
-      "Got a status: ${e.response.statusCode}"
-    case SimpleResponseTimeoutException(partialResponse: Some[SimpleHttpResponse]) =>
-      s"Body received before timeout: ${partialResponse.get.body}"
-  }
-```
-
 
 ## Configuring requests
 
@@ -306,6 +286,66 @@ request
     case _:Failure[SimpleHttpResponse] => println("Error: Could not upload stream")
   })
 ```
+
+## Error handling
+
+Have you ever been frustrated when an application fails silently or gives you a
+vague and insignificant error message? RösHTTP comes with a powerful error handling
+API which allows you to deal with exceptions at the granularity level of your choice!
+
+### Quick and easy error handling
+
+Most applications only need to distinguish two failure cases: Application-level failures
+and lower-level failures.
+
+Application-level errors occur when a bad status code is received. For instance:
+- The request contained invalid data (400)
+- The requested resource does not exist (404)
+- The server encountered an error (500)
+- _etc..._
+
+Lower-level errors include timeouts, tcp and dns failures. They are beyond the
+scope of most applications and should be treated separately from application-level
+errors, especially in code tied to user interfaces.
+
+
+```scala
+import fr.hmil.roshttp.exceptions.HttpException
+import java.io.IOException
+request.send()
+  .recover {
+    case HttpException(e: SimpleHttpResponse) =>
+      // Here we may have some detailed application-level insight about the error
+      println("There was an issue with your request." +
+        " Here is what the application server says: " + e.body)
+    case e: IOException =>
+      // By handling transport issues separately, you get a chance to apply
+      // your own recovery strategy. Should you report to the user? Log the error?
+      // Retry the request? Send an alert to your ops team?
+      println("There was a network issue, please try again")
+  }
+```
+
+note that `HttpException` is a case class which either contains a `SimpleHttpResponse`
+or a `StreamHttpResponse` depending on what you expect your response to be (see
+[Streaming](https://github.com/hmil/RosHTTP#streaming)).
+
+### Fine-grain error handling
+
+If you ever need very specific error details, here is the hierarchy of exceptions
+which can occur in the Future.
+
+(TODO: links to scaladoc, extensively test all exceptions)
+- IOException All RösHTTP exceptions inherit from `java.io.IOException`
+  - TimeoutException base class for timeout exceptions
+    - RequestTimeoutException Sending the request took longer than the configured request timeout threshold.
+    - ResponseTimeoutException Receiving the response took longer than the configured response timeout threshold.
+    Note that in this case the headers were already received and you can access them if needed (mainly for debugging purposes).
+  - RequestException A transport error occurred while sending the request (eg. DNS resolution failure). (TODO test DNS resolution failure)
+  - ResponseException A transport error occurred while receiving the response.
+  Note that in this case the headers were already received and you can access them if needed (mainly for debugging purposes).
+  - UploadStreamException The stream used as a data source for the request body failed.
+  - HttpException Application-level errors (ie. status codes >= 400)
 
 ---
 

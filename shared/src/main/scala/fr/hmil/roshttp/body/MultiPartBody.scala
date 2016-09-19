@@ -43,7 +43,7 @@ class MultiPartBody(parts: Map[String, BodyPart], subtype: String = "form-data")
       // Join body parts
       reduceLeft((acc, elem) => acc ++ elem).
       // Append the closing boundary
-      :+(ByteBuffer.wrap(s"\r\n--$boundary--".getBytes("utf-8")))
+      :+(ByteBuffer.wrap(s"\r\n--$boundary--\r\n".getBytes("utf-8")))
   }
 }
 

@@ -3,8 +3,7 @@ package fr.hmil.roshttp
 import java.net.URI
 
 import fr.hmil.roshttp.body.BodyPart
-import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException}
-import fr.hmil.roshttp.response.{HttpResponse, SimpleHttpResponse, StreamHttpResponse, StreamHttpResponse$}
+import fr.hmil.roshttp.response.{HttpResponse, SimpleHttpResponse, StreamHttpResponse}
 import fr.hmil.roshttp.util.{HeaderMap, Utils}
 import monix.execution.Scheduler
 
@@ -13,8 +12,6 @@ import scala.concurrent.Future
 /** Builds an HTTP request.
   *
   * The request is sent using  [[send]]. A request can be sent multiple times.
-  * Each time yields a Future[HttpResponse] which either succeeds with an [[HttpResponse]]
-  * or fails with an [[HttpNetworkException]] or [[HttpResponseException]]
   */
 final class HttpRequest  private (
     val method: Method,
@@ -248,22 +245,22 @@ final class HttpRequest  private (
   /** Sends this request.
     *
     * A request can be sent multiple times. When a request is sent, it returns a Future[HttpResponse]
-    * which either succeeds with an [[HttpResponse]] or fails.
-    *
-    * Possible reasons for the future failing are:
-    * - A status code >= 400 ([[HttpResponseException]])
-    * - A network error ([[HttpNetworkException]])
-    *
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkException]] or [[HttpResponseException]]
+    * which either succeeds with an [[HttpResponse]] or fails.]]
     */
   def send()(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
     HttpDriver.send(this, SimpleHttpResponse)
+
+  /** Sends this request with the GET method.
+    *
+    * @see [[send]]
+    */
+  def get()(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
+    withMethod(Method.GET).send()
 
   /** Sends this request with the POST method and a body
     *
     * @see [[send]]
     * @param body The body to send with the request
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkException]] or [[HttpResponseException]]
     */
   def post(body: BodyPart)(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
       withMethod(Method.POST).send(body)
@@ -272,7 +269,6 @@ final class HttpRequest  private (
     *
     * @see [[post]]
     * @param body The body to send with the request
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkException]] or [[HttpResponseException]]
     */
   def put(body: BodyPart)(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
       withMethod(Method.PUT).send(body)
@@ -281,7 +277,6 @@ final class HttpRequest  private (
     *
     * @see [[post]]
     * @param body The body to send with the request
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkException]] or [[HttpResponseException]]
     */
   def options(body: BodyPart)(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
       withMethod(Method.OPTIONS).send(body)
@@ -293,7 +288,6 @@ final class HttpRequest  private (
     * data with the request, you should use [[post]] without arguments.
     *
     * @param body The body to send.
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkException]] or [[HttpResponseException]]
     */
   def send(body: BodyPart)(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
       withBody(body).send()
