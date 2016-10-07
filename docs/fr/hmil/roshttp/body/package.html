@@ -83,8 +83,50 @@
       </a>
     </span>
       
+    </li><li name="fr.hmil.roshttp.body.BulkBodyPart" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="BulkBodyPartextendsBodyPart"></a>
+      <a id="BulkBodyPart:BulkBodyPart"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="BulkBodyPart.html"><span class="name">BulkBodyPart</span></a><span class="result"> extends <a href="BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.roshttp.body.package@BulkBodyPartextendsBodyPart" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="fr.hmil.roshttp.body.ByteBufferBody" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ByteBufferBodyextendsBulkBodyPart"></a>
+      <a id="ByteBufferBody:ByteBufferBody"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ByteBufferBody.html"><span class="name">ByteBufferBody</span></a><span class="result"> extends <a href="BulkBodyPart.html" class="extype" name="fr.hmil.roshttp.body.BulkBodyPart">BulkBodyPart</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.roshttp.body.package@ByteBufferBodyextendsBulkBodyPart" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A body containing raw binary data</p><div class="fullcomment"><div class="comment cmt"><p>A body containing raw binary data</p><p><b>Usage:</b> Stream bodies are used to send arbitrary binary data such as
+audio, video or any other file attachment.
+The content-type can be overridden to something more specific like <code>image/jpeg</code>
+or <code>audio/wav</code> for instance.
+It is common to embed a stream body in a <a href="MultiPartBody.html" class="extype" name="fr.hmil.roshttp.body.MultiPartBody">MultiPartBody</a> to send additional information
+with the binary file.
+When possible, send a <code>Content-Length</code> header along with an octet-stream body. It may allow the receiver
+end to better handle the loading.</p><p>A stream body is sent with the content-type application/octet-stream.
+</p></div></div>
     </li><li name="fr.hmil.roshttp.body.JSONBody" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="JSONBodyextendsBodyPart"></a>
+      <a id="JSONBodyextendsBulkBodyPart"></a>
       <a id="JSONBody:JSONBody"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -92,10 +134,10 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="JSONBody.html"><span class="name">JSONBody</span></a><span class="result"> extends <a href="BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a></span>
+        <a href="JSONBody.html"><span class="name">JSONBody</span></a><span class="result"> extends <a href="BulkBodyPart.html" class="extype" name="fr.hmil.roshttp.body.BulkBodyPart">BulkBodyPart</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.package@JSONBodyextendsBodyPart" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.body.package@JSONBodyextendsBulkBodyPart" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -118,12 +160,12 @@
     </span>
       <p class="shortcomment cmt">A body made of multiple parts.</p><div class="fullcomment"><div class="comment cmt"><p>A body made of multiple parts.</p><p><b>Usage:</b> A multipart body acts as a container for other bodies. For instance,
 the multipart body is commonly used to send a form with binary attachments in conjunction with
-the <a href="StreamBody.html" class="extype" name="fr.hmil.roshttp.body.StreamBody">StreamBody</a>.
+the <a href="ByteBufferBody.html" class="extype" name="fr.hmil.roshttp.body.ByteBufferBody">ByteBufferBody</a>.
 For simple key/value pairs, use <a href="URLEncodedBody.html" class="extype" name="fr.hmil.roshttp.body.URLEncodedBody">URLEncodedBody</a> instead.</p><p><b>Safety consideration:</b> A random boundary is generated to separate parts. If the boundary was
 to occur within a body part, it would mess up the whole body. In practice, the odds are extremely small though.
 </p></div></div>
     </li><li name="fr.hmil.roshttp.body.PlainTextBody" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="PlainTextBodyextendsBodyPart"></a>
+      <a id="PlainTextBodyextendsBulkBodyPart"></a>
       <a id="PlainTextBody:PlainTextBody"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -131,15 +173,15 @@ to occur within a body part, it would mess up the whole body. In practice, the o
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="PlainTextBody.html"><span class="name">PlainTextBody</span></a><span class="result"> extends <a href="BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a></span>
+        <a href="PlainTextBody.html"><span class="name">PlainTextBody</span></a><span class="result"> extends <a href="BulkBodyPart.html" class="extype" name="fr.hmil.roshttp.body.BulkBodyPart">BulkBodyPart</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.package@PlainTextBodyextendsBodyPart" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.body.package@PlainTextBodyextendsBulkBodyPart" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Plain text body sent as <code>text/plain</code> mime type.</p>
-    </li><li name="fr.hmil.roshttp.body.StreamBody" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="fr.hmil.roshttp.body.StreamBody" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="StreamBodyextendsBodyPart"></a>
       <a id="StreamBody:StreamBody"></a>
       <h4 class="signature">
@@ -155,17 +197,9 @@ to occur within a body part, it would mess up the whole body. In practice, the o
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">A body containing raw binary data</p><div class="fullcomment"><div class="comment cmt"><p>A body containing raw binary data</p><p><b>Usage:</b> Stream bodies are used to send arbitrary binary data such as
-audio, video or any other file attachment.
-The content-type can be overridden to something more specific like <code>image/jpeg</code>
-or <code>audio/wav</code> for instance.
-It is common to embed a stream body in a <a href="MultiPartBody.html" class="extype" name="fr.hmil.roshttp.body.MultiPartBody">MultiPartBody</a> to send additional information
-with the binary file.
-When possible, send a <code>Content-Length</code> header along with an octet-stream body. It may allow the receiver
-end to better handle the loading.</p><p>A stream body is sent with the content-type application/octet-stream.
-</p></div></div>
+      
     </li><li name="fr.hmil.roshttp.body.URLEncodedBody" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="URLEncodedBodyextendsBodyPart"></a>
+      <a id="URLEncodedBodyextendsBulkBodyPart"></a>
       <a id="URLEncodedBody:URLEncodedBody"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -173,15 +207,15 @@ end to better handle the loading.</p><p>A stream body is sent with the content-t
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="URLEncodedBody.html"><span class="name">URLEncodedBody</span></a><span class="result"> extends <a href="BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a></span>
+        <a href="URLEncodedBody.html"><span class="name">URLEncodedBody</span></a><span class="result"> extends <a href="BulkBodyPart.html" class="extype" name="fr.hmil.roshttp.body.BulkBodyPart">BulkBodyPart</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.package@URLEncodedBodyextendsBodyPart" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.body.package@URLEncodedBodyextendsBulkBodyPart" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">An urlencoded HTTP body.</p><div class="fullcomment"><div class="comment cmt"><p>An urlencoded HTTP body.</p><p><b>Usage:</b> urlencoded bodies are best suited for simple key/value maps of strings. For more
-structured data, use <a href="JSONBody.html" class="extype" name="fr.hmil.roshttp.body.JSONBody">JSONBody</a>. For binary data, use <a href="StreamBody.html" class="extype" name="fr.hmil.roshttp.body.StreamBody">StreamBody</a> or <a href="MultiPartBody.html" class="extype" name="fr.hmil.roshttp.body.MultiPartBody">MultiPartBody</a>.</p><p>URLEncoded bodies are associated with the mime type &quot;application/x-www-form-urlencoded&quot;
+structured data, use <a href="JSONBody.html" class="extype" name="fr.hmil.roshttp.body.JSONBody">JSONBody</a>. For binary data, use <a href="ByteBufferBody.html" class="extype" name="fr.hmil.roshttp.body.ByteBufferBody">ByteBufferBody</a> or <a href="MultiPartBody.html" class="extype" name="fr.hmil.roshttp.body.MultiPartBody">MultiPartBody</a>.</p><p>URLEncoded bodies are associated with the mime type &quot;application/x-www-form-urlencoded&quot;
 and look like query string parameters (eg. key=value&amp;key2=value2 ).
 </p></div></div>
     </li></ol>
@@ -191,7 +225,24 @@ and look like query string parameters (eg. key=value&amp;key2=value2 ).
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="fr.hmil.roshttp.body.Implicits" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="fr.hmil.roshttp.body.ByteBufferBody" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ByteBufferBody"></a>
+      <a id="ByteBufferBody:ByteBufferBody"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ByteBufferBody$.html"><span class="name">ByteBufferBody</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.roshttp.body.package@ByteBufferBody" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="fr.hmil.roshttp.body.Implicits" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Implicits"></a>
       <a id="Implicits:Implicits"></a>
       <h4 class="signature">
