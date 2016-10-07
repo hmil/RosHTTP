@@ -12,7 +12,11 @@ import scala.collection.mutable
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
-// TODO: doc this
+/**
+ * Mutable queue of byteBuffers which acts as a buffer between a source and a
+ * sink. This queue guarantees that all operations (data and errors) exit in
+ * the same order as they entered.
+ */
 private[roshttp] class ByteBufferQueue(
     private val capacity: Int,
     private val feeder: Feeder = ByteBufferQueue.noopFeeder)

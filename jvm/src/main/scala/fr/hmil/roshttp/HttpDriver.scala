@@ -31,17 +31,29 @@ private object HttpDriver extends DriverTrait {
     if (req.body.isDefined) {
       req.body.foreach({ part =>
         connection.setDoOutput(true)
-        connection.setChunkedStreamingMode(4096) // TODO move magic to backend config
+        if (req.backendConfig.allowChunkedRequestBody) {
+          req.headers.get("Content-Length") match {
+            case Some(lengthStr) =>
+              try {
+                val length = lengthStr.toInt
+                connection.setFixedLengthStreamingMode(length)
+              } catch {
+                case e:NumberFormatException =>
+                  p.tryFailure(e)
+              }
+            case None => connection.setChunkedStreamingMode(req.backendConfig.maxChunkSize)
+          }
+        }
 
         val os = connection.getOutputStream
         part.content.subscribe(new Observer[ByteBuffer] {
           override def onError(ex: Throwable): Unit = {
             os.close()
-            p.failure(new UploadStreamException(ex))
+            p.tryFailure(UploadStreamException(ex))
           }
           override def onComplete(): Unit = {
             os.close()
-            p.success(connection)
+            p.trySuccess(connection)
           }
           override def onNext(buffer: ByteBuffer): Future[Ack] = {
             if (buffer.hasArray) {
@@ -56,7 +68,7 @@ private object HttpDriver extends DriverTrait {
         })
       })
     } else {
-      p.success(connection)
+      p.trySuccess(connection)
     }
     p.future
   }

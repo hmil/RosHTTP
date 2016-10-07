@@ -29,22 +29,26 @@ private object NodeDriver extends DriverTrait {
       else
         https
     }
+    var headers = req.headers
+    if (!req.backendConfig.allowChunkedRequestBody) {
+      headers += "Transfer-Encoding" -> ""
+    }
     val nodeRequest = module.request(RequestOptions(
       hostname = req.host,
       port = req.port.orUndefined,
       method = req.method.toString,
-      headers = js.Dictionary(req.headers.toSeq: _*),
+      headers = js.Dictionary(headers.toSeq: _*),
       path = req.longPath
     ), handleResponse(req, factory, p)_)
     nodeRequest.on("error", { (s: js.Dynamic) =>
-      p.tryFailure(new RequestException(new IOException(s.toString)))
+      p.tryFailure(RequestException(new IOException(s.toString)))
       ()
     })
     if (req.body.isDefined) {
       req.body.foreach({ part =>
         part.content.subscribe(new Observer[ByteBuffer] {
           override def onError(ex: Throwable): Unit = {
-            p.tryFailure(new UploadStreamException(ex))
+            p.tryFailure(UploadStreamException(ex))
             nodeRequest.abort()
           }
 
@@ -69,7 +73,7 @@ private object NodeDriver extends DriverTrait {
       makeRequest(req.withURL(message.headers("location")), factory, p)
     } else {
       val headers = message.headers.toMap[String, String]
-      val bufferQueue = new ByteBufferQueue(64,
+      val bufferQueue = new ByteBufferQueue(req.backendConfig.internalBufferLength,
         new Feeder {
           override def onFlush(): Unit = message.resume()
           override def onFull(): Unit = message.pause()

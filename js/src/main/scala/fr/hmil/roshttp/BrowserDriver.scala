@@ -30,10 +30,10 @@ private object BrowserDriver extends DriverTrait {
     req.headers.foreach(t => xhr.setRequestHeader(t._1, t._2))
 
     xhr.onerror = { (e: ErrorEvent) =>
-      p.failure(new RequestException(JavaScriptException(e)))
+      p.failure(RequestException(JavaScriptException(e)))
     }
 
-    val bufferQueue = new ByteBufferQueue(1000) // TODO: factor-out threshold
+    val bufferQueue = new ByteBufferQueue(req.backendConfig.internalBufferLength)
 
     xhr.onreadystatechange = { (e: dom.Event) =>
       if (xhr.readyState == dom.XMLHttpRequest.HEADERS_RECEIVED) {
@@ -90,7 +90,7 @@ private object BrowserDriver extends DriverTrait {
     val p = Promise[ByteBuffer]()
 
     bodyStream.subscribe(new Observer[ByteBuffer] {
-      override def onError(ex: Throwable): Unit = p.failure(new UploadStreamException(ex))
+      override def onError(ex: Throwable): Unit = p.failure(UploadStreamException(ex))
 
       override def onComplete(): Unit = p.success(recomposeBody(bufferQueue, bytes))
 
