@@ -20,8 +20,20 @@ app.use(bodyParser.json());
 
 // parse all other types
 app.use(bodyParser.raw({
-  type: '*/*'
+  type: 'text/plain'
 }));
+
+// Profiling middleware
+app.use(function(req, res, next) {
+  var beginTime = Date.now();
+  var end = res.end;
+  res.end = function() {
+    var endTime = Date.now();
+    console.log("Spent " + (endTime - beginTime) + "ms on " + req.path);
+    end.apply(this, arguments);
+  };
+  next();
+});
 
 app.get('/status/:statusCode', function(req, res) {
   res.set('X-Status-Code', req.params.statusCode);
@@ -56,12 +68,12 @@ app.get('/echo/:text', function(req, res) {
 app.get('/echo_repeat/:text', function(req, res) {
   res.set('Content-Type', 'text/plain');
   var repeat = req.query.repeat || 1;
-  var delay = req.query.delay || 1;
+  var delay = req.query.delay || 1000;
   function sendOne() {
     res.write(req.params.text);
     repeat--;
     if (repeat > 0) {
-      setTimeout(sendOne, delay * 1000);
+      setTimeout(sendOne, delay);
     } else {
       res.end();
     }
@@ -116,13 +128,61 @@ app.all('/empty_body/:statusCode', function(req, res) {
 });
 
 app.post('/compare/:name', function(req, res) {
-  var fdata = fs.readFileSync(path.join(__dirname, "../resources", req.params.name));
+  bodyParser.raw()(req, res, function(err) {
+    var fdata = fs.readFileSync(path.join(__dirname, "../resources", req.params.name));
 
-  if (fdata.compare(req.body) == 0) {
-    res.status(200).send('Ok');
-  } else {
-    res.status(400).send(req.body);
+    if (fdata.compare(req.body) == 0) {
+      res.status(200).send('Ok');
+    } else {
+      res.status(400).send(req.body);
+    }
+  });
+});
+
+function logOverwrite(line) {
+  process.stdout.clearLine();  // clear current text
+  process.stdout.cursorTo(0);  // move cursor to beginning of line
+  process.stdout.write(line);
+}
+
+app.post('/streams/in', function(req, res) {
+  var count = 0;
+  req.on('data', function(chunk) {
+    var prev = count;
+    count += chunk.length
+    if (prev % 16777216 > count % 16777216) {
+      logOverwrite("Upload stream : " + count + " loaded");
+    }
+  });
+  req.on('end', function() {
+    process.stdout.write("\n");
+    res.send('Received ' + count + ' bytes.');
+  })
+});
+
+var ONE_MILLION = 1000000;
+app.get('/streams/out', function(req, res) {
+  var buff = Buffer.alloc(8192, 97);
+  var remaining = ONE_MILLION;
+  var increment = remaining / 100;
+  res.set('Content-Type', 'application/octet-stream');
+  res.set('Transfer-Encoding', 'chunked');
+
+  function niceWrite() {
+    while (remaining > 0) {
+      remaining --;
+      if (remaining % increment === 0) {
+        logOverwrite("Download stream: " + remaining + " chunks to go.")
+      }
+      if (res.write(buff) === false) {
+        res.once('drain', niceWrite);
+        return;
+      }
+    }
+    process.stdout.write("\n");
+    res.end();
   }
+  niceWrite();
 });
 
 app.use('/resources', express.static('../resources'));

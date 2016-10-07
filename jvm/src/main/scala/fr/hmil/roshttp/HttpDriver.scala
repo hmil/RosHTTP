@@ -3,8 +3,8 @@ package fr.hmil.roshttp
 import java.net.{HttpURLConnection, URL}
 import java.nio.ByteBuffer
 
-import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException, UploadStreamException}
-import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory}
+import fr.hmil.roshttp.exceptions._
+import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory, HttpResponseHeader}
 import fr.hmil.roshttp.util.HeaderMap
 import monix.execution.Ack.Continue
 import monix.execution.{Ack, Scheduler}
@@ -31,22 +31,30 @@ private object HttpDriver extends DriverTrait {
     if (req.body.isDefined) {
       req.body.foreach({ part =>
         connection.setDoOutput(true)
+        if (req.backendConfig.allowChunkedRequestBody) {
+          req.headers.get("Content-Length") match {
+            case Some(lengthStr) =>
+              try {
+                val length = lengthStr.toInt
+                connection.setFixedLengthStreamingMode(length)
+              } catch {
+                case e:NumberFormatException =>
+                  p.tryFailure(e)
+              }
+            case None => connection.setChunkedStreamingMode(req.backendConfig.maxChunkSize)
+          }
+        }
+
         val os = connection.getOutputStream
-        // TODO: unchecked buffer.array() (+ test edge case where a buffer is not backed by array)
-        // todo setXXXStreamingMode
-
         part.content.subscribe(new Observer[ByteBuffer] {
-
           override def onError(ex: Throwable): Unit = {
             os.close()
-            p.failure(new UploadStreamException(ex))
+            p.tryFailure(UploadStreamException(ex))
           }
-
           override def onComplete(): Unit = {
             os.close()
-            p.success(connection)
+            p.trySuccess(connection)
           }
-
           override def onNext(buffer: ByteBuffer): Future[Ack] = {
             if (buffer.hasArray) {
               os.write(buffer.array().view(0, buffer.limit).toArray)
@@ -60,7 +68,7 @@ private object HttpDriver extends DriverTrait {
         })
       })
     } else {
-      p.success(connection)
+      p.trySuccess(connection)
     }
     p.future
   }
@@ -79,31 +87,24 @@ private object HttpDriver extends DriverTrait {
         }
       }).toMap[String, String])
 
+    val header = new HttpResponseHeader(code, headerMap)
+
     Future {
       blocking {
-        try {
-          if (code < 400) {
-            responseFactory(
-              code,
-              headerMap,
-              inputStreamToObservable(connection.getInputStream, config.maxChunkSize),
-              config
-            )
-          } else {
-            responseFactory(
-              code,
-              headerMap,
-              Option(connection.getErrorStream)
-                .map(is => inputStreamToObservable(is, config.maxChunkSize))
-                .getOrElse(Observable.eval(ByteBuffer.allocate(0))),
-              config
-            ).map(response => throw HttpResponseException.badStatus(response))
-          }
-        } catch {
-          case e: HttpResponseException => throw e
-          case e: Throwable =>
-            e.printStackTrace()
-            throw new HttpNetworkException(e)
+        if (code < 400) {
+          responseFactory(
+            header,
+            inputStreamToObservable(connection.getInputStream, config.maxChunkSize),
+            config
+          )
+        } else {
+          responseFactory(
+            header,
+            Option(connection.getErrorStream)
+              .map(is => inputStreamToObservable(is, config.maxChunkSize))
+              .getOrElse(Observable.eval(ByteBuffer.allocate(0))),
+            config
+          ).map(response => throw HttpException.badStatus(response))
         }
       }
     }.flatMap(f => f)
@@ -111,8 +112,8 @@ private object HttpDriver extends DriverTrait {
 
   private def inputStreamToObservable(in: java.io.InputStream, chunkSize: Int): Observable[ByteBuffer] = {
     val iterator = new Iterator[ByteBuffer] {
-      private[this] var buffer: Array[Byte] = _
-      private[this] var lastCount = 0
+      private var buffer: Array[Byte] = _
+      private var lastCount = 0
 
       def hasNext: Boolean =
         lastCount match {

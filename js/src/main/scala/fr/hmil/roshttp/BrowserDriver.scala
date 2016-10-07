@@ -2,9 +2,8 @@ package fr.hmil.roshttp
 
 import java.nio.ByteBuffer
 
-import fr.hmil.roshttp.ByteBufferChopper.Finite
-import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException, UploadStreamException}
-import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory}
+import fr.hmil.roshttp.exceptions.{HttpException, RequestException, UploadStreamException}
+import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory, HttpResponseHeader}
 import fr.hmil.roshttp.util.HeaderMap
 import monix.execution.Ack.Continue
 import monix.execution.{Ack, Scheduler}
@@ -16,7 +15,7 @@ import org.scalajs.dom.raw.ErrorEvent
 import scala.collection.mutable
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js.JavaScriptException
-import scala.scalajs.js.typedarray.{ArrayBuffer, TypedArrayBuffer}
+import scala.scalajs.js.typedarray.ArrayBuffer
 import scala.util.{Failure, Success}
 
 private object BrowserDriver extends DriverTrait {
@@ -31,10 +30,10 @@ private object BrowserDriver extends DriverTrait {
     req.headers.foreach(t => xhr.setRequestHeader(t._1, t._2))
 
     xhr.onerror = { (e: ErrorEvent) =>
-      p.failure(new HttpNetworkException(JavaScriptException(e)))
+      p.failure(RequestException(JavaScriptException(e)))
     }
 
-    val bufferQueue = new ByteBufferQueue()
+    val bufferQueue = new ByteBufferQueue(req.backendConfig.internalBufferLength)
 
     xhr.onreadystatechange = { (e: dom.Event) =>
       if (xhr.readyState == dom.XMLHttpRequest.HEADERS_RECEIVED) {
@@ -48,20 +47,19 @@ private object BrowserDriver extends DriverTrait {
 
         p.completeWith(
           factory(
-              xhr.status,
-              HeaderMap(headers),
+            new HttpResponseHeader(xhr.status, HeaderMap(headers)),
               bufferQueue.observable,
               req.backendConfig)
             .map({response =>
               if (xhr.status >= 400) {
-                throw HttpResponseException.badStatus(response)
+                throw HttpException.badStatus(response)
               } else {
                 response
               }
             })
         )
       } else if (xhr.readyState == dom.XMLHttpRequest.DONE) {
-        bufferQueue.push(chopChunk())
+        chopChunk().foreach(bufferQueue.push)
         bufferQueue.end()
       }
     }
@@ -69,14 +67,9 @@ private object BrowserDriver extends DriverTrait {
     def chopChunk(): Seq[ByteBuffer] = {
       val buffer = xhr.response.asInstanceOf[ArrayBuffer]
       val buffers = ByteBufferChopper.chop(
-          new FiniteArrayBuffer(buffer),
-          req.backendConfig.maxChunkSize,
-          readChunk)
+          Converters.arrayBufferToByteBuffer(buffer),
+          req.backendConfig.maxChunkSize)
       buffers
-    }
-
-    def readChunk(buffer: FiniteArrayBuffer, start: Int, length: Int): ByteBuffer = {
-      TypedArrayBuffer.wrap(buffer.buffer, start, length)
     }
 
     if (req.body.isEmpty) {
@@ -97,7 +90,7 @@ private object BrowserDriver extends DriverTrait {
     val p = Promise[ByteBuffer]()
 
     bodyStream.subscribe(new Observer[ByteBuffer] {
-      override def onError(ex: Throwable): Unit = p.failure(new UploadStreamException(ex))
+      override def onError(ex: Throwable): Unit = p.failure(UploadStreamException(ex))
 
       override def onComplete(): Unit = p.success(recomposeBody(bufferQueue, bytes))
 
@@ -117,9 +110,5 @@ private object BrowserDriver extends DriverTrait {
     seq.foreach(chunk => buffer.put(chunk))
     buffer.rewind()
     buffer
-  }
-
-  private class FiniteArrayBuffer(val buffer: ArrayBuffer) extends Finite {
-    override def length: Int = buffer.byteLength
   }
 }

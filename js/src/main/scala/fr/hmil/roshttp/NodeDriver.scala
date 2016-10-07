@@ -3,12 +3,12 @@ package fr.hmil.roshttp
 import java.io.IOException
 import java.nio.ByteBuffer
 
-import fr.hmil.roshttp.ByteBufferChopper.Finite
-import fr.hmil.roshttp.exceptions.{HttpNetworkException, HttpResponseException, UploadStreamException}
+import fr.hmil.roshttp.ByteBufferQueue.Feeder
+import fr.hmil.roshttp.exceptions.{HttpException, RequestException, UploadStreamException}
 import fr.hmil.roshttp.node.Modules.{http, https}
 import fr.hmil.roshttp.node.buffer.Buffer
 import fr.hmil.roshttp.node.http.{IncomingMessage, RequestOptions}
-import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory}
+import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory, HttpResponseHeader}
 import fr.hmil.roshttp.util.HeaderMap
 import monix.execution.Ack.Continue
 import monix.execution.{Ack, Scheduler}
@@ -17,6 +17,7 @@ import monix.reactive.Observer
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.JavaScriptException
 
 private object NodeDriver extends DriverTrait {
 
@@ -28,22 +29,26 @@ private object NodeDriver extends DriverTrait {
       else
         https
     }
+    var headers = req.headers
+    if (!req.backendConfig.allowChunkedRequestBody) {
+      headers += "Transfer-Encoding" -> ""
+    }
     val nodeRequest = module.request(RequestOptions(
       hostname = req.host,
       port = req.port.orUndefined,
       method = req.method.toString,
-      headers = js.Dictionary(req.headers.toSeq: _*),
+      headers = js.Dictionary(headers.toSeq: _*),
       path = req.longPath
     ), handleResponse(req, factory, p)_)
     nodeRequest.on("error", { (s: js.Dynamic) =>
-      p.tryFailure(new HttpNetworkException(new IOException(s.toString)))
+      p.tryFailure(RequestException(new IOException(s.toString)))
       ()
     })
     if (req.body.isDefined) {
       req.body.foreach({ part =>
         part.content.subscribe(new Observer[ByteBuffer] {
           override def onError(ex: Throwable): Unit = {
-            p.tryFailure(new UploadStreamException(ex))
+            p.tryFailure(UploadStreamException(ex))
             nodeRequest.abort()
           }
 
@@ -68,25 +73,31 @@ private object NodeDriver extends DriverTrait {
       makeRequest(req.withURL(message.headers("location")), factory, p)
     } else {
       val headers = message.headers.toMap[String, String]
-      val bufferQueue = new ByteBufferQueue()
+      val bufferQueue = new ByteBufferQueue(req.backendConfig.internalBufferLength,
+        new Feeder {
+          override def onFlush(): Unit = message.resume()
+          override def onFull(): Unit = message.pause()
+        })
 
       message.on("data", { (nodeBuffer: js.Dynamic) =>
-        bufferQueue.push(byteBufferFromNodeBuffer(nodeBuffer, req.backendConfig.maxChunkSize))
+        convertAndChopBuffer(nodeBuffer, req.backendConfig.maxChunkSize).foreach(bufferQueue.push)
       })
       message.on("end", { (s: js.Dynamic) =>
         bufferQueue.end()
       })
+      message.on("error", { (s: js.Dynamic) =>
+        bufferQueue.pushError(JavaScriptException(s))
+      })
 
-      p.completeWith(factory(
-        message.statusCode,
-        HeaderMap(headers),
-        bufferQueue.observable,
-        req.backendConfig)
+      p.completeWith(
+        factory(new HttpResponseHeader(message.statusCode, HeaderMap(headers)),
+          bufferQueue.observable,
+          req.backendConfig)
         .map({ response =>
           if (message.statusCode < 400) {
             response
           } else {
-            throw HttpResponseException.badStatus(response)
+            throw HttpException.badStatus(response)
           }
         }))
     }
@@ -100,24 +111,9 @@ private object NodeDriver extends DriverTrait {
     p.future
   }
 
-  private def byteBufferFromNodeBuffer(nodeBuffer: js.Any, maxChunkSize: Int): Seq[ByteBuffer] = {
-    val buffer = nodeBuffer.asInstanceOf[Buffer]
-    ByteBufferChopper.chop(new FiniteBuffer(buffer), maxChunkSize, readChunk)
-  }
-
-  private def readChunk(buffer: FiniteBuffer, start: Int, length: Int): ByteBuffer = {
-    val byteBuffer = ByteBuffer.allocate(length)
-    var i = 0
-    while (i < length) {
-      byteBuffer.put(buffer.buffer.readInt8(start + i).toByte)
-      i += 1
-    }
-    byteBuffer.rewind()
-    byteBuffer
-  }
-
-  private class FiniteBuffer(val buffer: Buffer) extends Finite {
-    override def length: Int = buffer.length
+  private def convertAndChopBuffer(nodeBuffer: js.Any, maxChunkSize: Int): Seq[ByteBuffer] = {
+    val buffer = Converters.nodeBufferToByteBuffer(nodeBuffer.asInstanceOf[Buffer])
+    ByteBufferChopper.chop(buffer, maxChunkSize)
   }
 
 }

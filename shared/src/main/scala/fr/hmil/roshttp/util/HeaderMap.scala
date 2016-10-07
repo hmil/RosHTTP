@@ -31,7 +31,7 @@ class HeaderMap[B >: String] private(map: Map[CaseInsensitiveString, B] = Map())
     map.map({ t => (t._1.value, t._2)}).iterator
   }
 
-  override def +[B1 >: B](kv: (String, B1)): Map[String, B1] = {
+  override def +[B1 >: B](kv: (String, B1)): HeaderMap[B1] = {
     val key = new CaseInsensitiveString(kv._1)
     new HeaderMap[B1](map - key + (key -> kv._2))
   }

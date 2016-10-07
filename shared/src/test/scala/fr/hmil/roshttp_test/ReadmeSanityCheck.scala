@@ -15,10 +15,10 @@ object ReadmeSanityCheck extends TestSuite {
   }
   implicit def fromString(s: String): Dep = new Dep()
   var libraryDependencies = Set[Dep]()
-  
+
   // Silence print output
   def println(s: String): Unit = ()
-  
+
   // Test suite
   val tests = this {
     "Readme snippets compile and run successfully" - {
@@ -35,20 +35,8 @@ object ReadmeSanityCheck extends TestSuite {
       
       request.send().onComplete({
           case res:Success[SimpleHttpResponse] => println(res.get.body)
-          case e: Failure[SimpleHttpResponse] => e.exception.printStackTrace()
+          case e: Failure[SimpleHttpResponse] => println("Huston, we got a problem!")
         })
-      
-      import fr.hmil.roshttp.exceptions._
-      
-      HttpRequest("http://hmil.github.io/foobar")
-        .send()
-        .onFailure {
-          // An HttpResponseException always provides a response
-          case e:HttpResponseException =>
-            "Got a status: ${e.response.statusCode}"
-          case SimpleResponseTimeoutException(partialResponse: Some[SimpleHttpResponse]) =>
-            s"Body received before timeout: ${partialResponse.get.body}"
-        }
       
       import fr.hmil.roshttp.Protocol.HTTP
       
@@ -179,7 +167,22 @@ object ReadmeSanityCheck extends TestSuite {
           case _:Success[SimpleHttpResponse] => println("Data successfully uploaded")
           case _:Failure[SimpleHttpResponse] => println("Error: Could not upload stream")
         })
-  
+      
+      import fr.hmil.roshttp.exceptions.HttpException
+      import java.io.IOException
+      request.send()
+        .recover {
+          case HttpException(e: SimpleHttpResponse) =>
+            // Here we may have some detailed application-level insight about the error
+            println("There was an issue with your request." +
+              " Here is what the application server says: " + e.body)
+          case e: IOException =>
+            // By handling transport issues separately, you get a chance to apply
+            // your own recovery strategy. Should you report to the user? Log the error?
+            // Retry the request? Send an alert to your ops team?
+            println("There was a network issue, please try again")
+        }
+
       "Success"
     }
   }

@@ -18,10 +18,9 @@ extends HttpResponse
 
 object StreamHttpResponse extends HttpResponseFactory[StreamHttpResponse] {
   override def apply(
-      statusCode: Int,
-      headers: HeaderMap[String],
+      header: HttpResponseHeader,
       bodyStream: Observable[ByteBuffer],
       config: BackendConfig)
       (implicit scheduler: Scheduler): Future[StreamHttpResponse] =
-    Future.successful(new StreamHttpResponse(statusCode, headers, bodyStream))
+    Future.successful(new StreamHttpResponse(header.statusCode, header.headers, bodyStream))
 }

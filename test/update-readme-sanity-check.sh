@@ -31,10 +31,10 @@ object $test_name extends TestSuite {
   }
   implicit def fromString(s: String): Dep = new Dep()
   var libraryDependencies = Set[Dep]()
-  
+
   // Silence print output
   def println(s: String): Unit = ()
-  
+
   // Test suite
   val tests = this {
     "Readme snippets compile and run successfully" - {
@@ -42,7 +42,7 @@ EOF
   # print raw code in test suite
   sed -rn 's/^(.*)$/      \1/p'
   cat <<EOF
-  
+
       "Success"
     }
   }

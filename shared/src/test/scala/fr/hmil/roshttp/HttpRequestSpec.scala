@@ -5,11 +5,9 @@ import java.nio.ByteBuffer
 import fr.hmil.roshttp.body.Implicits._
 import fr.hmil.roshttp.body.JSONBody._
 import fr.hmil.roshttp.body._
-import fr.hmil.roshttp.exceptions.HttpResponseException.SimpleHttpResponseException
-import fr.hmil.roshttp.exceptions.{HttpTimeoutException, SimpleResponseTimeoutException, UploadStreamException}
+import fr.hmil.roshttp.exceptions._
 import fr.hmil.roshttp.response.SimpleHttpResponse
 import monix.execution.Scheduler.Implicits.global
-import monix.execution.schedulers.TestScheduler.Task
 import monix.reactive.Observable
 import utest._
 
@@ -118,16 +116,14 @@ object HttpRequestSpec extends TestSuite {
 
   val tests = this{
 
-
     "Meta" - {
       "The test server should be reachable" - {
         HttpRequest(SERVER_URL)
-          .send() map { s => s.statusCode ==> 200 }
+          .send().map({ s => s.statusCode ==> 200 })
       }
     }
 
     "Responses" - {
-
       "with status codes < 400" - {
         "should complete the request with success" - {
           goodStatus.map(status => {
@@ -140,7 +136,6 @@ object HttpRequestSpec extends TestSuite {
           }).reduce((f1, f2) => f1.flatMap(_ => f2))
         }
       }
-
       "with status codes >= 400" - {
         "should complete the request with failure" - {
           badStatus.map(status =>
@@ -152,7 +147,6 @@ object HttpRequestSpec extends TestSuite {
           ).reduce((f1, f2) => f1.flatMap(_ => f2))
         }
       }
-
       "with redirects" - {
         "follow redirects" - {
           HttpRequest(SERVER_URL)
@@ -161,6 +155,15 @@ object HttpRequestSpec extends TestSuite {
             .map(res => {
               res.body ==> "redirected"
             })
+        }
+      }
+      "with timeout" - {
+        "Throw the appropriate exception" - {
+          HttpRequest(s"$SERVER_URL/no_response")
+            .send()
+              .onFailure {
+                case TimeoutException(_) => () // success
+              }
         }
       }
     }
@@ -173,24 +176,22 @@ object HttpRequestSpec extends TestSuite {
               .withPath(s"/status/$status")
               .send()
               .failed.map {
-              case e: SimpleHttpResponseException =>
-                statusText(e.response.statusCode) ==> e.response.body
-              case _ => assert(false)
+              case HttpException(res: SimpleHttpResponse) =>
+                statusText(res.statusCode) ==> res.body
+              case e => throw new java.lang.AssertionError("Unexpected failure", e)
             }
           ).reduce((f1, f2) => f1.flatMap(_ => f2))
         }
-
         "can be empty" - {
           HttpRequest(s"$SERVER_URL/empty_body/400")
             .send()
             .failed
             .map {
-              case e: SimpleHttpResponseException =>
-                e.response.body ==> ""
+              case HttpException(res: SimpleHttpResponse) =>
+                res.body ==> ""
             }
         }
       }
-
       "with status code < 400" - {
         "can be empty" - {
           HttpRequest(s"$SERVER_URL/empty_body/200")
@@ -198,70 +199,26 @@ object HttpRequestSpec extends TestSuite {
             .map(response => response.body ==> "")
         }
       }
-
-      "with body timeout" - {
-        "can recover partial data" - {
-          if (!JsEnvUtils.isRealBrowser) {
-            HttpRequest(s"$SERVER_URL/echo_repeat/farfelu")
-              .withBackendConfig(BackendConfig(bodyCollectTimeout = 1))
-              .withQueryParameters(
-                "repeat" -> "2",
-                "delay" -> "2")
-              .send()
-              .failed
-              .map {
-                case SimpleResponseTimeoutException(e: Some[SimpleHttpResponse]) =>
-                  e.get.statusCode ==> 200
-                  e.get.headers("Content-Type") ==> "text/plain; charset=utf-8"
-                  e.get.body ==> "farfelu"
-              }
-          } else {
-            "not available in browser..."
-          }
-        }
-
-        "throws a timeout error" - {
-          if (JsEnvUtils.isChrome) {
-            "Doesn't work in chrome"
-          } else {
-            HttpRequest(s"$SERVER_URL/echo_repeat/farfelu")
-              .withBackendConfig(BackendConfig(bodyCollectTimeout = 1))
-              .withQueryParameters(
-                "repeat" -> "2",
-                "delay" -> "2")
-              .send()
-              .failed
-              .map {
-                case e: HttpTimeoutException => "OK"
-              }
-          }
-        }
-      }
-
       "can be chunked and recomposed" - {
         HttpRequest(s"$SERVER_URL/echo_repeat/foo")
           .withQueryParameters(
             "repeat" -> "4",
-            "delay" -> "1")
+            "delay" -> "1000")
           .withBackendConfig(BackendConfig(maxChunkSize = 4))
           .send()
           .map(res => res.body ==> "foofoofoofoo")
       }
-
       "can contain multibyte characters" - {
         val payload = "12\uD83D\uDCA978"
         HttpRequest(s"$SERVER_URL/multibyte_string")
           .send()
           .map(res => res.body ==> payload)
       }
-
       "can contain multibyte characters split by chunk boundary" - {
         val payload = "12\uD83D\uDCA978"
-        val config = BackendConfig(maxChunkSize = 4)
         HttpRequest(s"$SERVER_URL/multibyte_string")
           .withBackendConfig(BackendConfig(
-            maxChunkSize = 4,
-            bodyCollectTimeout = 10
+            maxChunkSize = 4
           ))
           .send()
           .map(res => res.body ==> payload)
@@ -278,7 +235,6 @@ object HttpRequestSpec extends TestSuite {
             r.body.firstL.map(_.get ==> greeting_bytes)
           })
       }
-
       "fail on bad status code" - {
         HttpRequest(SERVER_URL)
           .withPath(s"/status/400")
@@ -286,7 +242,6 @@ object HttpRequestSpec extends TestSuite {
           .map(r => r.headers("X-Status-Code") ==> r.statusCode)
           .failed.map(_ => "success")
       }
-
       "chunks are capped to chunkSize config" - {
         val config = BackendConfig(maxChunkSize = 128)
         HttpRequest(s"$SERVER_URL/resources/icon.png")
@@ -303,7 +258,6 @@ object HttpRequestSpec extends TestSuite {
       }
     }
 
-
     "Query string" - {
       "set in constructor" - {
         "vanilla" - {
@@ -313,7 +267,6 @@ object HttpRequestSpec extends TestSuite {
               res.body ==> "Hello world."
             })
         }
-
         "with illegal characters" - {
           HttpRequest(s"$SERVER_URL/query?Heizölrückstoßabdämpfung%20+")
             .send()
@@ -321,7 +274,6 @@ object HttpRequestSpec extends TestSuite {
               res.body ==> "Heizölrückstoßabdämpfung +"
             })
         }
-
         "with key-value pairs" - {
           HttpRequest(s"$SERVER_URL/query/parsed?foo=bar&hello=world")
             .send()
@@ -330,9 +282,7 @@ object HttpRequestSpec extends TestSuite {
             })
         }
       }
-
       "set in withQueryString" - {
-
         "vanilla" - {
           HttpRequest(s"$SERVER_URL/query")
             .withQueryString("Hello world.")
@@ -341,7 +291,6 @@ object HttpRequestSpec extends TestSuite {
               res.body ==> "Hello world."
             })
         }
-
         "with illegal characters" - {
           HttpRequest(s"$SERVER_URL/query")
             .withQueryString("Heizölrückstoßabdämpfung %20+")
@@ -350,14 +299,12 @@ object HttpRequestSpec extends TestSuite {
               res.body ==> "Heizölrückstoßabdämpfung %20+"
             })
         }
-
         "is escaped" - {
           HttpRequest(s"$SERVER_URL/query")
             .withQueryString("Heizölrückstoßabdämpfung")
             .queryString.get ==> "Heiz%C3%B6lr%C3%BCcksto%C3%9Fabd%C3%A4mpfung"
         }
       }
-
       "set in withRawQueryString" - {
         HttpRequest(s"$SERVER_URL/query")
           .withQueryStringRaw("Heiz%C3%B6lr%C3%BCcksto%C3%9Fabd%C3%A4mpfung")
@@ -366,7 +313,6 @@ object HttpRequestSpec extends TestSuite {
             res.body ==> "Heizölrückstoßabdämpfung"
           })
       }
-
       "set in withQueryParameter" - {
         "single" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
@@ -376,7 +322,6 @@ object HttpRequestSpec extends TestSuite {
               res.body ==> "{\"device\":\"neon\"}"
             })
         }
-
         "added in batch" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
             .withQueryParameters(
@@ -387,7 +332,6 @@ object HttpRequestSpec extends TestSuite {
               res.body ==> "{\"device\":\"neon\",\"element\":\"argon\"}"
             })
         }
-
         "added in batch with illegal characters" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
             .withQueryParameters(
@@ -399,7 +343,6 @@ object HttpRequestSpec extends TestSuite {
                 "\"chäřac+=r&\":\"+Heizölrückstoßabdämpfung=r&\"}"
             })
         }
-
         "added in sequence" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
             .withQueryParameters(
@@ -413,7 +356,6 @@ object HttpRequestSpec extends TestSuite {
               res.body ==> "{\"element\":\"argon\",\"device\":[\"chair\",\"neon\"],\"tool\":\"hammer\"}"
             })
         }
-
         "as list parameter" - {
           HttpRequest(s"$SERVER_URL/query/parsed")
             .withQuerySeqParameter("map", Seq("foo", "bar"))
@@ -423,7 +365,6 @@ object HttpRequestSpec extends TestSuite {
             })
         }
       }
-
       "removed" - {
         val req = HttpRequest(s"$SERVER_URL/query/parsed")
           .withQueryString("device=chair")
@@ -431,9 +372,7 @@ object HttpRequestSpec extends TestSuite {
 
         assert(req.queryString.isEmpty)
       }
-
     }
-
     "Protocol" - {
       "can be set to HTTP and HTTPS" - {
         HttpRequest()
@@ -461,7 +400,6 @@ object HttpRequestSpec extends TestSuite {
           assert(res.body.contains("\"custom\":\"foobar\""))
         })
       }
-
       "Can be set individually" - {
         val req = HttpRequest(s"$SERVER_URL/headers")
           .withHeader("cache-control", "max-age=0")
@@ -476,7 +414,6 @@ object HttpRequestSpec extends TestSuite {
           assert(res.body.contains("\"custom\":\"foobar\""))
         })
       }
-
       "Overwrite previous value when set" - {
         val req = HttpRequest(s"$SERVER_URL/headers")
           .withHeaders(
@@ -501,7 +438,6 @@ object HttpRequestSpec extends TestSuite {
           assert(res.body.contains("\"accept\":\"application/json\""))
         })
       }
-
       "Override body content-type" - {
         HttpRequest(s"$SERVER_URL/headers")
           .withBody(PlainTextBody("Hello world"))
@@ -516,7 +452,6 @@ object HttpRequestSpec extends TestSuite {
     }
 
     "Response headers" - {
-
       "can be read in the general case" - {
         HttpRequest(s"$SERVER_URL/")
           .send()
@@ -525,19 +460,17 @@ object HttpRequestSpec extends TestSuite {
               res.headers("X-Powered-By") ==> "Express"
           })
       }
-
       "can be read in the error case" - {
         HttpRequest(s"$SERVER_URL/status/400")
           .send()
           .failed.map {
-            case e: SimpleHttpResponseException =>
-              e.response.headers("X-Powered-By") ==> "Express"
+            case HttpException(res: SimpleHttpResponse) =>
+              res.headers("X-Powered-By") ==> "Express"
           }
       }
     }
 
     "Http method" - {
-
       "can be set to any legal value" - {
         legalMethods.map(method =>
           HttpRequest(s"$SERVER_URL/method")
@@ -546,7 +479,6 @@ object HttpRequestSpec extends TestSuite {
             .map(_.headers("X-Request-Method") ==> method)
         ).reduce((f1, f2) => f1.flatMap(_=>f2))
       }
-
       "ignores case and capitalizes" - {
         legalMethods.map(method =>
           HttpRequest(s"$SERVER_URL/method")
@@ -558,100 +490,167 @@ object HttpRequestSpec extends TestSuite {
     }
 
     "Request body" - {
-
-      "can be POSTed with ASCII strings" - {
-        HttpRequest(s"$SERVER_URL/body")
-          .post(PlainTextBody("Hello world"))
-          .map({ res =>
-            res.body ==> "Hello world"
-            res.headers("Content-Type").toLowerCase ==> "text/plain; charset=utf-8"
-          })
+      "Plain text" - {
+        "works with ASCII strings" - {
+          HttpRequest(s"$SERVER_URL/body")
+            .post(PlainTextBody("Hello world"))
+            .map({ res =>
+              res.body ==> "Hello world"
+              res.headers("Content-Type").toLowerCase ==> "text/plain; charset=utf-8"
+            })
+        }
+        "works with non-ASCII strings" - {
+          HttpRequest(s"$SERVER_URL/body")
+            .post(PlainTextBody("Heizölrückstoßabdämpfung"))
+            .map({ res =>
+              res.body ==> "Heizölrückstoßabdämpfung"
+              res.headers("Content-Type").toLowerCase ==> "text/plain; charset=utf-8"
+            })
+        }
+      }
+      "Multipart" - {
+        "works as intended" - {
+          val part = MultiPartBody(
+            "foo" -> PlainTextBody("bar"),
+            "engine" -> PlainTextBody("Heizölrückstoßabdämpfung"))
+          HttpRequest(s"$SERVER_URL/body")
+            .post(part)
+            .map({ res =>
+              res.body ==> "{\"foo\":\"bar\",\"engine\":\"Heizölrückstoßabdämpfung\"}"
+              res.headers("Content-Type").toLowerCase ==>
+                s"multipart/form-data; boundary=${part.boundary}; charset=utf-8"
+            })
+        }
+      }
+      "URL encoded" - {
+        "works as intended" - {
+          val part = URLEncodedBody(
+            "foo" -> "bar",
+            "engine" -> "Heizölrückstoßabdämpfung")
+          HttpRequest(s"$SERVER_URL/body")
+            .post(part)
+            .map({ res =>
+              res.body ==> "{\"foo\":\"bar\",\"engine\":\"Heizölrückstoßabdämpfung\"}"
+              res.headers("Content-Type").toLowerCase ==> s"application/x-www-form-urlencoded; charset=utf-8"
+            })
+        }
       }
 
-      "can be POSTed with non-ascii strings" - {
-        HttpRequest(s"$SERVER_URL/body")
-          .post(PlainTextBody("Heizölrückstoßabdämpfung"))
-          .map({ res =>
-            res.body ==> "Heizölrückstoßabdämpfung"
-            res.headers("Content-Type").toLowerCase ==> "text/plain; charset=utf-8"
-          })
+      "JSON" - {
+        "works as intended" - {
+          val part = JSONObject(
+            "foo" -> 42,
+            "engine" -> "Heizölrückstoßabdämpfung",
+            "\"quoted'" -> "Has \" quotes")
+          HttpRequest(s"$SERVER_URL/body")
+            .post(part)
+            .map({ res =>
+              res.body ==> "{\"foo\":42,\"engine\":\"Heizölrückstoßabdämpfung\"," +
+                "\"\\\"quoted'\":\"Has \\\" quotes\"}"
+              res.headers("Content-Type").toLowerCase ==> s"application/json; charset=utf-8"
+            })
+        }
       }
-
-      "can be POSTed as multipart" - {
-        val part = MultiPartBody(
-          "foo" -> PlainTextBody("bar"),
-          "engine" -> PlainTextBody("Heizölrückstoßabdämpfung")
-        )
-
-        HttpRequest(s"$SERVER_URL/body")
-          .post(part)
-          .map({ res =>
-            res.body ==> "{\"foo\":\"bar\",\"engine\":\"Heizölrückstoßabdämpfung\"}"
-            res.headers("Content-Type").toLowerCase ==> s"multipart/form-data; boundary=${part.boundary}; charset=utf-8"
-          })
+      "Byte Buffer" - {
+        "can send a binary buffer" - {
+          HttpRequest(s"$SERVER_URL/compare/icon.png")
+            .post(ByteBufferBody(ByteBuffer.wrap(IMAGE_BYTES)))
+        }
       }
-
-      "can be POSTed as urlencoded" - {
-        val part = URLEncodedBody(
-          "foo" -> "bar",
-          "engine" -> "Heizölrückstoßabdämpfung"
-        )
-
-        HttpRequest(s"$SERVER_URL/body")
-          .post(part)
-          .map({ res =>
-            res.body ==> "{\"foo\":\"bar\",\"engine\":\"Heizölrückstoßabdämpfung\"}"
-            res.headers("Content-Type").toLowerCase ==> s"application/x-www-form-urlencoded; charset=utf-8"
-          })
-      }
-
-      "can be POSTed as json" - {
-        val part = JSONObject(
-          "foo" -> 42,
-          "engine" -> "Heizölrückstoßabdämpfung",
-          "\"quoted'" -> "Has \" quotes"
-        )
-
-        HttpRequest(s"$SERVER_URL/body")
-          .post(part)
-          .map({ res =>
-            res.body ==> "{\"foo\":42,\"engine\":\"Heizölrückstoßabdämpfung\"," +
-              "\"\\\"quoted'\":\"Has \\\" quotes\"}"
-            res.headers("Content-Type").toLowerCase ==> s"application/json; charset=utf-8"
-          })
-      }
-
-      "can post a file" - {
-        HttpRequest(s"$SERVER_URL/compare/icon.png")
-          .post(ByteBufferBody(ByteBuffer.wrap(IMAGE_BYTES)))
-      }
-    }
-
-    "Streamed request body" - {
-      "is properly sent" - {
-        HttpRequest(s"$SERVER_URL/compare/icon.png")
-          .post(
-            // Splits the image bytes into chunks to create a streamed body
-            StreamBody(
-              Observable.fromIterable(Seq(IMAGE_BYTES: _*)
+      "streamed" - {
+        "with wrapped array ByteBuffer" - {
+          "is properly sent" - {
+            HttpRequest(s"$SERVER_URL/compare/icon.png")
+              .post(
+                // Splits the image bytes into chunks to create a streamed body
+                StreamBody(
+                  Observable.fromIterable(Seq(IMAGE_BYTES: _*)
+                    .grouped(12)
+                    .toSeq
+                  ).map(b => ByteBuffer.wrap(b.toArray))
+                )
+              )
+          }
+        }
+        "with native ByteBuffer" - {
+          "is properly sent" - {
+            val nativeBufferSeq = Seq(IMAGE_BYTES: _*)
+              .grouped(12)
+              .map({chunk =>
+                val b = ByteBuffer.allocateDirect(chunk.size)
+                var i = 0
+                while (i < chunk.size) {
+                  b.put(chunk(i))
+                  i += 1
+                }
+                b.rewind()
+                b
+              }).toSeq
+            HttpRequest(s"$SERVER_URL/compare/icon.png")
+              .post(StreamBody(Observable.fromIterable(nativeBufferSeq)))
+          }
+        }
+        "with read-only ByteBuffer" - {
+          "is properly sent" - {
+            val readOnlyBuffers = Observable.fromIterable(
+                Seq(IMAGE_BYTES: _*)
                 .grouped(12)
-                .toSeq
-              ).map(b => ByteBuffer.wrap(b.toArray))
-            )
-          )
-      }
-
-      "with error is properly handled" - {
-        HttpRequest(s"$SERVER_URL/does_not_exist")
-          .post(StreamBody(
+                .toSeq)
+              .map({ b =>
+              val res = ByteBuffer.wrap(b.toArray).asReadOnlyBuffer()
+              assert(!res.hasArray)
+              res
+            })
+            HttpRequest(s"$SERVER_URL/compare/icon.png")
+              .post(StreamBody(readOnlyBuffers))
+              .recover {
+                case e: UploadStreamException =>
+                  e.printStackTrace()
+                  throw e
+              }
+          }
+        }
+        "embedded in multipart" - {
+          "handles errors correctly" - {
+            def stateAction(i: Int) = {
+              if (i == 0) throw new Exception("Stream error")
+              (ByteBuffer.allocate(1), i - 1)
+            }
+            HttpRequest(s"$SERVER_URL/does_not_exist")
+              .post(MultiPartBody("stream" -> StreamBody(Observable.fromStateAction(stateAction)(3))))
+              .recover({
+                case e: UploadStreamException => e
+              })
+          }
+          "is properly sent" - {
+            val part = MultiPartBody(
+              "stream" -> StreamBody(Observable.fromIterator(new Iterator[ByteBuffer]() {
+                private var emitted = false
+                override def hasNext: Boolean = !emitted
+                override def next(): ByteBuffer = {
+                  emitted = true
+                  ByteBuffer.wrap("Bonjour.".getBytes)
+                }
+              })))
+            HttpRequest(s"$SERVER_URL/body")
+              .post(part)
+              .map({ res =>
+                res.body ==> "{\"stream\":\"Bonjour.\"}"
+              })
+          }
+        }
+        "handles errors correctly" - {
+          HttpRequest(s"$SERVER_URL/does_not_exist")
+            .post(StreamBody(
               Observable.fromStateAction({ i: Int =>
                 if (i == 0) throw new Exception("Stream error")
                 (ByteBuffer.allocate(1), i - 1)
               })(3)
             ))
             .recover({
-              case e:UploadStreamException => e
+              case e: UploadStreamException => e
             })
+        }
       }
     }
   }

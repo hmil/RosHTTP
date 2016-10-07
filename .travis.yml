@@ -6,8 +6,8 @@ scala:
 
 install:
   - nvm list
-  - nvm install 4.4.0
-  - nvm use 4.4.0
+  - nvm install 5.10.0
+  - nvm use 5.10.0
 
 before_script:
   # Init xvfb for headless browser testing
