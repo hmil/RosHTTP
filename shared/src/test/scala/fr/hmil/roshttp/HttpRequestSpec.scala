@@ -178,7 +178,7 @@ object HttpRequestSpec extends TestSuite {
               .failed.map {
               case HttpException(res: SimpleHttpResponse) =>
                 statusText(res.statusCode) ==> res.body
-              case _ => assert(false)
+              case e => throw new java.lang.AssertionError("Unexpected failure", e)
             }
           ).reduce((f1, f2) => f1.flatMap(_ => f2))
         }
