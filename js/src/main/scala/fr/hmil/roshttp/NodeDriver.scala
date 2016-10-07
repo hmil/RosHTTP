@@ -85,10 +85,10 @@ private object NodeDriver extends DriverTrait {
         bufferQueue.pushError(JavaScriptException(s))
       })
 
-      p.completeWith(factory(
-        new HttpResponseHeader(message.statusCode, HeaderMap(headers)),
-        bufferQueue.observable,
-        req.backendConfig)
+      p.completeWith(
+        factory(new HttpResponseHeader(message.statusCode, HeaderMap(headers)),
+          bufferQueue.observable,
+          req.backendConfig)
         .map({ response =>
           if (message.statusCode < 400) {
             response

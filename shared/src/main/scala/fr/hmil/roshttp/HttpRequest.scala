@@ -267,10 +267,10 @@ final class HttpRequest  private (
       })
 
     val backendFuture: Future[T] = HttpDriver.send(this, factory)
-    backendFuture.map({response =>
+    backendFuture.onComplete({response =>
       timeoutTask.cancel()
-      response
-    }).onComplete(promise.tryComplete)
+      promise.tryComplete(response)
+    })
 
     promise.future
   }
