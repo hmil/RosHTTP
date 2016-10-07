@@ -6,5 +6,5 @@ import java.io.IOException
   *
   * @see [[ResponseException]]
   */
-class RequestException(cause: Throwable)
+case class RequestException(cause: Throwable)
   extends IOException("A network error occurred during HTTP request transmission.", cause)

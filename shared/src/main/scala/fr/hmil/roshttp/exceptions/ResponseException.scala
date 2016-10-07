@@ -11,7 +11,7 @@ import fr.hmil.roshttp.response.HttpResponseHeader
   *
   * @see [[RequestException]]
   */
-class ResponseException private[roshttp](
+case class ResponseException private[roshttp](
     cause: Throwable,
-    val header: HttpResponseHeader)
+    header: HttpResponseHeader)
   extends IOException("A network error occurred during HTTP response transmission.", cause)

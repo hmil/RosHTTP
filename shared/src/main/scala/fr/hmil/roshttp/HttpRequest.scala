@@ -4,7 +4,7 @@ import java.net.URI
 import java.util.concurrent.TimeUnit
 
 import fr.hmil.roshttp.body.BodyPart
-import fr.hmil.roshttp.exceptions.ResponseTimeoutException
+import fr.hmil.roshttp.exceptions.TimeoutException
 import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory, SimpleHttpResponse, StreamHttpResponse}
 import fr.hmil.roshttp.util.{HeaderMap, Utils}
 import monix.execution.Scheduler
@@ -202,7 +202,7 @@ final class HttpRequest  private (
   /** Specifies the request timeout.
     *
     * When a request takes longer than timeout to complete, the future is
-    * rejected with a [[fr.hmil.roshttp.exceptions.RequestTimeoutException]].
+    * rejected with a [[fr.hmil.roshttp.exceptions.TimeoutException]].
     *
     * @param timeout The duration to wait before throwing a timeout exception.
     * @return A copu of this [[HttpRequest]] with an updated timeout setting.
@@ -262,7 +262,7 @@ final class HttpRequest  private (
     val timeoutTask = scheduler.scheduleOnce(timeout.length, timeout.unit,
       new Runnable {
         override def run(): Unit = {
-          promise.tryFailure(new ResponseTimeoutException)
+          promise.tryFailure(new TimeoutException)
         }
       })
 

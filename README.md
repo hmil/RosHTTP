@@ -226,6 +226,10 @@ request.post(MultiPartBody(
 
 ## Streaming
 
+**Warning:** Even though the streaming API works flawlessly on the JVM, it is an
+experimental feature as the JS implementation may leak memory or buffer things
+in the background.
+
 ### Download streams
 
 Streaming a response is as simple as calling `.stream()` instead of `.send()`.

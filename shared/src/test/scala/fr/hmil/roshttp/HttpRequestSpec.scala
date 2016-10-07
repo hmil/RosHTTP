@@ -157,6 +157,15 @@ object HttpRequestSpec extends TestSuite {
             })
         }
       }
+      "with timeout" - {
+        "Throw the appropriate exception" - {
+          HttpRequest(s"$SERVER_URL/no_response")
+            .send()
+              .onFailure {
+                case TimeoutException(_) => () // success
+              }
+        }
+      }
     }
 
     "Buffered responses" - {
@@ -248,7 +257,6 @@ object HttpRequestSpec extends TestSuite {
           )
       }
     }
-
 
     "Query string" - {
       "set in constructor" - {
