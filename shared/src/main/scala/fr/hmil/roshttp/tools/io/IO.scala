@@ -67,7 +67,7 @@ private[roshttp] object IO {
   def readInputStreamToByteArray(stream: InputStream): Array[Byte] = {
     val builder = new ByteArrayOutputStream()
     pipe(stream, builder)
-    builder.toByteArray()
+    builder.toByteArray
   }
   /** Pipes data from `in` to `out` */
   def pipe(in: InputStream, out: OutputStream): Unit = {
@@ -81,7 +81,13 @@ private[roshttp] object IO {
         loop()
       }
     }
-    loop()
+    try {
+      loop()
+    } catch {
+      // work around java quirk. See SO thread for details
+      // http://stackoverflow.com/questions/10333257/java-io-ioexception-premature-eof
+      case e:IOException if e.getMessage == "Premature EOF" => // ignore
+    }
   }
 
   /** Pipes data from `in` to `out` */

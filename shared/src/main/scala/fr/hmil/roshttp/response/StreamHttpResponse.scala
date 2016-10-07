@@ -1,0 +1,26 @@
+package fr.hmil.roshttp.response
+
+import java.nio.ByteBuffer
+
+import fr.hmil.roshttp.BackendConfig
+import fr.hmil.roshttp.util.HeaderMap
+import monix.execution.Scheduler
+import monix.reactive.Observable
+
+import scala.concurrent.Future
+
+
+class StreamHttpResponse(
+    val statusCode: Int,
+    val headers: HeaderMap[String],
+    val body: Observable[ByteBuffer])
+extends HttpResponse
+
+object StreamHttpResponse extends HttpResponseFactory[StreamHttpResponse] {
+  override def apply(
+      header: HttpResponseHeader,
+      bodyStream: Observable[ByteBuffer],
+      config: BackendConfig)
+      (implicit scheduler: Scheduler): Future[StreamHttpResponse] =
+    Future.successful(new StreamHttpResponse(header.statusCode, header.headers, bodyStream))
+}

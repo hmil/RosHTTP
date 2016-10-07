@@ -14,7 +14,7 @@ A human-readable scala http client API compatible with:
 Add a dependency in your build.sbt:
 
 ```scala
-libraryDependencies += "fr.hmil" %%% "roshttp" % "1.0.1"
+libraryDependencies += "fr.hmil" %%% "roshttp" % "2.0.0-RC1"
 ```
 
 # Usage
@@ -23,50 +23,39 @@ The following is a simplified usage guide. You may find useful information in
 the [API doc](http://hmil.github.io/RosHTTP/docs/index.html) too.
 ## Basic usage
 
-<!--- test: "Main example" -->
 ```scala
 import fr.hmil.roshttp.HttpRequest
-import scala.concurrent.ExecutionContext.Implicits.global
-
-/* ... */
+import monix.execution.Scheduler.Implicits.global
+import scala.util.{Failure, Success}
+import fr.hmil.roshttp.response.SimpleHttpResponse
 
 // Runs consistently on the jvm, in node.js and in the browser!
 val request = HttpRequest("https://schema.org/WebPage")
 
-request.send().map(response => println(response.body))
+request.send().onComplete({
+    case res:Success[SimpleHttpResponse] => println(res.get.body)
+    case e: Failure[SimpleHttpResponse] => println("Huston, we got a problem!")
+  })
 ```
-
-When you `send()` a request, you get a `Future[HttpResponse]` which resolves to
-an HttpResponse if everything went fine or fails with an HttpException if a
-network error occurred or if a statusCode > 400 was received.
-When applicable, the response body of a failed request can be read:
-
-<!--- test: "Error handling" -->
-```scala
-HttpRequest("http://hmil.github.io/foobar")
-  .send()
-  .onFailure {
-    case e:HttpResponseError =>
-      s"Got a status: ${e.response.statusCode}" ==> "Got a status: 404"
-  }
-```
-
 
 ## Configuring requests
 
-Every aspect of a request can be customized using `.withXXX` methods. These are
-meant to be chained, they do not modify the original request.
+[HttpRequests](http://hmil.github.io/RosHTTP/docs/index.html#fr.hmil.roshttp.HttpRequest)
+are immutable objects. They expose methods named `.withXXX` which can be used to
+create more complex requests.
 
 ### URI
 
+The URI can be passed as argument of the request constructor or `.withURI`.
 The URI can be built using `.withProtocol`, `.withHost`, `.withPort`,
 `.withPath`, and `.withQuery...`. The latter is a bit more complex and
 is detailed below.
 
-<!--- test: "Composite URI" -->
 ```scala
+import fr.hmil.roshttp.Protocol.HTTP
+
 HttpRequest()
-  .withProtocol("HTTP")
+  .withProtocol(HTTP)
   .withHost("localhost")
   .withPort(3000)
   .withPath("/weather")
@@ -92,15 +81,14 @@ Most of the time, the query string is used to pass key/value pairs in the
 [HttpRequest](http://hmil.github.io/RosHTTP/docs/index.html#fr.hmil.roshttp.HttpRequest)
 offers an API to add, update and delete keys in the query string.  
 
-<!--- test: "Query parameters" -->
 ```scala
 request
   .withQueryParameter("foo", "bar")
-  .withQueryArrayParameter("table", "a", "b", "c")
-  .withQueryObjectParameter("map",
+  .withQuerySeqParameter("table", Seq("a", "b", "c"))
+  .withQueryObjectParameter("map", Seq(
     "d" -> "dval",
     "e" -> "e value"
-  )
+  ))
   .withQueryParameters(
     "license" -> "MIT",
     "copy" -> "© 2016"
@@ -110,7 +98,15 @@ request
   */
 ```
 
-### Request headers
+### HTTP Method
+
+```scala
+import fr.hmil.roshttp.Method.PUT
+
+request.withMethod(PUT).send()
+```
+
+### Headers
 
 Set individual headers using `.withHeader`
 ```scala
@@ -124,16 +120,33 @@ request.withHeaders(
 )
 ```
 
-### Response headers
+### Backend configuration
 
-A map of response headers is available on the [[HttpResponse]] object:
+Some low-level configuration settings are available in [BackendConfig](http://hmil.github.io/RosHTTP/docs/index.html#fr.hmil.roshttp.BackendConfig).
+Each request can use a specific backend configuration using `.withBackendConfig`.
+
+example:
+```scala
+import fr.hmil.roshttp.BackendConfig
+
+HttpRequest("long.source.of/data")
+  .withBackendConfig(BackendConfig(
+    // Uses stream chunks of at most 1024 bytes
+    maxChunkSize = 1024
+  ))
+  .stream()
+```
+
+## Response headers
+
+A map of response headers is available on the `HttpResponse` object:
 ```scala
 request.send().map({res =>
   println(res.headers("Set-Cookie"))
 })
 ```
 
-### Sending data
+## Sending data
 
 An HTTP request can send data wrapped in an implementation of `BodyPart`. The most common
 formats are already provided but you can create your own as well.   
@@ -142,41 +155,46 @@ A set of implicit conversions is provided in `body.Implicits` for convenience.
 You can `post` or `put` some data with your favorite encoding.
 ```scala
 import fr.hmil.roshttp.body.Implicits._
+import fr.hmil.roshttp.body.URLEncodedBody
 
-val data = URLEncodedBody(
+val urlEncodedData = URLEncodedBody(
   "answer" -> "42",
   "platform" -> "jvm"
 )
-request.post(data)
+request.post(urlEncodedData)
 // or
-request.put(data)
+request.put(urlEncodedData)
 ```
 
 Create JSON requests easily using implicit conversions.
 ```scala
 import fr.hmil.roshttp.body.Implicits._
+import fr.hmil.roshttp.body.JSONBody._
 
-val data = JSONObject(
+val jsonData = JSONObject(
   "answer" -> 42,
   "platform" -> "node"
 )
-request.post(data)
+request.post(jsonData)
 ```
 
-#### File upload
+### File upload
 
 To send file data you must turn a file into a ByteBuffer and then send it in a
-StreamBody. For instance, on the jvm you could do:
-```
-import fr.hmil.roshttp.body.Implicits._
+ByteBufferBody. For instance, on the jvm you could do:
+```scala
+import java.nio.ByteBuffer
+import fr.hmil.roshttp.body.ByteBufferBody
 
-val bytes = Source.fromFile("icon.png")(scala.io.Codec.ISO8859).map(_.toByte).toArray
-request.post(ByteBuffer.wrap(bytes))
+val buffer = ByteBuffer.wrap(
+        List[Byte](0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64, 0x0a)
+        .toArray)
+request.post(ByteBufferBody(buffer))
 ```
 Note that the codec argument is important to read the file as-is and avoid side-effects
 due to character interpretation.
 
-#### Multipart
+### Multipart
 
 Use the `MultiPartBody` to compose request bodies arbitrarily. It allows for instance
 to send binary data with some textual data.
@@ -185,6 +203,8 @@ The following example illustrates how you could send a form to update a user pro
 made of a variety of data types.
 ```scala
 import fr.hmil.roshttp.body.Implicits._
+import fr.hmil.roshttp.body.JSONBody._
+import fr.hmil.roshttp.body._
 
 request.post(MultiPartBody(
   // The name part is sent as plain text
@@ -198,17 +218,138 @@ request.post(MultiPartBody(
     ),
     "design" -> 2
   ),
-  // The picture is sent using a StreamBody, assuming image_bytes is a ByteBuffer containing the image
-  "picture" -> StreamBody(image_bytes, "image/jpeg")
+  // The picture is sent using a ByteBufferBody, assuming buffer is a ByteBuffer
+  // containing the image data
+  "picture" -> ByteBufferBody(buffer, "image/jpeg")
 ))
 ```
 
-### HTTP Method
+## Streaming
+
+**Warning:** Even though the streaming API works flawlessly on the JVM, it is an
+experimental feature as the JS implementation may leak memory or buffer things
+in the background.
+
+### Download streams
+
+Streaming a response is as simple as calling `.stream()` instead of `.send()`.
+`HttpRequest#stream()` returns a Future of `StreamHttpResponse`. A `StreamHttpResponse`
+is just like a `SimpleHttpResponse` except that its `body` property is an
+[Observable](https://monix.io/api/2.0/#monix.reactive.Observable).
+The observable will spit out a stream of `ByteBuffer`s as shown in this example:
 
 ```scala
-// Set the request method to GET, POST, PUT, etc...
-request.withMethod(Method.PUT).send()
+import fr.hmil.roshttp.util.Utils._
+
+request
+  .stream()
+  .map({ r =>
+    r.body.foreach(buffer => println(getStringFromBuffer(buffer, "UTF-8")))
+  })
 ```
+_Note that special care should be taken when converting chunks into strings because
+multibyte characters may span multiple chunks._
+_In general streaming is used for binary data and any reasonable quantity
+of text can safely be handled by the non-streaming API._
+
+#### HTTP methods
+
+There is no shortcut method such as `.post` to get a streaming response. You can
+still achieve that by using the constructor methods as shown below:
+```scala
+import fr.hmil.roshttp.Method.POST
+
+request
+  .withMethod(POST)
+  .withBody(PlainTextBody("My upload data"))
+  .stream()
+  // The response will be streamed
+```
+
+### Upload Streams
+
+There are cases where you want to upload some very large data with minimal memory
+consumption. We've got you covered! The [StreamBody](TODO: doc link) takes an
+[Observable](https://monix.io/api/2.0/#monix.reactive.Observable)[ByteBuffer]
+and streams its contents to the server. You can also pass an InputStream directly
+using RösHTTP's implicit converters:
+<!-- Defining an inputStream for the tests
+```scala
+val inputStream = new java.io.ByteArrayInputStream(new Array[Byte](1))
+```
+-->
+```scala
+import fr.hmil.roshttp.body.Implicits._
+
+// On the JVM:
+// val inputStream = new java.io.FileInputStream("video.avi")
+request
+  .post(inputStream)
+  .onComplete({
+    case _:Success[SimpleHttpResponse] => println("Data successfully uploaded")
+    case _:Failure[SimpleHttpResponse] => println("Error: Could not upload stream")
+  })
+```
+
+## Error handling
+
+Have you ever been frustrated when an application fails silently or gives you a
+vague and insignificant error message? RösHTTP comes with a powerful error handling
+API which allows you to deal with exceptions at the granularity level of your choice!
+
+### Quick and easy error handling
+
+Most applications only need to distinguish two failure cases: Application-level failures
+and lower-level failures.
+
+Application-level errors occur when a bad status code is received. For instance:
+- The request contained invalid data (400)
+- The requested resource does not exist (404)
+- The server encountered an error (500)
+- _etc..._
+
+Lower-level errors include timeouts, tcp and dns failures. They are beyond the
+scope of most applications and should be treated separately from application-level
+errors, especially in code tied to user interfaces.
+
+
+```scala
+import fr.hmil.roshttp.exceptions.HttpException
+import java.io.IOException
+request.send()
+  .recover {
+    case HttpException(e: SimpleHttpResponse) =>
+      // Here we may have some detailed application-level insight about the error
+      println("There was an issue with your request." +
+        " Here is what the application server says: " + e.body)
+    case e: IOException =>
+      // By handling transport issues separately, you get a chance to apply
+      // your own recovery strategy. Should you report to the user? Log the error?
+      // Retry the request? Send an alert to your ops team?
+      println("There was a network issue, please try again")
+  }
+```
+
+note that `HttpException` is a case class which either contains a `SimpleHttpResponse`
+or a `StreamHttpResponse` depending on what you expect your response to be (see
+[Streaming](https://github.com/hmil/RosHTTP#streaming)).
+
+### Fine-grain error handling
+
+If you ever need very specific error details, here is the hierarchy of exceptions
+which can occur in the Future.
+
+(TODO: links to scaladoc, extensively test all exceptions)
+- IOException All RösHTTP exceptions inherit from `java.io.IOException`
+  - TimeoutException base class for timeout exceptions
+    - RequestTimeoutException Sending the request took longer than the configured request timeout threshold.
+    - ResponseTimeoutException Receiving the response took longer than the configured response timeout threshold.
+    Note that in this case the headers were already received and you can access them if needed (mainly for debugging purposes).
+  - RequestException A transport error occurred while sending the request (eg. DNS resolution failure). (TODO test DNS resolution failure)
+  - ResponseException A transport error occurred while receiving the response.
+  Note that in this case the headers were already received and you can access them if needed (mainly for debugging purposes).
+  - UploadStreamException The stream used as a data source for the request body failed.
+  - HttpException Application-level errors (ie. status codes >= 400)
 
 ---
 
@@ -216,19 +357,35 @@ Watch the [issues](https://github.com/hmil/RosHTTP/issues)
 for upcoming features. Feedback is very welcome so feel free to file an issue if you
 see something that is missing.
 
-## Known limitations
+# Known limitations
 
+- Streaming is emulated in the browser, meaning that streaming large request or
+  response payloads in the browser will consume large amounts of memory and might fail.
+  This [problem has a solution](https://github.com/hmil/RosHTTP/issues/46)
 - Some headers cannot be set in the browser ([list](https://developer.mozilla.org/en-US/docs/Glossary/Forbidden_header_name)).
 - There is no way to avoid redirects in the browser. This is a W3C spec.
 - Chrome does not allow userspace handling of a 407 status code. It is treated
   like a network error. See [chromium issue](https://bugs.chromium.org/p/chromium/issues/detail?id=372136).
 - The `TRACE` HTTP method does not work in browsers and `PATCH` does not work in the JVM.
 
-## Contributing
+# Contributing
 
 Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master/CONTRIBUTING.md).
 
-## Changelog
+# Changelog
+
+**v2.0.0**
+
+- Renamed withQueryArrayParameter to withQuerySeqParameter
+- Timeout errors on body
+- Rename *Error classes to *Exception
+- Add streaming API
+- Add implicit Scheduler parameter
+- Add implicit execution context parameter
+
+**v1.1.0**
+- Fix bug on responses without Content-Type header
+- Detect key-value pairs during query string escapement
 
 **v1.0.1**
 - Fix NPE when reading empty error response
@@ -253,6 +410,6 @@ Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master
 **v0.1.0**
 - First release
 
-## License
+# License
 
 MIT

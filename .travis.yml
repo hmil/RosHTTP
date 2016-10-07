@@ -6,8 +6,8 @@ scala:
 
 install:
   - nvm list
-  - nvm install 4.4.0
-  - nvm use 4.4.0
+  - nvm install 5.10.0
+  - nvm use 5.10.0
 
 before_script:
   # Init xvfb for headless browser testing
@@ -19,6 +19,7 @@ before_script:
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION scalastyle
+  - test/update-readme-sanity-check.sh --fatalDiff
   - sbt ++$TRAVIS_SCALA_VERSION scalaHttpJS/test
   - sbt ++$TRAVIS_SCALA_VERSION scalaHttpJVM/test
   - sbt ++$TRAVIS_SCALA_VERSION firefox:test

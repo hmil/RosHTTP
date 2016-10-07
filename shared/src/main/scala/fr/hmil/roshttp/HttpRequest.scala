@@ -1,16 +1,21 @@
 package fr.hmil.roshttp
 
 import java.net.URI
+import java.util.concurrent.TimeUnit
 
 import fr.hmil.roshttp.body.BodyPart
+import fr.hmil.roshttp.exceptions.TimeoutException
+import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory, SimpleHttpResponse, StreamHttpResponse}
+import fr.hmil.roshttp.util.{HeaderMap, Utils}
+import monix.execution.Scheduler
 
-import scala.concurrent.Future
+import scala.concurrent.{Future, Promise}
+import scala.concurrent.duration.{FiniteDuration, TimeUnit}
+import scala.util.{Success, Failure}
 
 /** Builds an HTTP request.
   *
   * The request is sent using  [[send]]. A request can be sent multiple times.
-  * Each time yields a Future[HttpResponse] which either succeeds with an [[HttpResponse]]
-  * or fails with an [[HttpNetworkError]] or [[HttpResponseError]]
   */
 final class HttpRequest  private (
     val method: Method,
@@ -20,7 +25,9 @@ final class HttpRequest  private (
     val protocol: Protocol,
     val queryString: Option[String],
     val headers: HeaderMap[String],
-    val body: Option[BodyPart]) {
+    val body: Option[BodyPart],
+    val backendConfig: BackendConfig,
+    val timeout: FiniteDuration) {
 
   /** The path with the query string or just the path if there is no query string */
   val longPath = path + queryString.map(q => s"?$q").getOrElse("")
@@ -98,7 +105,7 @@ final class HttpRequest  private (
     * @return A copy of this [[HttpRequest]] with an updated queryString
     */
   def withQueryString(queryString: String): HttpRequest =
-    copy(queryString = Some(CrossPlatformUtils.encodeQueryString(queryString)))
+    copy(queryString = Some(Utils.encodeQueryString(queryString)))
 
   /** Sets the query string without escaping.
     *
@@ -132,9 +139,9 @@ final class HttpRequest  private (
   def withQueryParameter(key: String, value: String): HttpRequest =
     copy(queryString = Some(
       queryString.map(q => q + '&').getOrElse("") +
-      CrossPlatformUtils.encodeQueryString(key) +
+      CrossPlatformUtils.encodeURIComponent(key) +
       "=" +
-      CrossPlatformUtils.encodeQueryString(value)))
+      CrossPlatformUtils.encodeURIComponent(value)))
 
   /** Adds a query array parameter.
     *
@@ -148,24 +155,21 @@ final class HttpRequest  private (
     * @param key The unescaped parameter key
     * @param values The unescaped parameter array values
     * @return A copy of this [[HttpRequest]] with an updated query string.
-    * @see [[withQueryArrayParameter(String,String)]]
     */
-  def withQueryArrayParameter(key: String, values: Seq[String]): HttpRequest =
+  def withQuerySeqParameter(key: String, values: Seq[String]): HttpRequest =
     values.foldLeft(this)((acc, value) => acc.withQueryParameter(key, value))
 
-  /** Adds a query map parameter.
+  /** Adds an object made of key/value pairs to the query string.
     *
     * Although this is not part of a spec, most servers recognize bracket indices
-    * in a query string as array indices or object keys.
+    * in a query string as object keys. The same key can appear multiple times as
+    * some server will interpret this as multiple elements in an array for that key.
     *
     * example: ?obj[foo]=bar&obj[baz]=42
-    *
-    * This method formats map values according to the above example.
     *
     * @param key The unescaped parameter key
     * @param values The unescaped parameter map values
     * @return A copy of this [[HttpRequest]] with an updated query string.
-    * @see [[withQueryArrayParameter(String,String)]]
     */
   def withQueryObjectParameter(key: String, values: Seq[(String, String)]): HttpRequest =
     withQueryParameters(values.map(p => (s"$key[${p._1}]", p._2)): _*)
@@ -174,7 +178,6 @@ final class HttpRequest  private (
     *
     * @param parameters A sequence of new, unescaped parameters.
     * @return A copy of this [[HttpRequest]] with an updated query string.
-    * @see [[withQueryArrayParameter(String,String)]]
     */
   def withQueryParameters(parameters: (String, String)*): HttpRequest =
     parameters.foldLeft(this)((acc, entry) => acc.withQueryParameter(entry._1, entry._2))
@@ -196,6 +199,17 @@ final class HttpRequest  private (
   def withHeaders(newHeaders: (String, String)*): HttpRequest =
     copy(headers = HeaderMap(headers ++ newHeaders))
 
+  /** Specifies the request timeout.
+    *
+    * When a request takes longer than timeout to complete, the future is
+    * rejected with a [[fr.hmil.roshttp.exceptions.TimeoutException]].
+    *
+    * @param timeout The duration to wait before throwing a timeout exception.
+    * @return A copu of this [[HttpRequest]] with an updated timeout setting.
+    */
+  def withTimeout(timeout: FiniteDuration): HttpRequest =
+    copy(timeout = timeout)
+
   /** Updates request protocol, host, port, path and queryString according to a url.
     *
     * @param url A valid HTTP url
@@ -210,11 +224,18 @@ final class HttpRequest  private (
     path = if (parser.getPath != null) parser.getPath else  path,
     queryString = {
         if (parser.getQuery != null)
-        Some(CrossPlatformUtils.encodeQueryString(parser.getQuery))
+        Some(Utils.encodeQueryString(parser.getQuery))
         else
         queryString
       }
     )
+  }
+
+  /**
+    * Use the provided backend configuration when executing the request
+    */
+  def withBackendConfig(backendConfig: BackendConfig): HttpRequest = {
+    copy(backendConfig = backendConfig)
   }
 
   /** Attaches a body to this request and sets the Content-Type header.
@@ -229,50 +250,72 @@ final class HttpRequest  private (
     * Note that the HTTP spec forbids sending data with some methods. In case you need to deal with a broken backend,
     * this library allows you to do so anyway. **Beware that in this case, the JVM can still enforce a compliant HTTP
     * method**.
-    *
-    * @param body
-    * @return
     */
   def withBody(body: BodyPart): HttpRequest = {
     withHeader("Content-Type", body.contentType).copy(body = Some(body))
   }
 
+
+  private def _send[T <: HttpResponse](factory: HttpResponseFactory[T])(implicit scheduler: Scheduler): Future[T] = {
+    val promise = Promise[T]
+
+    val timeoutTask = scheduler.scheduleOnce(timeout.length, timeout.unit,
+      new Runnable {
+        override def run(): Unit = {
+          promise.tryFailure(new TimeoutException)
+        }
+      })
+
+    val backendFuture: Future[T] = HttpDriver.send(this, factory)
+    backendFuture.onComplete({response =>
+      timeoutTask.cancel()
+      promise.tryComplete(response)
+    })
+
+    promise.future
+  }
+
+  def stream()(implicit scheduler: Scheduler): Future[StreamHttpResponse] =
+    _send(StreamHttpResponse)
+
   /** Sends this request.
     *
     * A request can be sent multiple times. When a request is sent, it returns a Future[HttpResponse]
-    * which either succeeds with an [[HttpResponse]] or fails.
-    *
-    * Possible reasons for the future failing are:
-    * - A status code >= 400 ([[HttpResponseError]])
-    * - A network error ([[HttpNetworkError]])
-    *
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
+    * which either succeeds with an [[HttpResponse]] or fails.]]
     */
-  def send(): Future[HttpResponse] = HttpDriver.send(this)
+  def send()(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
+  _send(SimpleHttpResponse)
+
+  /** Sends this request with the GET method.
+    *
+    * @see [[send]]
+    */
+  def get()(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
+    withMethod(Method.GET).send()
 
   /** Sends this request with the POST method and a body
     *
     * @see [[send]]
     * @param body The body to send with the request
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
-  def post(body: BodyPart): Future[HttpResponse] = withMethod(Method.POST).send(body)
+  def post(body: BodyPart)(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
+      withMethod(Method.POST).send(body)
 
   /** Sends this request with the PUT method and a body
     *
     * @see [[post]]
     * @param body The body to send with the request
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
-  def put(body: BodyPart): Future[HttpResponse] = withMethod(Method.PUT).send(body)
+  def put(body: BodyPart)(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
+      withMethod(Method.PUT).send(body)
 
   /** Sends this request with the OPTIONS method and a body
     *
     * @see [[post]]
     * @param body The body to send with the request
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
-  def options(body: BodyPart): Future[HttpResponse] = withMethod(Method.OPTIONS).send(body)
+  def options(body: BodyPart)(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
+      withMethod(Method.OPTIONS).send(body)
 
   /** Sends this request with a body.
     *
@@ -281,9 +324,9 @@ final class HttpRequest  private (
     * data with the request, you should use [[post]] without arguments.
     *
     * @param body The body to send.
-    * @return A future of HttpResponse which may fail with an [[HttpNetworkError]] or [[HttpResponseError]]
     */
-  def send(body: BodyPart): Future[HttpResponse] = withBody(body).send()
+  def send(body: BodyPart)(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
+      withBody(body).send()
 
   /** Internal method to back public facing .withXXX methods. */
   private def copy(
@@ -294,7 +337,9 @@ final class HttpRequest  private (
       protocol: Protocol  = this.protocol,
       queryString: Option[String] = this.queryString,
       headers: HeaderMap[String]  = this.headers,
-      body: Option[BodyPart] = this.body
+      body: Option[BodyPart] = this.body,
+      backendConfig: BackendConfig = this.backendConfig,
+      timeout: FiniteDuration = this.timeout
   ): HttpRequest = {
     new HttpRequest(
       method    = method,
@@ -304,14 +349,16 @@ final class HttpRequest  private (
       protocol  = protocol,
       queryString = queryString,
       headers   = headers,
-      body = body)
+      body      = body,
+      backendConfig = backendConfig,
+      timeout   = timeout)
   }
 
 }
 
 object HttpRequest {
 
-  private val default = new HttpRequest(
+  private def default = new HttpRequest(
     method = Method.GET,
     host = null,
     path = null,
@@ -319,7 +366,9 @@ object HttpRequest {
     protocol = Protocol.HTTP,
     queryString = None,
     headers = HeaderMap(),
-    body = None
+    body = None,
+    backendConfig = BackendConfig(),
+    timeout = FiniteDuration(30, TimeUnit.SECONDS)
   )
 
   /** Creates a blank HTTP request.

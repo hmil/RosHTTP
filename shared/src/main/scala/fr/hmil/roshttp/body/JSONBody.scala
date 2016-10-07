@@ -8,10 +8,10 @@ import fr.hmil.roshttp.body.JSONBody.JSONValue
   *
   * @param value The JSON value to send.
   */
-class JSONBody private(value: JSONValue) extends BodyPart {
+class JSONBody private(value: JSONValue) extends BulkBodyPart {
   override def contentType: String = s"application/json; charset=utf-8"
 
-  override def content: ByteBuffer = ByteBuffer.wrap(value.toString.getBytes("utf-8"))
+  override def contentData: ByteBuffer = ByteBuffer.wrap(value.toString.getBytes("utf-8"))
 }
 
 object JSONBody {
