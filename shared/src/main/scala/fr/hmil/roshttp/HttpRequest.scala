@@ -1,13 +1,17 @@
 package fr.hmil.roshttp
 
 import java.net.URI
+import java.util.concurrent.TimeUnit
 
 import fr.hmil.roshttp.body.BodyPart
-import fr.hmil.roshttp.response.{HttpResponse, SimpleHttpResponse, StreamHttpResponse}
+import fr.hmil.roshttp.exceptions.ResponseTimeoutException
+import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory, SimpleHttpResponse, StreamHttpResponse}
 import fr.hmil.roshttp.util.{HeaderMap, Utils}
 import monix.execution.Scheduler
 
-import scala.concurrent.Future
+import scala.concurrent.{Future, Promise}
+import scala.concurrent.duration.{FiniteDuration, TimeUnit}
+import scala.util.{Success, Failure}
 
 /** Builds an HTTP request.
   *
@@ -22,7 +26,8 @@ final class HttpRequest  private (
     val queryString: Option[String],
     val headers: HeaderMap[String],
     val body: Option[BodyPart],
-    val backendConfig: BackendConfig) {
+    val backendConfig: BackendConfig,
+    val timeout: FiniteDuration) {
 
   /** The path with the query string or just the path if there is no query string */
   val longPath = path + queryString.map(q => s"?$q").getOrElse("")
@@ -194,6 +199,17 @@ final class HttpRequest  private (
   def withHeaders(newHeaders: (String, String)*): HttpRequest =
     copy(headers = HeaderMap(headers ++ newHeaders))
 
+  /** Specifies the request timeout.
+    *
+    * When a request takes longer than timeout to complete, the future is
+    * rejected with a [[fr.hmil.roshttp.exceptions.RequestTimeoutException]].
+    *
+    * @param timeout The duration to wait before throwing a timeout exception.
+    * @return A copu of this [[HttpRequest]] with an updated timeout setting.
+    */
+  def withTimeout(timeout: FiniteDuration): HttpRequest =
+    copy(timeout = timeout)
+
   /** Updates request protocol, host, port, path and queryString according to a url.
     *
     * @param url A valid HTTP url
@@ -239,8 +255,28 @@ final class HttpRequest  private (
     withHeader("Content-Type", body.contentType).copy(body = Some(body))
   }
 
+
+  private def _send[T <: HttpResponse](factory: HttpResponseFactory[T])(implicit scheduler: Scheduler): Future[T] = {
+    val promise = Promise[T]
+
+    val timeoutTask = scheduler.scheduleOnce(timeout.length, timeout.unit,
+      new Runnable {
+        override def run(): Unit = {
+          promise.tryFailure(new ResponseTimeoutException)
+        }
+      })
+
+    val backendFuture: Future[T] = HttpDriver.send(this, factory)
+    backendFuture.map({response =>
+      timeoutTask.cancel()
+      response
+    }).onComplete(promise.tryComplete)
+
+    promise.future
+  }
+
   def stream()(implicit scheduler: Scheduler): Future[StreamHttpResponse] =
-    HttpDriver.send(this, StreamHttpResponse)
+    _send(StreamHttpResponse)
 
   /** Sends this request.
     *
@@ -248,7 +284,7 @@ final class HttpRequest  private (
     * which either succeeds with an [[HttpResponse]] or fails.]]
     */
   def send()(implicit scheduler: Scheduler): Future[SimpleHttpResponse] =
-    HttpDriver.send(this, SimpleHttpResponse)
+  _send(SimpleHttpResponse)
 
   /** Sends this request with the GET method.
     *
@@ -302,7 +338,8 @@ final class HttpRequest  private (
       queryString: Option[String] = this.queryString,
       headers: HeaderMap[String]  = this.headers,
       body: Option[BodyPart] = this.body,
-      backendConfig: BackendConfig = this.backendConfig
+      backendConfig: BackendConfig = this.backendConfig,
+      timeout: FiniteDuration = this.timeout
   ): HttpRequest = {
     new HttpRequest(
       method    = method,
@@ -313,7 +350,8 @@ final class HttpRequest  private (
       queryString = queryString,
       headers   = headers,
       body      = body,
-      backendConfig = backendConfig)
+      backendConfig = backendConfig,
+      timeout   = timeout)
   }
 
 }
@@ -329,7 +367,8 @@ object HttpRequest {
     queryString = None,
     headers = HeaderMap(),
     body = None,
-    backendConfig = BackendConfig()
+    backendConfig = BackendConfig(),
+    timeout = FiniteDuration(30, TimeUnit.SECONDS)
   )
 
   /** Creates a blank HTTP request.

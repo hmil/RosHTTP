@@ -190,26 +190,6 @@ object HttpRequestSpec extends TestSuite {
             .map(response => response.body ==> "")
         }
       }
-      "with body timeout" - {
-        "throws a timeout error" - {
-          if (JsEnvUtils.isChrome) {
-            "Doesn't work in chrome"
-          } else {
-            HttpRequest(s"$SERVER_URL/echo_repeat/farfelu")
-              .withBackendConfig(BackendConfig(bodyCollectTimeout = 1))
-              .withQueryParameters(
-                "repeat" -> "2",
-                "delay" -> "2000")
-              .send()
-              .failed
-              .map {
-                case e:ResponseTimeoutException =>
-                  e.header.statusCode ==> 200
-                  e.header.headers("Content-Type") ==> "text/plain; charset=utf-8"
-              }
-          }
-        }
-      }
       "can be chunked and recomposed" - {
         HttpRequest(s"$SERVER_URL/echo_repeat/foo")
           .withQueryParameters(
@@ -229,8 +209,7 @@ object HttpRequestSpec extends TestSuite {
         val payload = "12\uD83D\uDCA978"
         HttpRequest(s"$SERVER_URL/multibyte_string")
           .withBackendConfig(BackendConfig(
-            maxChunkSize = 4,
-            bodyCollectTimeout = 10
+            maxChunkSize = 4
           ))
           .send()
           .map(res => res.body ==> payload)

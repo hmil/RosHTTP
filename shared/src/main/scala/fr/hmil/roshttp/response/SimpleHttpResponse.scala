@@ -1,10 +1,9 @@
 package fr.hmil.roshttp.response
 
 import java.nio.ByteBuffer
-import java.util.concurrent.TimeUnit
 
 import fr.hmil.roshttp.BackendConfig
-import fr.hmil.roshttp.exceptions.{ResponseException, ResponseTimeoutException}
+import fr.hmil.roshttp.exceptions.ResponseException
 import fr.hmil.roshttp.util.{HeaderMap, Utils}
 import monix.execution.Scheduler
 import monix.reactive.Observable
@@ -40,21 +39,10 @@ object SimpleHttpResponse extends HttpResponseFactory[SimpleHttpResponse] {
         new SimpleHttpResponse(header.statusCode, header.headers, body)
       })
 
-
-    val timeoutTask = scheduler.scheduleOnce(config.bodyCollectTimeout, TimeUnit.SECONDS,
-      new Runnable {
-        override def run(): Unit = {
-          promise.failure(new ResponseTimeoutException(header))
-          streamCollector.cancel()
-        }
-      })
-
     streamCollector.onComplete({
       case res:Success[SimpleHttpResponse] =>
-        timeoutTask.cancel()
         promise.trySuccess(res.value)
       case e:Failure[_] =>
-        timeoutTask.cancel()
         promise.tryFailure(new ResponseException(e.exception, header))
     })
 
