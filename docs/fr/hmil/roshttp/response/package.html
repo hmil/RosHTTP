@@ -1,0 +1,194 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>response - fr.hmil.roshttp.response</title>
+          <meta name="description" content="response - fr.hmil.roshttp.response" />
+          <meta name="keywords" content="response fr.hmil.roshttp.response" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../../index.html';
+            var hash = 'fr.hmil.roshttp.response.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img alt="Package" src="../../../../lib/package_big.png" />
+        <p id="owner"><a href="../../../package.html" class="extype" name="fr">fr</a>.<a href="../../package.html" class="extype" name="fr.hmil">hmil</a>.<a href="../package.html" class="extype" name="fr.hmil.roshttp">roshttp</a></p>
+        <h1>response</h1><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.package" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">response</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="fr.hmil.roshttp.response.HttpResponseHeader" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="HttpResponseHeaderextendsAnyRef"></a>
+      <a id="HttpResponseHeader:HttpResponseHeader"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpResponseHeader.html"><span class="name">HttpResponseHeader</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.package@HttpResponseHeaderextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Data contained by the header section of an HTTP response message</p><div class="fullcomment"><div class="comment cmt"><p>Data contained by the header section of an HTTP response message</p><p>Most of the time, <a href="SimpleHttpResponse.html" class="extype" name="fr.hmil.roshttp.response.SimpleHttpResponse">SimpleHttpResponse</a> and <a href="StreamHttpResponse.html" class="extype" name="fr.hmil.roshttp.response.StreamHttpResponse">StreamHttpResponse</a> are the classes
+you will want to use since they contain both header and body data.
+However, if a network error occurs and the response body cannot be retreived, this class
+is used to represent the header data received.
+</p></div></div>
+    </li><li name="fr.hmil.roshttp.response.SimpleHttpResponse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SimpleHttpResponseextendsHttpResponse"></a>
+      <a id="SimpleHttpResponse:SimpleHttpResponse"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SimpleHttpResponse.html"><span class="name">SimpleHttpResponse</span></a><span class="result"> extends <span class="extype" name="fr.hmil.roshttp.response.HttpResponse">HttpResponse</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.package@SimpleHttpResponseextendsHttpResponse" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">An HTTP response obtained via an <a href="../HttpRequest.html" class="extype" name="fr.hmil.roshttp.HttpRequest">fr.hmil.roshttp.HttpRequest</a>
+</p>
+    </li><li name="fr.hmil.roshttp.response.StreamHttpResponse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StreamHttpResponseextendsHttpResponse"></a>
+      <a id="StreamHttpResponse:StreamHttpResponse"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="StreamHttpResponse.html"><span class="name">StreamHttpResponse</span></a><span class="result"> extends <span class="extype" name="fr.hmil.roshttp.response.HttpResponse">HttpResponse</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.package@StreamHttpResponseextendsHttpResponse" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="fr.hmil.roshttp.response.SimpleHttpResponse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SimpleHttpResponse"></a>
+      <a id="SimpleHttpResponse:SimpleHttpResponse"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SimpleHttpResponse$.html"><span class="name">SimpleHttpResponse</span></a><span class="result"> extends <span class="extype" name="fr.hmil.roshttp.response.HttpResponseFactory">HttpResponseFactory</span>[<a href="SimpleHttpResponse.html" class="extype" name="fr.hmil.roshttp.response.SimpleHttpResponse">SimpleHttpResponse</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.package@SimpleHttpResponse" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="fr.hmil.roshttp.response.StreamHttpResponse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="StreamHttpResponse"></a>
+      <a id="StreamHttpResponse:StreamHttpResponse"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="StreamHttpResponse$.html"><span class="name">StreamHttpResponse</span></a><span class="result"> extends <span class="extype" name="fr.hmil.roshttp.response.HttpResponseFactory">HttpResponseFactory</span>[<a href="StreamHttpResponse.html" class="extype" name="fr.hmil.roshttp.response.StreamHttpResponse">StreamHttpResponse</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.package@StreamHttpResponse" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

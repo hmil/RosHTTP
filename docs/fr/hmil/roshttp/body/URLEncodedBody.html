@@ -47,16 +47,16 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">URLEncodedBody</span><span class="result"> extends <a href="BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a></span>
+        <span class="name">URLEncodedBody</span><span class="result"> extends <a href="BulkBodyPart.html" class="extype" name="fr.hmil.roshttp.body.BulkBodyPart">BulkBodyPart</a></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>An urlencoded HTTP body.</p><p><b>Usage:</b> urlencoded bodies are best suited for simple key/value maps of strings. For more
-structured data, use <a href="JSONBody.html" class="extype" name="fr.hmil.roshttp.body.JSONBody">JSONBody</a>. For binary data, use <a href="StreamBody.html" class="extype" name="fr.hmil.roshttp.body.StreamBody">StreamBody</a> or <a href="MultiPartBody.html" class="extype" name="fr.hmil.roshttp.body.MultiPartBody">MultiPartBody</a>.</p><p>URLEncoded bodies are associated with the mime type &quot;application/x-www-form-urlencoded&quot;
+structured data, use <a href="JSONBody.html" class="extype" name="fr.hmil.roshttp.body.JSONBody">JSONBody</a>. For binary data, use <a href="ByteBufferBody.html" class="extype" name="fr.hmil.roshttp.body.ByteBufferBody">ByteBufferBody</a> or <a href="MultiPartBody.html" class="extype" name="fr.hmil.roshttp.body.MultiPartBody">MultiPartBody</a>.</p><p>URLEncoded bodies are associated with the mime type &quot;application/x-www-form-urlencoded&quot;
 and look like query string parameters (eg. key=value&amp;key2=value2 ).
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="BulkBodyPart.html" class="extype" name="fr.hmil.roshttp.body.BulkBodyPart">BulkBodyPart</a>, <a href="BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -67,20 +67,20 @@ and look like query string parameters (eg. key=value&amp;key2=value2 ).
               <ol>
                 
                 <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By inheritance</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
         <div id="ancestors">
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="fr.hmil.roshttp.body.URLEncodedBody"><span>URLEncodedBody</span></li><li class="in" name="fr.hmil.roshttp.body.BodyPart"><span>BodyPart</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="fr.hmil.roshttp.body.URLEncodedBody"><span>URLEncodedBody</span></li><li class="in" name="fr.hmil.roshttp.body.BulkBodyPart"><span>BulkBodyPart</span></li><li class="in" name="fr.hmil.roshttp.body.BodyPart"><span>BodyPart</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
             <ol>
               <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li>
+              <li class="showall in"><span>Show All</span></li>
             </ol>
           </div>
         <div id="visbl">
@@ -190,23 +190,40 @@ and look like query string parameters (eg. key=value&amp;key2=value2 ).
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="fr.hmil.roshttp.body.URLEncodedBody#content" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="content:java.nio.ByteBuffer"></a>
-      <a id="content:ByteBuffer"></a>
+    </li><li name="fr.hmil.roshttp.body.BulkBodyPart#content" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="content:monix.reactive.Observable[java.nio.ByteBuffer]"></a>
+      <a id="content:Observable[ByteBuffer]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">content</span><span class="result">: <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span></span>
+        <span class="name">content</span><span class="result">: <span class="extype" name="monix.reactive.Observable">Observable</span>[<span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody@content:java.nio.ByteBuffer" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody@content:monix.reactive.Observable[java.nio.ByteBuffer]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="fr.hmil.roshttp.body.URLEncodedBody">URLEncodedBody</a> → <a href="BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a></dd></dl></div>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="BulkBodyPart.html" class="extype" name="fr.hmil.roshttp.body.BulkBodyPart">BulkBodyPart</a> → <a href="BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a></dd></dl></div>
+    </li><li name="fr.hmil.roshttp.body.URLEncodedBody#contentData" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="contentData:java.nio.ByteBuffer"></a>
+      <a id="contentData:ByteBuffer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">contentData</span><span class="result">: <span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody@contentData:java.nio.ByteBuffer" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="fr.hmil.roshttp.body.URLEncodedBody">URLEncodedBody</a> → <a href="BulkBodyPart.html" class="extype" name="fr.hmil.roshttp.body.BulkBodyPart">BulkBodyPart</a></dd></dl></div>
     </li><li name="fr.hmil.roshttp.body.URLEncodedBody#contentType" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="contentType:String"></a>
       <a id="contentType:String"></a>
@@ -495,7 +512,9 @@ and look like query string parameters (eg. key=value&amp;key2=value2 ).
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="fr.hmil.roshttp.body.BodyPart">
+        <div class="parent" name="fr.hmil.roshttp.body.BulkBodyPart">
+              <h3>Inherited from <a href="BulkBodyPart.html" class="extype" name="fr.hmil.roshttp.body.BulkBodyPart">BulkBodyPart</a></h3>
+            </div><div class="parent" name="fr.hmil.roshttp.body.BodyPart">
               <h3>Inherited from <a href="BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>

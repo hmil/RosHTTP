@@ -1,9 +1,9 @@
 <!DOCTYPE html >
 <html>
         <head>
-          <title>URLEncodedBody - fr.hmil.roshttp.body.URLEncodedBody</title>
-          <meta name="description" content="URLEncodedBody - fr.hmil.roshttp.body.URLEncodedBody" />
-          <meta name="keywords" content="URLEncodedBody fr.hmil.roshttp.body.URLEncodedBody" />
+          <title>StreamHttpResponse - fr.hmil.roshttp.response.StreamHttpResponse</title>
+          <meta name="description" content="StreamHttpResponse - fr.hmil.roshttp.response.StreamHttpResponse" />
+          <meta name="keywords" content="StreamHttpResponse fr.hmil.roshttp.response.StreamHttpResponse" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link href="../../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
@@ -16,7 +16,7 @@
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../../index.html';
-            var hash = 'fr.hmil.roshttp.body.URLEncodedBody$';
+            var hash = 'fr.hmil.roshttp.response.StreamHttpResponse';
             var anchor = window.location.hash;
             var anchor_opt = '';
             if (anchor.length >= 1)
@@ -26,16 +26,16 @@
    	  </script>
     
         </head>
-        <body class="value">
+        <body class="type">
       <div id="definition">
-        <a href="URLEncodedBody.html" title="See companion class"><img alt="Object/Class" src="../../../../lib/object_to_class_big.png" /></a>
-        <p id="owner"><a href="../../../package.html" class="extype" name="fr">fr</a>.<a href="../../package.html" class="extype" name="fr.hmil">hmil</a>.<a href="../package.html" class="extype" name="fr.hmil.roshttp">roshttp</a>.<a href="package.html" class="extype" name="fr.hmil.roshttp.body">body</a></p>
-        <h1><a href="URLEncodedBody.html" title="See companion class">URLEncodedBody</a></h1><h3><span class="morelinks"><div>
+        <a href="StreamHttpResponse$.html" title="See companion object"><img alt="Class/Object" src="../../../../lib/class_to_object_big.png" /></a>
+        <p id="owner"><a href="../../../package.html" class="extype" name="fr">fr</a>.<a href="../../package.html" class="extype" name="fr.hmil">hmil</a>.<a href="../package.html" class="extype" name="fr.hmil.roshttp">roshttp</a>.<a href="package.html" class="extype" name="fr.hmil.roshttp.response">response</a></p>
+        <h1><a href="StreamHttpResponse$.html" title="See companion object">StreamHttpResponse</a></h1><h3><span class="morelinks"><div>
             Related Docs:
-            <a href="URLEncodedBody.html" title="See companion class">class URLEncodedBody</a>
-            | <a href="package.html" class="extype" name="fr.hmil.roshttp.body">package body</a>
+            <a href="StreamHttpResponse$.html" title="See companion object">object StreamHttpResponse</a>
+            | <a href="package.html" class="extype" name="fr.hmil.roshttp.response">package response</a>
           </div></span></h3><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -44,16 +44,16 @@
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">object</span>
+        <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <span class="name">URLEncodedBody</span>
+        <span class="name">StreamHttpResponse</span><span class="result"> extends <span class="extype" name="fr.hmil.roshttp.response.HttpResponse">HttpResponse</span></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="fr.hmil.roshttp.response.HttpResponse">HttpResponse</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -71,7 +71,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="fr.hmil.roshttp.body.URLEncodedBody"><span>URLEncodedBody</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="fr.hmil.roshttp.response.StreamHttpResponse"><span>StreamHttpResponse</span></li><li class="in" name="fr.hmil.roshttp.response.HttpResponse"><span>HttpResponse</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -88,7 +88,27 @@
 
       <div id="template">
         <div id="allMembers">
-        
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="fr.hmil.roshttp.response.StreamHttpResponse#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(statusCode:Int,headers:fr.hmil.roshttp.util.HeaderMap[String],body:monix.reactive.Observable[java.nio.ByteBuffer]):fr.hmil.roshttp.response.StreamHttpResponse"></a>
+      <a id="&lt;init&gt;:StreamHttpResponse"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">StreamHttpResponse</span><span class="params">(<span name="statusCode">statusCode: <span class="extype" name="scala.Int">Int</span></span>, <span name="headers">headers: <a href="../util/HeaderMap.html" class="extype" name="fr.hmil.roshttp.util.HeaderMap">HeaderMap</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="body">body: <span class="extype" name="monix.reactive.Observable">Observable</span>[<span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span>]</span>)</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@&lt;init&gt;(statusCode:Int,headers:fr.hmil.roshttp.util.HeaderMap[String],body:monix.reactive.Observable[java.nio.ByteBuffer]):fr.hmil.roshttp.response.StreamHttpResponse" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
 
         
 
@@ -108,7 +128,7 @@
         <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@!=(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -125,7 +145,7 @@
         <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@##():Int" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@##():Int" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -142,28 +162,11 @@
         <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@==(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@==(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="fr.hmil.roshttp.body.URLEncodedBody#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="apply(values:(String,String)*):fr.hmil.roshttp.body.URLEncodedBody"></a>
-      <a id="apply((String,String)*):URLEncodedBody"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="values">values: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.String">String</span>)*</span>)</span><span class="result">: <a href="URLEncodedBody.html" class="extype" name="fr.hmil.roshttp.body.URLEncodedBody">URLEncodedBody</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@apply(values:(String,String)*):fr.hmil.roshttp.body.URLEncodedBody" title="Permalink" target="_top">
-        <img src="../../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -176,11 +179,28 @@
         <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@asInstanceOf[T0]:T0" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="fr.hmil.roshttp.response.StreamHttpResponse#body" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="body:monix.reactive.Observable[java.nio.ByteBuffer]"></a>
+      <a id="body:Observable[ByteBuffer]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">body</span><span class="result">: <span class="extype" name="monix.reactive.Observable">Observable</span>[<span class="extype" name="java.nio.ByteBuffer">ByteBuffer</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@body:monix.reactive.Observable[java.nio.ByteBuffer]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="fr.hmil.roshttp.response.StreamHttpResponse">StreamHttpResponse</a> → HttpResponse</dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -193,7 +213,7 @@
         <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@clone():Object" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@clone():Object" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -216,7 +236,7 @@
         <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -233,7 +253,7 @@
         <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@equals(x$1:Any):Boolean" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -250,7 +270,7 @@
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@finalize():Unit" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@finalize():Unit" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -273,7 +293,7 @@
         <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@getClass():Class[_]" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@getClass():Class[_]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -290,11 +310,28 @@
         <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@hashCode():Int" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@hashCode():Int" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="fr.hmil.roshttp.response.StreamHttpResponse#headers" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="headers:fr.hmil.roshttp.util.HeaderMap[String]"></a>
+      <a id="headers:HeaderMap[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">headers</span><span class="result">: <a href="../util/HeaderMap.html" class="extype" name="fr.hmil.roshttp.util.HeaderMap">HeaderMap</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@headers:fr.hmil.roshttp.util.HeaderMap[String]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="fr.hmil.roshttp.response.StreamHttpResponse">StreamHttpResponse</a> → HttpResponse</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -307,7 +344,7 @@
         <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -324,7 +361,7 @@
         <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -341,7 +378,7 @@
         <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@notify():Unit" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@notify():Unit" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -358,11 +395,28 @@
         <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@notifyAll():Unit" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@notifyAll():Unit" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="fr.hmil.roshttp.response.StreamHttpResponse#statusCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="statusCode:Int"></a>
+      <a id="statusCode:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">statusCode</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@statusCode:Int" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="fr.hmil.roshttp.response.StreamHttpResponse">StreamHttpResponse</a> → HttpResponse</dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -375,7 +429,7 @@
         <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -392,7 +446,7 @@
         <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@toString():String" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@toString():String" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -409,7 +463,7 @@
         <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@wait():Unit" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@wait():Unit" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -432,7 +486,7 @@
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -455,7 +509,7 @@
         <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#fr.hmil.roshttp.body.URLEncodedBody$@wait(x$1:Long):Unit" title="Permalink" target="_top">
+      <a href="../../../../index.html#fr.hmil.roshttp.response.StreamHttpResponse@wait(x$1:Long):Unit" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -475,7 +529,9 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="fr.hmil.roshttp.response.HttpResponse">
+              <h3>Inherited from <span class="extype" name="fr.hmil.roshttp.response.HttpResponse">HttpResponse</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>

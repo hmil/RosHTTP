@@ -51,9 +51,7 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Builds an HTTP request.</p><p>The request is sent using  <a href="#send(body:fr.hmil.roshttp.body.BodyPart):scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]" class="extmbr" name="fr.hmil.roshttp.HttpRequest#send">send</a>. A request can be sent multiple times.
-Each time yields a Future[HttpResponse] which either succeeds with an <a href="HttpResponse.html" class="extype" name="fr.hmil.roshttp.HttpResponse">HttpResponse</a>
-or fails with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.roshttp.HttpNetworkError">HttpNetworkError</a> or <a href="HttpResponseError.html" class="extype" name="fr.hmil.roshttp.HttpResponseError">HttpResponseError</a>
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Builds an HTTP request.</p><p>The request is sent using  <a href="#send(body:fr.hmil.roshttp.body.BodyPart)(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]" class="extmbr" name="fr.hmil.roshttp.HttpRequest#send">send</a>. A request can be sent multiple times.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
@@ -67,7 +65,7 @@ or fails with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.ro
               <ol>
                 
                 <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By inheritance</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
         <div id="ancestors">
@@ -80,7 +78,7 @@ or fails with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.ro
             <span class="filtertype"></span>
             <ol>
               <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li>
+              <li class="showall in"><span>Show All</span></li>
             </ol>
           </div>
         <div id="visbl">
@@ -167,6 +165,23 @@ or fails with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.ro
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="fr.hmil.roshttp.HttpRequest#backendConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="backendConfig:fr.hmil.roshttp.BackendConfig"></a>
+      <a id="backendConfig:BackendConfig"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">backendConfig</span><span class="result">: <a href="BackendConfig.html" class="extype" name="fr.hmil.roshttp.BackendConfig">BackendConfig</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@backendConfig:fr.hmil.roshttp.BackendConfig" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="fr.hmil.roshttp.HttpRequest#body" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="body:Option[fr.hmil.roshttp.body.BodyPart]"></a>
       <a id="body:Option[BodyPart]"></a>
@@ -264,6 +279,24 @@ or fails with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.ro
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="fr.hmil.roshttp.HttpRequest#get" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="get()(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]"></a>
+      <a id="get()(Scheduler):Future[SimpleHttpResponse]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">get</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="scheduler">scheduler: <span class="extype" name="monix.execution.Scheduler">Scheduler</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="response/SimpleHttpResponse.html" class="extype" name="fr.hmil.roshttp.response.SimpleHttpResponse">SimpleHttpResponse</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@get()(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Sends this request with the GET method.</p><div class="fullcomment"><div class="comment cmt"><p>Sends this request with the GET method.
+</p></div><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#send(body:fr.hmil.roshttp.body.BodyPart)(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]" class="extmbr" name="fr.hmil.roshttp.HttpRequest#send">send</a></p></span></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <a id="getClass():Class[_]"></a>
@@ -299,7 +332,7 @@ or fails with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.ro
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="fr.hmil.roshttp.HttpRequest#headers" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="headers:fr.hmil.roshttp.HeaderMap[String]"></a>
+      <a id="headers:fr.hmil.roshttp.util.HeaderMap[String]"></a>
       <a id="headers:HeaderMap[String]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -307,10 +340,10 @@ or fails with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.ro
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">headers</span><span class="result">: <a href="HeaderMap.html" class="extype" name="fr.hmil.roshttp.HeaderMap">HeaderMap</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+        <span class="name">headers</span><span class="result">: <a href="util/HeaderMap.html" class="extype" name="fr.hmil.roshttp.util.HeaderMap">HeaderMap</a>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@headers:fr.hmil.roshttp.HeaderMap[String]" title="Permalink" target="_top">
+      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@headers:fr.hmil.roshttp.util.HeaderMap[String]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -435,24 +468,24 @@ or fails with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.ro
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="fr.hmil.roshttp.HttpRequest#options" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="options(body:fr.hmil.roshttp.body.BodyPart):scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]"></a>
-      <a id="options(BodyPart):Future[HttpResponse]"></a>
+      <a id="options(body:fr.hmil.roshttp.body.BodyPart)(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]"></a>
+      <a id="options(BodyPart)(Scheduler):Future[SimpleHttpResponse]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">options</span><span class="params">(<span name="body">body: <a href="body/BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="HttpResponse.html" class="extype" name="fr.hmil.roshttp.HttpResponse">HttpResponse</a>]</span>
+        <span class="name">options</span><span class="params">(<span name="body">body: <a href="body/BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="scheduler">scheduler: <span class="extype" name="monix.execution.Scheduler">Scheduler</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="response/SimpleHttpResponse.html" class="extype" name="fr.hmil.roshttp.response.SimpleHttpResponse">SimpleHttpResponse</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@options(body:fr.hmil.roshttp.body.BodyPart):scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]" title="Permalink" target="_top">
+      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@options(body:fr.hmil.roshttp.body.BodyPart)(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Sends this request with the OPTIONS method and a body
 </p><div class="fullcomment"><div class="comment cmt"><p>Sends this request with the OPTIONS method and a body
-</p></div><dl class="paramcmts block"><dt class="param">body</dt><dd class="cmt"><p>The body to send with the request</p></dd><dt>returns</dt><dd class="cmt"><p>A future of HttpResponse which may fail with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.roshttp.HttpNetworkError">HttpNetworkError</a> or <a href="HttpResponseError.html" class="extype" name="fr.hmil.roshttp.HttpResponseError">HttpResponseError</a></p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#post(body:fr.hmil.roshttp.body.BodyPart):scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]" class="extmbr" name="fr.hmil.roshttp.HttpRequest#post">post</a></p></span></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">body</dt><dd class="cmt"><p>The body to send with the request</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#post(body:fr.hmil.roshttp.body.BodyPart)(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]" class="extmbr" name="fr.hmil.roshttp.HttpRequest#post">post</a></p></span></dd></dl></div>
     </li><li name="fr.hmil.roshttp.HttpRequest#path" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="path:String"></a>
       <a id="path:String"></a>
@@ -488,24 +521,24 @@ or fails with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.ro
     </span>
       
     </li><li name="fr.hmil.roshttp.HttpRequest#post" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="post(body:fr.hmil.roshttp.body.BodyPart):scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]"></a>
-      <a id="post(BodyPart):Future[HttpResponse]"></a>
+      <a id="post(body:fr.hmil.roshttp.body.BodyPart)(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]"></a>
+      <a id="post(BodyPart)(Scheduler):Future[SimpleHttpResponse]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">post</span><span class="params">(<span name="body">body: <a href="body/BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="HttpResponse.html" class="extype" name="fr.hmil.roshttp.HttpResponse">HttpResponse</a>]</span>
+        <span class="name">post</span><span class="params">(<span name="body">body: <a href="body/BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="scheduler">scheduler: <span class="extype" name="monix.execution.Scheduler">Scheduler</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="response/SimpleHttpResponse.html" class="extype" name="fr.hmil.roshttp.response.SimpleHttpResponse">SimpleHttpResponse</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@post(body:fr.hmil.roshttp.body.BodyPart):scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]" title="Permalink" target="_top">
+      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@post(body:fr.hmil.roshttp.body.BodyPart)(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Sends this request with the POST method and a body
 </p><div class="fullcomment"><div class="comment cmt"><p>Sends this request with the POST method and a body
-</p></div><dl class="paramcmts block"><dt class="param">body</dt><dd class="cmt"><p>The body to send with the request</p></dd><dt>returns</dt><dd class="cmt"><p>A future of HttpResponse which may fail with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.roshttp.HttpNetworkError">HttpNetworkError</a> or <a href="HttpResponseError.html" class="extype" name="fr.hmil.roshttp.HttpResponseError">HttpResponseError</a></p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#send(body:fr.hmil.roshttp.body.BodyPart):scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]" class="extmbr" name="fr.hmil.roshttp.HttpRequest#send">send</a></p></span></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">body</dt><dd class="cmt"><p>The body to send with the request</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#send(body:fr.hmil.roshttp.body.BodyPart)(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]" class="extmbr" name="fr.hmil.roshttp.HttpRequest#send">send</a></p></span></dd></dl></div>
     </li><li name="fr.hmil.roshttp.HttpRequest#protocol" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="protocol:fr.hmil.roshttp.Protocol"></a>
       <a id="protocol:Protocol"></a>
@@ -524,24 +557,24 @@ or fails with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.ro
     </span>
       
     </li><li name="fr.hmil.roshttp.HttpRequest#put" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="put(body:fr.hmil.roshttp.body.BodyPart):scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]"></a>
-      <a id="put(BodyPart):Future[HttpResponse]"></a>
+      <a id="put(body:fr.hmil.roshttp.body.BodyPart)(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]"></a>
+      <a id="put(BodyPart)(Scheduler):Future[SimpleHttpResponse]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">put</span><span class="params">(<span name="body">body: <a href="body/BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="HttpResponse.html" class="extype" name="fr.hmil.roshttp.HttpResponse">HttpResponse</a>]</span>
+        <span class="name">put</span><span class="params">(<span name="body">body: <a href="body/BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="scheduler">scheduler: <span class="extype" name="monix.execution.Scheduler">Scheduler</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="response/SimpleHttpResponse.html" class="extype" name="fr.hmil.roshttp.response.SimpleHttpResponse">SimpleHttpResponse</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@put(body:fr.hmil.roshttp.body.BodyPart):scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]" title="Permalink" target="_top">
+      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@put(body:fr.hmil.roshttp.body.BodyPart)(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Sends this request with the PUT method and a body
 </p><div class="fullcomment"><div class="comment cmt"><p>Sends this request with the PUT method and a body
-</p></div><dl class="paramcmts block"><dt class="param">body</dt><dd class="cmt"><p>The body to send with the request</p></dd><dt>returns</dt><dd class="cmt"><p>A future of HttpResponse which may fail with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.roshttp.HttpNetworkError">HttpNetworkError</a> or <a href="HttpResponseError.html" class="extype" name="fr.hmil.roshttp.HttpResponseError">HttpResponseError</a></p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#post(body:fr.hmil.roshttp.body.BodyPart):scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]" class="extmbr" name="fr.hmil.roshttp.HttpRequest#post">post</a></p></span></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">body</dt><dd class="cmt"><p>The body to send with the request</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><a href="#post(body:fr.hmil.roshttp.body.BodyPart)(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]" class="extmbr" name="fr.hmil.roshttp.HttpRequest#post">post</a></p></span></dd></dl></div>
     </li><li name="fr.hmil.roshttp.HttpRequest#queryString" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="queryString:Option[String]"></a>
       <a id="queryString:Option[String]"></a>
@@ -560,46 +593,61 @@ or fails with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.ro
     </span>
       
     </li><li name="fr.hmil.roshttp.HttpRequest#send" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="send(body:fr.hmil.roshttp.body.BodyPart):scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]"></a>
-      <a id="send(BodyPart):Future[HttpResponse]"></a>
+      <a id="send(body:fr.hmil.roshttp.body.BodyPart)(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]"></a>
+      <a id="send(BodyPart)(Scheduler):Future[SimpleHttpResponse]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">send</span><span class="params">(<span name="body">body: <a href="body/BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="HttpResponse.html" class="extype" name="fr.hmil.roshttp.HttpResponse">HttpResponse</a>]</span>
+        <span class="name">send</span><span class="params">(<span name="body">body: <a href="body/BodyPart.html" class="extype" name="fr.hmil.roshttp.body.BodyPart">BodyPart</a></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="scheduler">scheduler: <span class="extype" name="monix.execution.Scheduler">Scheduler</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="response/SimpleHttpResponse.html" class="extype" name="fr.hmil.roshttp.response.SimpleHttpResponse">SimpleHttpResponse</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@send(body:fr.hmil.roshttp.body.BodyPart):scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]" title="Permalink" target="_top">
+      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@send(body:fr.hmil.roshttp.body.BodyPart)(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Sends this request with a body.</p><div class="fullcomment"><div class="comment cmt"><p>Sends this request with a body.</p><p>This method should not be used directly. If you want to <a href="#post(body:fr.hmil.roshttp.body.BodyPart):scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]" class="extmbr" name="fr.hmil.roshttp.HttpRequest#post">post</a> or <a href="#put(body:fr.hmil.roshttp.body.BodyPart):scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]" class="extmbr" name="fr.hmil.roshttp.HttpRequest#put">put</a>
+      <p class="shortcomment cmt">Sends this request with a body.</p><div class="fullcomment"><div class="comment cmt"><p>Sends this request with a body.</p><p>This method should not be used directly. If you want to <a href="#post(body:fr.hmil.roshttp.body.BodyPart)(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]" class="extmbr" name="fr.hmil.roshttp.HttpRequest#post">post</a> or <a href="#put(body:fr.hmil.roshttp.body.BodyPart)(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]" class="extmbr" name="fr.hmil.roshttp.HttpRequest#put">put</a>
 some data, you should use the appropriate methods. If you do not want to send
-data with the request, you should use <a href="#post(body:fr.hmil.roshttp.body.BodyPart):scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]" class="extmbr" name="fr.hmil.roshttp.HttpRequest#post">post</a> without arguments.
-</p></div><dl class="paramcmts block"><dt class="param">body</dt><dd class="cmt"><p>The body to send.</p></dd><dt>returns</dt><dd class="cmt"><p>A future of HttpResponse which may fail with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.roshttp.HttpNetworkError">HttpNetworkError</a> or <a href="HttpResponseError.html" class="extype" name="fr.hmil.roshttp.HttpResponseError">HttpResponseError</a></p></dd></dl></div>
+data with the request, you should use <a href="#post(body:fr.hmil.roshttp.body.BodyPart)(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]" class="extmbr" name="fr.hmil.roshttp.HttpRequest#post">post</a> without arguments.
+</p></div><dl class="paramcmts block"><dt class="param">body</dt><dd class="cmt"><p>The body to send.</p></dd></dl></div>
     </li><li name="fr.hmil.roshttp.HttpRequest#send" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="send():scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]"></a>
-      <a id="send():Future[HttpResponse]"></a>
+      <a id="send()(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]"></a>
+      <a id="send()(Scheduler):Future[SimpleHttpResponse]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">send</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="HttpResponse.html" class="extype" name="fr.hmil.roshttp.HttpResponse">HttpResponse</a>]</span>
+        <span class="name">send</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="scheduler">scheduler: <span class="extype" name="monix.execution.Scheduler">Scheduler</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="response/SimpleHttpResponse.html" class="extype" name="fr.hmil.roshttp.response.SimpleHttpResponse">SimpleHttpResponse</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@send():scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]" title="Permalink" target="_top">
+      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@send()(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       <p class="shortcomment cmt">Sends this request.</p><div class="fullcomment"><div class="comment cmt"><p>Sends this request.</p><p>A request can be sent multiple times. When a request is sent, it returns a Future[HttpResponse]
-which either succeeds with an <a href="HttpResponse.html" class="extype" name="fr.hmil.roshttp.HttpResponse">HttpResponse</a> or fails.</p><p>Possible reasons for the future failing are:
-- A status code &gt;= 400 (<a href="HttpResponseError.html" class="extype" name="fr.hmil.roshttp.HttpResponseError">HttpResponseError</a>)
-- A network error (<a href="HttpNetworkError.html" class="extype" name="fr.hmil.roshttp.HttpNetworkError">HttpNetworkError</a>)
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>A future of HttpResponse which may fail with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.roshttp.HttpNetworkError">HttpNetworkError</a> or <a href="HttpResponseError.html" class="extype" name="fr.hmil.roshttp.HttpResponseError">HttpResponseError</a></p></dd></dl></div>
+which either succeeds with an <span class="extype" name="HttpResponse">HttpResponse</span> or fails.]]
+</p></div></div>
+    </li><li name="fr.hmil.roshttp.HttpRequest#stream" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="stream()(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.StreamHttpResponse]"></a>
+      <a id="stream()(Scheduler):Future[StreamHttpResponse]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stream</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="scheduler">scheduler: <span class="extype" name="monix.execution.Scheduler">Scheduler</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<a href="response/StreamHttpResponse.html" class="extype" name="fr.hmil.roshttp.response.StreamHttpResponse">StreamHttpResponse</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@stream()(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.StreamHttpResponse]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -617,6 +665,23 @@ which either succeeds with an <a href="HttpResponse.html" class="extype" name="f
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="fr.hmil.roshttp.HttpRequest#timeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="timeout:scala.concurrent.duration.FiniteDuration"></a>
+      <a id="timeout:FiniteDuration"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">timeout</span><span class="result">: <span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@timeout:scala.concurrent.duration.FiniteDuration" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <a id="toString():String"></a>
@@ -720,6 +785,24 @@ which either succeeds with an <a href="HttpResponse.html" class="extype" name="f
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="fr.hmil.roshttp.HttpRequest#withBackendConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="withBackendConfig(backendConfig:fr.hmil.roshttp.BackendConfig):fr.hmil.roshttp.HttpRequest"></a>
+      <a id="withBackendConfig(BackendConfig):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withBackendConfig</span><span class="params">(<span name="backendConfig">backendConfig: <a href="BackendConfig.html" class="extype" name="fr.hmil.roshttp.BackendConfig">BackendConfig</a></span>)</span><span class="result">: <a href="" class="extype" name="fr.hmil.roshttp.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@withBackendConfig(backendConfig:fr.hmil.roshttp.BackendConfig):fr.hmil.roshttp.HttpRequest" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Use the provided backend configuration when executing the request
+</p>
     </li><li name="fr.hmil.roshttp.HttpRequest#withBody" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withBody(body:fr.hmil.roshttp.body.BodyPart):fr.hmil.roshttp.HttpRequest"></a>
       <a id="withBody(BodyPart):HttpRequest"></a>
@@ -891,25 +974,6 @@ string is not part of the path.
     </span>
       <p class="shortcomment cmt">Sets the protocol used in the request URL.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the protocol used in the request URL.</p><p>Setting the protocol also sets the port accordingly (80 for HTTP, 443 for HTTPS).
 </p></div><dl class="paramcmts block"><dt class="param">protocol</dt><dd class="cmt"><p>The HTTP or HTTPS protocol</p></dd><dt>returns</dt><dd class="cmt"><p>A copy of this <a href="" class="extype" name="fr.hmil.roshttp.HttpRequest">HttpRequest</a> with an updated protocol and port</p></dd></dl></div>
-    </li><li name="fr.hmil.roshttp.HttpRequest#withQueryArrayParameter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="withQueryArrayParameter(key:String,values:Seq[String]):fr.hmil.roshttp.HttpRequest"></a>
-      <a id="withQueryArrayParameter(String,Seq[String]):HttpRequest"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">withQueryArrayParameter</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="values">values: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="" class="extype" name="fr.hmil.roshttp.HttpRequest">HttpRequest</a></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@withQueryArrayParameter(key:String,values:Seq[String]):fr.hmil.roshttp.HttpRequest" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Adds a query array parameter.</p><div class="fullcomment"><div class="comment cmt"><p>Adds a query array parameter.</p><p>Although this is not part of a spec, most servers recognize bracket indices
-in a query string as array indices or object keys.</p><p>example: ?list[0]=foo&amp;list[1]=bar</p><p>This method formats array values according to the above example.
-</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"><p>The unescaped parameter key</p></dd><dt class="param">values</dt><dd class="cmt"><p>The unescaped parameter array values</p></dd><dt>returns</dt><dd class="cmt"><p>A copy of this <a href="" class="extype" name="fr.hmil.roshttp.HttpRequest">HttpRequest</a> with an updated query string.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="withQueryArrayParameter(String,String)">withQueryArrayParameter(String,String)</span></p></span></dd></dl></div>
     </li><li name="fr.hmil.roshttp.HttpRequest#withQueryObjectParameter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withQueryObjectParameter(key:String,values:Seq[(String,String)]):fr.hmil.roshttp.HttpRequest"></a>
       <a id="withQueryObjectParameter(String,Seq[(String,String)]):HttpRequest"></a>
@@ -926,9 +990,10 @@ in a query string as array indices or object keys.</p><p>example: ?list[0]=foo&a
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Adds a query map parameter.</p><div class="fullcomment"><div class="comment cmt"><p>Adds a query map parameter.</p><p>Although this is not part of a spec, most servers recognize bracket indices
-in a query string as array indices or object keys.</p><p>example: ?obj[foo]=bar&amp;obj[baz]=42</p><p>This method formats map values according to the above example.
-</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"><p>The unescaped parameter key</p></dd><dt class="param">values</dt><dd class="cmt"><p>The unescaped parameter map values</p></dd><dt>returns</dt><dd class="cmt"><p>A copy of this <a href="" class="extype" name="fr.hmil.roshttp.HttpRequest">HttpRequest</a> with an updated query string.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="withQueryArrayParameter(String,String)">withQueryArrayParameter(String,String)</span></p></span></dd></dl></div>
+      <p class="shortcomment cmt">Adds an object made of key/value pairs to the query string.</p><div class="fullcomment"><div class="comment cmt"><p>Adds an object made of key/value pairs to the query string.</p><p>Although this is not part of a spec, most servers recognize bracket indices
+in a query string as object keys. The same key can appear multiple times as
+some server will interpret this as multiple elements in an array for that key.</p><p>example: ?obj[foo]=bar&amp;obj[baz]=42
+</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"><p>The unescaped parameter key</p></dd><dt class="param">values</dt><dd class="cmt"><p>The unescaped parameter map values</p></dd><dt>returns</dt><dd class="cmt"><p>A copy of this <a href="" class="extype" name="fr.hmil.roshttp.HttpRequest">HttpRequest</a> with an updated query string.</p></dd></dl></div>
     </li><li name="fr.hmil.roshttp.HttpRequest#withQueryParameter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withQueryParameter(key:String,value:String):fr.hmil.roshttp.HttpRequest"></a>
       <a id="withQueryParameter(String,String):HttpRequest"></a>
@@ -965,7 +1030,26 @@ Both the key and parameter are escaped to ensure proper query string format.
       </a>
     </span>
       <p class="shortcomment cmt">Adds multiple query parameters.</p><div class="fullcomment"><div class="comment cmt"><p>Adds multiple query parameters.
-</p></div><dl class="paramcmts block"><dt class="param">parameters</dt><dd class="cmt"><p>A sequence of new, unescaped parameters.</p></dd><dt>returns</dt><dd class="cmt"><p>A copy of this <a href="" class="extype" name="fr.hmil.roshttp.HttpRequest">HttpRequest</a> with an updated query string.</p></dd></dl><dl class="attributes block"> <dt>See also</dt><dd><span class="cmt"><p><span class="extype" name="withQueryArrayParameter(String,String)">withQueryArrayParameter(String,String)</span></p></span></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">parameters</dt><dd class="cmt"><p>A sequence of new, unescaped parameters.</p></dd><dt>returns</dt><dd class="cmt"><p>A copy of this <a href="" class="extype" name="fr.hmil.roshttp.HttpRequest">HttpRequest</a> with an updated query string.</p></dd></dl></div>
+    </li><li name="fr.hmil.roshttp.HttpRequest#withQuerySeqParameter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withQuerySeqParameter(key:String,values:Seq[String]):fr.hmil.roshttp.HttpRequest"></a>
+      <a id="withQuerySeqParameter(String,Seq[String]):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withQuerySeqParameter</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="values">values: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="" class="extype" name="fr.hmil.roshttp.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@withQuerySeqParameter(key:String,values:Seq[String]):fr.hmil.roshttp.HttpRequest" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Adds a query array parameter.</p><div class="fullcomment"><div class="comment cmt"><p>Adds a query array parameter.</p><p>Although this is not part of a spec, most servers recognize bracket indices
+in a query string as array indices or object keys.</p><p>example: ?list[0]=foo&amp;list[1]=bar</p><p>This method formats array values according to the above example.
+</p></div><dl class="paramcmts block"><dt class="param">key</dt><dd class="cmt"><p>The unescaped parameter key</p></dd><dt class="param">values</dt><dd class="cmt"><p>The unescaped parameter array values</p></dd><dt>returns</dt><dd class="cmt"><p>A copy of this <a href="" class="extype" name="fr.hmil.roshttp.HttpRequest">HttpRequest</a> with an updated query string.</p></dd></dl></div>
     </li><li name="fr.hmil.roshttp.HttpRequest#withQueryString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withQueryString(queryString:String):fr.hmil.roshttp.HttpRequest"></a>
       <a id="withQueryString(String):HttpRequest"></a>
@@ -1004,6 +1088,25 @@ argument to <a href="#withQueryString(queryString:String):fr.hmil.roshttp.HttpRe
       <p class="shortcomment cmt">Sets the query string without escaping.</p><div class="fullcomment"><div class="comment cmt"><p>Sets the query string without escaping.</p><p>Raw query strings must only contain legal characters as per rfc3986. Adding
 special characters yields undefined behaviour.</p><p>In most cases, <a href="#withQueryString(queryString:String):fr.hmil.roshttp.HttpRequest" class="extmbr" name="fr.hmil.roshttp.HttpRequest#withQueryString">withQueryString</a> should be preferred.
 </p></div><dl class="paramcmts block"><dt class="param">queryString</dt><dd class="cmt"><p>The raw, escaped query string</p></dd><dt>returns</dt><dd class="cmt"><p>A copy of this <a href="" class="extype" name="fr.hmil.roshttp.HttpRequest">HttpRequest</a> with an updated queryString</p></dd></dl></div>
+    </li><li name="fr.hmil.roshttp.HttpRequest#withTimeout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withTimeout(timeout:scala.concurrent.duration.FiniteDuration):fr.hmil.roshttp.HttpRequest"></a>
+      <a id="withTimeout(FiniteDuration):HttpRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withTimeout</span><span class="params">(<span name="timeout">timeout: <span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span></span>)</span><span class="result">: <a href="" class="extype" name="fr.hmil.roshttp.HttpRequest">HttpRequest</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#fr.hmil.roshttp.HttpRequest@withTimeout(timeout:scala.concurrent.duration.FiniteDuration):fr.hmil.roshttp.HttpRequest" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Specifies the request timeout.</p><div class="fullcomment"><div class="comment cmt"><p>Specifies the request timeout.</p><p>When a request takes longer than timeout to complete, the future is
+rejected with a <a href="exceptions/TimeoutException.html" class="extype" name="fr.hmil.roshttp.exceptions.TimeoutException">fr.hmil.roshttp.exceptions.TimeoutException</a>.
+</p></div><dl class="paramcmts block"><dt class="param">timeout</dt><dd class="cmt"><p>The duration to wait before throwing a timeout exception.</p></dd><dt>returns</dt><dd class="cmt"><p>A copu of this <a href="" class="extype" name="fr.hmil.roshttp.HttpRequest">HttpRequest</a> with an updated timeout setting.</p></dd></dl></div>
     </li><li name="fr.hmil.roshttp.HttpRequest#withURL" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="withURL(url:String):fr.hmil.roshttp.HttpRequest"></a>
       <a id="withURL(String):HttpRequest"></a>

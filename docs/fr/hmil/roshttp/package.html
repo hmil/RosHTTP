@@ -66,46 +66,24 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="fr.hmil.roshttp.HeaderMap" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="HeaderMap[B&gt;:String]extendsMap[String,B]withMapLike[String,B,fr.hmil.roshttp.HeaderMap[B]]"></a>
-      <a id="HeaderMap[B&gt;:String]:HeaderMap[B]"></a>
+              <ol><li name="fr.hmil.roshttp.BackendConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BackendConfigextendsAnyRef"></a>
+      <a id="BackendConfig:BackendConfig"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="HeaderMap.html"><span class="name">HeaderMap</span></a><span class="tparams">[<span name="B">B &gt;: <span class="extype" name="scala.Predef.String">String</span></span>]</span><span class="result"> extends <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="fr.hmil.roshttp.HeaderMap.B">B</span>] with <span class="extype" name="scala.collection.immutable.MapLike">MapLike</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="fr.hmil.roshttp.HeaderMap.B">B</span>, <a href="HeaderMap.html" class="extype" name="fr.hmil.roshttp.HeaderMap">HeaderMap</a>[<span class="extype" name="fr.hmil.roshttp.HeaderMap.B">B</span>]]</span>
+        <a href="BackendConfig.html"><span class="name">BackendConfig</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#fr.hmil.roshttp.package@HeaderMap[B&gt;:String]extendsMap[String,B]withMapLike[String,B,fr.hmil.roshttp.HeaderMap[B]]" title="Permalink" target="_top">
+      <a href="../../../index.html#fr.hmil.roshttp.package@BackendConfigextendsAnyRef" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">A set of HTTP headers identified by case insensitive keys</p><div class="fullcomment"><div class="comment cmt"><p>A set of HTTP headers identified by case insensitive keys</p><p>A Map[CaseInsensitiveString, String] would conform to the strict Map specification
-but it would make the API ugly, forcing the explicit usage of CaseInsensitiveString
-instead of string.</p><p>That's why we have the HeaderMap class to represent HTTP headers in a map like
-interface which is nice to use. It is however not *exactly* a map because
-different keys can map to the same value if they are case-insensitive equivalent.
-</p></div><dl class="paramcmts block"><dt class="tparam">B</dt><dd class="cmt"><p>Required for MapLike implementation. Should always be set to String.</p></dd></dl></div>
-    </li><li name="fr.hmil.roshttp.HttpNetworkError" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="HttpNetworkErrorextendsIOException"></a>
-      <a id="HttpNetworkError:HttpNetworkError"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="HttpNetworkError.html"><span class="name">HttpNetworkError</span></a><span class="result"> extends <span class="extype" name="java.io.IOException">IOException</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#fr.hmil.roshttp.package@HttpNetworkErrorextendsIOException" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Exception thrown when an error occurs during an HTTP request.</p><div class="fullcomment"><div class="comment cmt"><p>Exception thrown when an error occurs during an HTTP request.</p><p>This exception can occur because of network issues.
-</p></div></div>
+      <p class="shortcomment cmt">Low-level configuration for the HTTP client backend
+</p>
     </li><li name="fr.hmil.roshttp.HttpRequest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="HttpRequestextendsAnyRef"></a>
       <a id="HttpRequest:HttpRequest"></a>
@@ -122,46 +100,7 @@ different keys can map to the same value if they are case-insensitive equivalent
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Builds an HTTP request.</p><div class="fullcomment"><div class="comment cmt"><p>Builds an HTTP request.</p><p>The request is sent using  <a href="HttpRequest.html#send(body:fr.hmil.roshttp.body.BodyPart):scala.concurrent.Future[fr.hmil.roshttp.HttpResponse]" class="extmbr" name="fr.hmil.roshttp.HttpRequest#send">send</a>. A request can be sent multiple times.
-Each time yields a Future[HttpResponse] which either succeeds with an <a href="HttpResponse.html" class="extype" name="fr.hmil.roshttp.HttpResponse">HttpResponse</a>
-or fails with an <a href="HttpNetworkError.html" class="extype" name="fr.hmil.roshttp.HttpNetworkError">HttpNetworkError</a> or <a href="HttpResponseError.html" class="extype" name="fr.hmil.roshttp.HttpResponseError">HttpResponseError</a>
-</p></div></div>
-    </li><li name="fr.hmil.roshttp.HttpResponse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="HttpResponseextendsAnyRef"></a>
-      <a id="HttpResponse:HttpResponse"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="HttpResponse.html"><span class="name">HttpResponse</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#fr.hmil.roshttp.package@HttpResponseextendsAnyRef" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">An HTTP response obtained via an <a href="HttpRequest.html" class="extype" name="fr.hmil.roshttp.HttpRequest">HttpRequest</a>
-</p>
-    </li><li name="fr.hmil.roshttp.HttpResponseError" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="HttpResponseErrorextendsIOException"></a>
-      <a id="HttpResponseError:HttpResponseError"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="HttpResponseError.html"><span class="name">HttpResponseError</span></a><span class="result"> extends <span class="extype" name="java.io.IOException">IOException</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#fr.hmil.roshttp.package@HttpResponseErrorextendsIOException" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">Exception thrown when an error occurs during an HTTP request.</p><div class="fullcomment"><div class="comment cmt"><p>Exception thrown when an error occurs during an HTTP request.</p><p>This exception can occur because of bad HTTP status code (status &gt;= 400).</p><p>This exception must be constructed via the companion object in order to factor out
-error messages.
+      <p class="shortcomment cmt">Builds an HTTP request.</p><div class="fullcomment"><div class="comment cmt"><p>Builds an HTTP request.</p><p>The request is sent using  <a href="HttpRequest.html#send(body:fr.hmil.roshttp.body.BodyPart)(implicitscheduler:monix.execution.Scheduler):scala.concurrent.Future[fr.hmil.roshttp.response.SimpleHttpResponse]" class="extmbr" name="fr.hmil.roshttp.HttpRequest#send">send</a>. A request can be sent multiple times.
 </p></div></div>
     </li><li name="fr.hmil.roshttp.Method" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MethodextendsAnyRef"></a>
@@ -206,19 +145,19 @@ not to alter the url.
 
         <div id="values" class="values members">
               <h3>Value Members</h3>
-              <ol><li name="fr.hmil.roshttp.HeaderMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="HeaderMap"></a>
-      <a id="HeaderMap:HeaderMap"></a>
+              <ol><li name="fr.hmil.roshttp.BackendConfig" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BackendConfig"></a>
+      <a id="BackendConfig:BackendConfig"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="HeaderMap$.html"><span class="name">HeaderMap</span></a>
+        <a href="BackendConfig$.html"><span class="name">BackendConfig</span></a>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#fr.hmil.roshttp.package@HeaderMap" title="Permalink" target="_top">
+      <a href="../../../index.html#fr.hmil.roshttp.package@BackendConfig" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -236,23 +175,6 @@ not to alter the url.
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#fr.hmil.roshttp.package@HttpRequest" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="fr.hmil.roshttp.HttpResponseError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="HttpResponseError"></a>
-      <a id="HttpResponseError:HttpResponseError"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">object</span>
-      </span>
-      <span class="symbol">
-        <a href="HttpResponseError$.html"><span class="name">HttpResponseError</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#fr.hmil.roshttp.package@HttpResponseError" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -309,6 +231,57 @@ with other HTTP methods, please submit an issue with your motivation.
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#fr.hmil.roshttp.package@body" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="fr.hmil.roshttp.exceptions" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="exceptions"></a>
+      <a id="exceptions:exceptions"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="exceptions/package.html"><span class="name">exceptions</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#fr.hmil.roshttp.package@exceptions" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="fr.hmil.roshttp.response" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="response"></a>
+      <a id="response:response"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="response/package.html"><span class="name">response</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#fr.hmil.roshttp.package@response" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="fr.hmil.roshttp.util" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="util"></a>
+      <a id="util:util"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="util/package.html"><span class="name">util</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#fr.hmil.roshttp.package@util" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
