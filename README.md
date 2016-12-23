@@ -14,7 +14,7 @@ A human-readable scala http client API compatible with:
 Add a dependency in your build.sbt:
 
 ```scala
-libraryDependencies += "fr.hmil" %%% "roshttp" % "2.0.0-RC1"
+libraryDependencies += "fr.hmil" %%% "roshttp" % "2.0.0"
 ```
 
 # Usage
@@ -269,7 +269,7 @@ request
 ### Upload Streams
 
 There are cases where you want to upload some very large data with minimal memory
-consumption. We've got you covered! The [StreamBody](TODO: doc link) takes an
+consumption. We've got you covered! The [StreamBody](http://hmil.github.io/RosHTTP/docs/index.html#fr.hmil.roshttp.body.StreamBody) takes an
 [Observable](https://monix.io/api/2.0/#monix.reactive.Observable)[ByteBuffer]
 and streams its contents to the server. You can also pass an InputStream directly
 using RösHTTP's implicit converters:
@@ -336,17 +336,14 @@ or a `StreamHttpResponse` depending on what you expect your response to be (see
 
 ### Fine-grain error handling
 
-If you ever need very specific error details, here is the hierarchy of exceptions
+If you ever need very specific error details, here is the list of exceptions
 which can occur in the Future.
 
-(TODO: links to scaladoc, extensively test all exceptions)
 - IOException All RösHTTP exceptions inherit from `java.io.IOException`
-  - TimeoutException base class for timeout exceptions
-    - RequestTimeoutException Sending the request took longer than the configured request timeout threshold.
-    - ResponseTimeoutException Receiving the response took longer than the configured response timeout threshold.
+  - TimeoutException Receiving the response took longer than the configured response timeout threshold.
     Note that in this case the headers were already received and you can access them if needed (mainly for debugging purposes).
-  - RequestException A transport error occurred while sending the request (eg. DNS resolution failure). (TODO test DNS resolution failure)
-  - ResponseException A transport error occurred while receiving the response.
+  - RequestException A transport error occurred while sending the request (eg. DNS resolution failure).
+  - ResponseException A transport error occurred while receiving the response (for buffered responses).
   Note that in this case the headers were already received and you can access them if needed (mainly for debugging purposes).
   - UploadStreamException The stream used as a data source for the request body failed.
   - HttpException Application-level errors (ie. status codes >= 400)
