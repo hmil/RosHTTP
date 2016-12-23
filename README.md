@@ -14,7 +14,7 @@ A human-readable scala http client API compatible with:
 Add a dependency in your build.sbt:
 
 ```scala
-libraryDependencies += "fr.hmil" %%% "roshttp" % "2.0.0-RC1"
+libraryDependencies += "fr.hmil" %%% "roshttp" % "2.0.0"
 ```
 
 # Usage
