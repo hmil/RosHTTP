@@ -1,7 +1,18 @@
 # Contributing
 
+
 This repository is far from underwhelmed by requests so feel free to file an issue
 for any of the cases mentioned below.
+
+**Want to help?** Issues marked as [open](https://github.com/hmil/RosHTTP/issues?q=is%3Aissue+is%3Aopen+label%3A%22status%3A+open%22) are open to contributions. 
+Post a comment stating that you would like to work on the issue and do feel free
+to ask for more details and discuss possible implementations at any time.
+
+## Branches
+
+**Always base your pull requests on the latest release branch (ie. v2.x.x)**. 
+master always reflects the latest published version of the library and therefore is
+not a suitable target for pull requests.
 
 ## Reporting bugs
 
@@ -11,10 +22,8 @@ some details on each affected environments (java version, jdk used, node version
 browser + version).
 
 For bug fixes, file an issue as instructed above and create a pull request referencing
-the issue. Bug fix pull requests should be based on _master_  such that they can
-be deployed in the next minor update. Always try to provide a test case with your
-bug fix. If for some reason you can really not test your bug, let me know in your
-pull request comment.
+the issue. Always try to provide a test case with your bug fix. If for some reason you
+can really not test your bug, let me know in your pull request comment.
 
 ## Feature requests
 
@@ -22,18 +31,7 @@ Feel free to file an issue to request a feature, or even just to start a convers
 related to the project. It is advised that you discuss any feature you would like
 to implement before starting working on it.
 
-You can still provide proofs of concepts in pull requests based on _develop_.
-Once a feature has been approved, its development happens in a PR based on _develop_.
 New features **must be tested**.
-
-
-## Repository structure
-
-The _develop_ branch contains unpublished features for the next release. Ongoing
-feature development happens in dedicated branches based on _develop_. When new
-code is released, the develop branch is merged into _master_ such that _master_
-always contains code for the latest stable release.  
-Except for important bug fixes, all pull requests should target _develop_.
 
 ## Development
 
