@@ -38,8 +38,8 @@ lazy val scalaHttp = crossProject.in(file("."))
     ),
     pomIncludeRepository := { _ => false },
 
-    libraryDependencies += "com.lihaoyi" %%% "utest" % "0.4.4",
-    libraryDependencies += "io.monix" %%% "monix" % "2.0.6",
+    libraryDependencies += "com.lihaoyi" %%% "utest" % "0.4.5" % Test,
+    libraryDependencies += "io.monix" %%% "monix" % "2.1.2",
 
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
