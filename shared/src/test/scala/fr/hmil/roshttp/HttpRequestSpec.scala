@@ -460,6 +460,14 @@ object HttpRequestSpec extends TestSuite {
               res.headers("X-Powered-By") ==> "Express"
           })
       }
+      "can be read and transformed in the general case" - {
+        HttpRequest(s"$SERVER_URL/cookie")
+          .send()
+          .map({
+            res =>
+              res.headers.get("Set-Cookie").map(_.toLowerCase) ==> Some("test=test; path=/")
+          })
+      }
       "can be read in the error case" - {
         HttpRequest(s"$SERVER_URL/status/400")
           .send()
