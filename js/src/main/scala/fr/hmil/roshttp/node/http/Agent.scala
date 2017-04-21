@@ -1,6 +1,7 @@
 package fr.hmil.roshttp.node.http
 
 import scala.scalajs.js
+import scala.scalajs.js.annotation.JSGlobal
 
 
 /**
@@ -9,6 +10,7 @@ import scala.scalajs.js
   * This facade is not complete!
   */
 @js.native
+@JSGlobal
 private[roshttp] class Agent extends js.Object {
 
   def this(options: AgentOptions) {
