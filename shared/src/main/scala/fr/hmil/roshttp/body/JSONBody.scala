@@ -38,6 +38,12 @@ object JSONBody {
     }
   }
 
+
+  class JSONArray(values: JSONValue*) extends JSONValue {
+    override def toString: String = "[" + values.mkString(",") + "]"
+  }
+
+
   object JSONObject {
     def apply(values: (String, JSONValue)*): JSONObject = new JSONObject(Map(values: _*))
   }
