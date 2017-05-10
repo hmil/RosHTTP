@@ -1,7 +1,7 @@
 package fr.hmil.roshttp.node.http
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSName
+import scala.scalajs.js.annotation.{JSGlobal, JSName}
 
 /**
   * The node http API.
@@ -56,5 +56,5 @@ private[roshttp] trait Http extends js.Object{
 }
 
 @js.native
-@JSName("http")
+@JSGlobal("http")
 private[roshttp] object Http extends Http

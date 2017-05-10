@@ -2,10 +2,11 @@ package fr.hmil.roshttp.node.http
 
 import fr.hmil.roshttp.node.events.EventEmitter
 
-import scala.collection.mutable
 import scala.scalajs.js
+import scala.scalajs.js.annotation.JSGlobal
 
 @js.native
+@JSGlobal
 private[roshttp] class IncomingMessage extends EventEmitter {
   val headers: js.Dictionary[String] = js.native
   val httpVersion: String = js.native
