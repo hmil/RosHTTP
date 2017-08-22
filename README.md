@@ -364,6 +364,14 @@ see something that is missing.
 - Chrome does not allow userspace handling of a 407 status code. It is treated
   like a network error. See [chromium issue](https://bugs.chromium.org/p/chromium/issues/detail?id=372136).
 - The `TRACE` HTTP method does not work in browsers and `PATCH` does not work in the JVM.
+  - You may be able to bypass this on the jvm with [this workaround](https://stackoverflow.com/a/32503192) if the server supports the `X-HTTP-Method-Override` header
+    ```scala
+    import fr.hmil.roshttp.{Method, HttpRequest}
+    HttpRequest("https://patch.me.up")
+      .withMethod(Method.POST)
+      .withHeader("X-HTTP-Method-Override", "PATCH")
+      .send
+    ```
 
 # Contributing
 
