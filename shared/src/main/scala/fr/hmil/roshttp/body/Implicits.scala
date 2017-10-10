@@ -11,6 +11,7 @@ object Implicits {
   implicit def intToJSONNumber(value: Int): JSONNumber = new JSONNumber(value)
   implicit def floatToJSONNumber(value: Float): JSONNumber = new JSONNumber(value)
   implicit def doubleToJSONNumber(value: Double): JSONNumber = new JSONNumber(value)
+  implicit def booleanToJSONBoolean(value:Boolean):JSONBoolean = new JSONBoolean(value)
   implicit def JSONObjectToJSONBody(obj: JSONObject): JSONBody = JSONBody(obj)
 
   implicit def byteBufferToByteBufferBody(buffer: ByteBuffer): BodyPart = ByteBufferBody(buffer)
