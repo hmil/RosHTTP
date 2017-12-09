@@ -42,15 +42,19 @@ object JSONBody {
     }
   }
 
-
-  class JSONArray(values: JSONValue*) extends JSONValue {
-    override def toString: String = "[" + values.mkString(",") + "]"
-  }
-
-
   object JSONObject {
     def apply(values: (String, JSONValue)*): JSONObject = new JSONObject(Map(values: _*))
   }
+
+  class JSONArray(values: Seq[JSONValue]) extends JSONValue {
+    override def toString: String = "[" + values.mkString(",") + "]"
+  }
+
+  object JSONArray {
+    def apply(values: JSONValue*): JSONArray = new JSONArray(values)
+  }
+
+
 
   def apply(value: JSONValue): JSONBody = new JSONBody(value)
 

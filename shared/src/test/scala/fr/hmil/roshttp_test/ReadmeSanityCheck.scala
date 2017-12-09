@@ -134,6 +134,10 @@ object ReadmeSanityCheck extends TestSuite {
           ),
           "design" -> 2
         ),
+        "hobbies" -> JSONArray(
+          "programming",
+          "stargazing"
+        ),
         // The picture is sent using a ByteBufferBody, assuming buffer is a ByteBuffer
         // containing the image data
         "picture" -> ByteBufferBody(buffer, "image/jpeg")
