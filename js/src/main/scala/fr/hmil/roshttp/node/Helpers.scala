@@ -25,7 +25,7 @@ private[roshttp] object Helpers {
     if (!js.isUndefined(module.inst)) {
       Some(module.inst)
     } else if (isRequireAvailable) {
-      Some(Global.require[T](module.name))
+      Global.require[T](module.name).toOption
     } else {
       None
     }
