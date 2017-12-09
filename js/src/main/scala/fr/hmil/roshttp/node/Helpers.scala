@@ -1,6 +1,7 @@
 package fr.hmil.roshttp.node
 
 import scala.scalajs.js
+import scala.scalajs.js.JavaScriptException
 
 /**
   * collection of helper functions for nodejs related stuff
@@ -25,7 +26,11 @@ private[roshttp] object Helpers {
     if (!js.isUndefined(module.inst)) {
       Some(module.inst)
     } else if (isRequireAvailable) {
-      Global.require[T](module.name).toOption
+      try {
+        Global.require[T](module.name).toOption
+      } catch {
+        case _: JavaScriptException => None
+      }
     } else {
       None
     }
