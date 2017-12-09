@@ -23,7 +23,7 @@ object ReadmeSanityCheck extends TestSuite {
   val tests = this {
     "Readme snippets compile and run successfully" - {
       
-      libraryDependencies += "fr.hmil" %%% "roshttp" % "2.0.2"
+      libraryDependencies += "fr.hmil" %%% "roshttp" % "2.1.0"
       
       import fr.hmil.roshttp.HttpRequest
       import monix.execution.Scheduler.Implicits.global
@@ -35,7 +35,7 @@ object ReadmeSanityCheck extends TestSuite {
       
       request.send().onComplete({
           case res:Success[SimpleHttpResponse] => println(res.get.body)
-          case e: Failure[SimpleHttpResponse] => println("Huston, we got a problem!")
+          case e: Failure[SimpleHttpResponse] => println("Houston, we got a problem!")
         })
       
       import fr.hmil.roshttp.Protocol.HTTP
@@ -138,6 +138,7 @@ object ReadmeSanityCheck extends TestSuite {
           "programming",
           "stargazing"
         ),
+        "awesome" -> true,
         // The picture is sent using a ByteBufferBody, assuming buffer is a ByteBuffer
         // containing the image data
         "picture" -> ByteBufferBody(buffer, "image/jpeg")
