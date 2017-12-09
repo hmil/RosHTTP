@@ -1,2 +1,0 @@
-#!/bin/sh
-sbt `cat .travis.yml | grep sbt | sed 's/^  - sbt ++$TRAVIS_SCALA_VERSION //'`
