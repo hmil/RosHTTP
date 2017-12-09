@@ -216,13 +216,12 @@ request.post(MultiPartBody(
       "PHP" -> 1,
       "Scala" -> 5
     ),
-    "design" -> 2
+    "design" -> true
   ),
   "hobbies" -> JSONArray(
     "programming",
     "stargazing"
   ),
-  "awesome" -> true,
   // The picture is sent using a ByteBufferBody, assuming buffer is a ByteBuffer
   // containing the image data
   "picture" -> ByteBufferBody(buffer, "image/jpeg")
