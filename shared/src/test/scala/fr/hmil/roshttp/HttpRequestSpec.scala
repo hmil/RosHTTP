@@ -540,12 +540,13 @@ object HttpRequestSpec extends TestSuite {
         "works as intended" - {
           val part = JSONObject(
             "foo" -> 42,
+            "bar" -> true,
             "engine" -> "Heizölrückstoßabdämpfung",
             "\"quoted'" -> "Has \" quotes")
           HttpRequest(s"$SERVER_URL/body")
             .post(part)
             .map({ res =>
-              res.body ==> "{\"foo\":42,\"engine\":\"Heizölrückstoßabdämpfung\"," +
+              res.body ==> "{\"foo\":42,\"bar\":true,\"engine\":\"Heizölrückstoßabdämpfung\"," +
                 "\"\\\"quoted'\":\"Has \\\" quotes\"}"
               res.headers("Content-Type").toLowerCase ==> s"application/json; charset=utf-8"
             })

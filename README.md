@@ -14,7 +14,7 @@ A human-readable scala http client API compatible with:
 Add a dependency in your build.sbt:
 
 ```scala
-libraryDependencies += "fr.hmil" %%% "roshttp" % "2.0.1"
+libraryDependencies += "fr.hmil" %%% "roshttp" % "2.0.2"
 ```
 
 # Usage
@@ -370,6 +370,11 @@ see something that is missing.
 Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master/CONTRIBUTING.md).
 
 # Changelog
+
+**v2.0.2**
+
+- Update to monix v2.3.0
+- Update to scala v2.11.11
 
 **v2.0.1**
 

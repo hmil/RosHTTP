@@ -26,4 +26,4 @@ script:
   - test/update-readme-sanity-check.sh --fatalDiff
   - sbt ++$TRAVIS_SCALA_VERSION scalaHttpJS/test
   - sbt ++$TRAVIS_SCALA_VERSION scalaHttpJVM/test
-  - sbt ++$TRAVIS_SCALA_VERSION firefox:test
+  # - sbt ++$TRAVIS_SCALA_VERSION firefox:test

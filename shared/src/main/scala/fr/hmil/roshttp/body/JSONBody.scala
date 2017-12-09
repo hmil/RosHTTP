@@ -23,6 +23,10 @@ object JSONBody {
     override def toString: String = value.toString
   }
 
+  class JSONBoolean(value:Boolean) extends JSONValue {
+    override def toString: String = value.toString
+  }
+
   class JSONString(value: String) extends JSONValue {
     override def toString: String = "\"" + escapeJS(value) + "\""
   }

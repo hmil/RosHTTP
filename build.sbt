@@ -9,7 +9,7 @@ lazy val scalaHttp = crossProject.in(file("."))
   .configureCross(InBrowserTesting.cross)
   .settings(
     name := "roshttp",
-    version := "2.0.1",
+    version := "2.0.2",
     scalaVersion := "2.11.11",
     organization := "fr.hmil",
     licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT")),
@@ -39,7 +39,7 @@ lazy val scalaHttp = crossProject.in(file("."))
     pomIncludeRepository := { _ => false },
 
     libraryDependencies += "com.lihaoyi" %%% "utest" % "0.4.5" % Test,
-    libraryDependencies += "io.monix" %%% "monix" % "2.2.4",
+    libraryDependencies += "io.monix" %%% "monix" % "2.3.0",
 
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
