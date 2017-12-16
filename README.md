@@ -14,7 +14,7 @@ A human-readable scala http client API compatible with:
 Add a dependency in your build.sbt:
 
 ```scala
-libraryDependencies += "fr.hmil" %%% "roshttp" % "2.0.2"
+libraryDependencies += "fr.hmil" %%% "roshttp" % "2.1.0"
 ```
 
 # Usage
@@ -34,7 +34,7 @@ val request = HttpRequest("https://schema.org/WebPage")
 
 request.send().onComplete({
     case res:Success[SimpleHttpResponse] => println(res.get.body)
-    case e: Failure[SimpleHttpResponse] => println("Huston, we got a problem!")
+    case e: Failure[SimpleHttpResponse] => println("Houston, we got a problem!")
   })
 ```
 
@@ -216,7 +216,11 @@ request.post(MultiPartBody(
       "PHP" -> 1,
       "Scala" -> 5
     ),
-    "design" -> 2
+    "design" -> true
+  ),
+  "hobbies" -> JSONArray(
+    "programming",
+    "stargazing"
   ),
   // The picture is sent using a ByteBufferBody, assuming buffer is a ByteBuffer
   // containing the image data
@@ -370,6 +374,11 @@ see something that is missing.
 Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master/CONTRIBUTING.md).
 
 # Changelog
+
+**v2.1.0**
+
+- Fix edge cases with `require` in JS environments
+- Add missing boolean and array JSON types
 
 **v2.0.2**
 

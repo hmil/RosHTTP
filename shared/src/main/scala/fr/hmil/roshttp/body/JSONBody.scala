@@ -23,6 +23,10 @@ object JSONBody {
     override def toString: String = value.toString
   }
 
+  class JSONBoolean(value:Boolean) extends JSONValue {
+    override def toString: String = value.toString
+  }
+
   class JSONString(value: String) extends JSONValue {
     override def toString: String = "\"" + escapeJS(value) + "\""
   }
@@ -41,6 +45,16 @@ object JSONBody {
   object JSONObject {
     def apply(values: (String, JSONValue)*): JSONObject = new JSONObject(Map(values: _*))
   }
+
+  class JSONArray(values: Seq[JSONValue]) extends JSONValue {
+    override def toString: String = "[" + values.mkString(",") + "]"
+  }
+
+  object JSONArray {
+    def apply(values: JSONValue*): JSONArray = new JSONArray(values)
+  }
+
+
 
   def apply(value: JSONValue): JSONBody = new JSONBody(value)
 

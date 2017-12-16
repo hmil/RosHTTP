@@ -8,5 +8,5 @@ import scala.scalajs.js.annotation.JSName
   */
 @js.native
 private[roshttp] object Global extends js.GlobalScope {
-  def require[T](name: String): T = js.native
+  def require[T](name: String): js.UndefOr[T] = js.native
 }
