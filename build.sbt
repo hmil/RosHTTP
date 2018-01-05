@@ -6,7 +6,6 @@ lazy val root = project.in(file(".")).
 aggregate(scalaHttpJS, scalaHttpJVM)
 
 lazy val scalaHttp = crossProject.in(file("."))
-  .configureCross(InBrowserTesting.cross)
   .settings(
     name := "roshttp",
     version := "2.1.1",
