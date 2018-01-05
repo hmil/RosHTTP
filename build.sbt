@@ -1,3 +1,5 @@
+import sbtcrossproject.{crossProject, CrossType}
+
 name := "RösHTTP root project"
 
 crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.4")
@@ -47,9 +49,7 @@ lazy val scalaHttp = crossProject.in(file("."))
   )
   .jsSettings(
     // js-specific settings
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.4",
-
-    jsEnv := NodeJSEnv().value
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.4"
   )
 
 lazy val scalaHttpJVM = scalaHttp.jvm
