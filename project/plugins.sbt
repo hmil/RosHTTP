@@ -11,4 +11,6 @@ addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.1")
 
 libraryDependencies += "org.scala-js" %% "scalajs-env-selenium" % "0.2.0"
 
+libraryDependencies += "org.scala-js" %% "scalajs-env-nodejs" % "1.0.0-M2"
+
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.3.3")
