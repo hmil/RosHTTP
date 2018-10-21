@@ -24,6 +24,7 @@ final class HttpRequest  private (
     val port: Option[Int],
     val protocol: Protocol,
     val queryString: Option[String],
+    val credentials: Boolean,
     val headers: HeaderMap[String],
     val body: Option[BodyPart],
     val backendConfig: BackendConfig,
@@ -199,6 +200,9 @@ final class HttpRequest  private (
   def withHeaders(newHeaders: (String, String)*): HttpRequest =
     copy(headers = HeaderMap(headers ++ newHeaders))
 
+  def withCredentials(toggle: Boolean) =
+    copy(credentials = toggle)
+    
   /** Specifies the request timeout.
     *
     * When a request takes longer than timeout to complete, the future is
@@ -337,6 +341,7 @@ final class HttpRequest  private (
       protocol: Protocol  = this.protocol,
       queryString: Option[String] = this.queryString,
       headers: HeaderMap[String]  = this.headers,
+      credentials: Boolean = this.credentials,
       body: Option[BodyPart] = this.body,
       backendConfig: BackendConfig = this.backendConfig,
       timeout: FiniteDuration = this.timeout
@@ -348,6 +353,7 @@ final class HttpRequest  private (
       port      = port,
       protocol  = protocol,
       queryString = queryString,
+      credentials = credentials,
       headers   = headers,
       body      = body,
       backendConfig = backendConfig,
@@ -366,6 +372,7 @@ object HttpRequest {
     protocol = Protocol.HTTP,
     queryString = None,
     headers = HeaderMap(),
+    credentials = false,
     body = None,
     backendConfig = BackendConfig(),
     timeout = FiniteDuration(30, TimeUnit.SECONDS)
