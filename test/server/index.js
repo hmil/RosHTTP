@@ -6,10 +6,12 @@ var bodyParser = require('body-parser');
 var multipart = require('connect-multiparty');
 var fs = require('fs');
 var path = require('path');
+var cookieParser = require('cookie-parser')
+var cors = require('cors')
 
 app.use(morgan('combined'));
-
-
+app.use(cookieParser())
+app.use(cors({credentials: true, origin: true}))
 app.use(multipart());
 
 // parse application/x-www-form-urlencoded
@@ -158,6 +160,31 @@ app.post('/streams/in', function(req, res) {
     process.stdout.write("\n");
     res.send('Received ' + count + ' bytes.');
   })
+});
+
+app.get('/send_cookie', function(req, res) {
+  if (req.cookies === undefined || Object.keys(req.cookies).length === 0) {
+    res.cookie('connected', 'blue');
+	res.status(200).send('New cookie created. Returning it now.');
+  } else {
+	var connected = req.cookies['connected'];
+	res.status(200).send('Cookie already existed: ', connected, '.',
+	                     '(This is OK.) Returning it now.');
+  }
+});
+
+app.get('/receive_cookie', function(req, res) {
+  var connected = req.cookies['connected'];
+
+  if (connected === undefined) {
+    res.status(500).send('Cookie not received!');
+  } else {
+    if (connected === 'blue') {
+      res.status(200).send('Cookie received.')
+    } else {
+      res.status(500).send('A cookie received, but data was wrong!')
+    }
+  }
 });
 
 var ONE_MILLION = 1000000;
