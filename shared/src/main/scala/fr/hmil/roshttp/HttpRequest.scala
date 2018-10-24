@@ -200,6 +200,12 @@ final class HttpRequest  private (
   def withHeaders(newHeaders: (String, String)*): HttpRequest =
     copy(headers = HeaderMap(headers ++ newHeaders))
 
+  /** Allows browser to add a cookie to the request, if one was received
+    * prior from the server.
+    *
+    * @param toggle If true, browser is allowed to add cookie to request.
+    * @return A copy of this [[HttpRequest]] with an updated header set.
+    */
   def withCredentials(toggle: Boolean) =
     copy(credentials = toggle)
     
