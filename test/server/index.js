@@ -162,27 +162,24 @@ app.post('/streams/in', function(req, res) {
   })
 });
 
-app.get('/send_cookie', function(req, res) {
-  if (req.cookies === undefined || Object.keys(req.cookies).length === 0) {
-    res.cookie('connected', 'blue');
-	res.status(200).send('New cookie created. Returning it now.');
+app.get('/set_cookie', function(req, res) {
+  if (req.query.token !== undefined || req.cookies === undefined || Object.keys(req.cookies).length === 0) {
+    res.cookie('test_cookie', req.query.token);
+	res.status(200).send("Cookie request answered by sending cookie client.");
   } else {
-	var connected = req.cookies['connected'];
-	res.status(200).send('Cookie already existed: ', connected, '.',
-	                     '(This is OK.) Returning it now.');
+    res.status(500).send('Server sent no cookie to client!')
   }
 });
 
-app.get('/receive_cookie', function(req, res) {
-  var connected = req.cookies['connected'];
-
-  if (connected === undefined) {
-    res.status(500).send('Cookie not received!');
+app.get('/verify_cookie', function(req, res) {
+  var testCookie = req.cookies['test_cookie'];
+  if (testCookie === undefined) {
+    res.status(500).send('Cookie not received from client!');
   } else {
-    if (connected === 'blue') {
-      res.status(200).send('Cookie received.')
+    if (testCookie === req.query.token) {
+      res.status(200).send('Cookie received from client.')
     } else {
-      res.status(500).send('A cookie received, but data was wrong!')
+      res.status(500).send('A cookie received from client, but contained data was wrong!')
     }
   }
 });

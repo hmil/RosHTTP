@@ -137,13 +137,14 @@ HttpRequest("long.source.of/data")
   .stream()
 ```
 
-### Cookies
+### Cross-domain cookies
 
-Servers may use cookies to authenticate users or exchange other information. To make sure that the browser
-adds a previously obtained cookie to subsequent requests of the client, `withCredentials` is offered:
+By default, cross-domain client requests are not sent with authorization headers or cookies. To make sure
+that they do, `withCrossDomainCookies` is provided:
 ```scala
-request.withCredentials(true)
+request.withCrossDomainCookies(true)
 ```
+Setting this to `true` has no effect on same-site requests though.
 
 ## Response headers
 

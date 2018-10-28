@@ -655,23 +655,24 @@ object HttpRequestSpec extends TestSuite {
       }
     }
 
-    "Cookies" - {
-      "created on and returned from server" - {
-        HttpRequest(s"$SERVER_URL/send_cookie")
-          .withCredentials(true)
-          .send()
-          .map(res => {
-            assert(res.statusCode == 200)
-          })
-      }
-      "resent to server and processed accordingly" - {
-        HttpRequest(s"$SERVER_URL/receive_cookie")
-          .withCredentials(true)
-          .send()
-          .map(res => {
-            assert(res.statusCode == 200)
-          })
-      }
+    "CORS cookies" - {
+      val currentDate = new java.util.Date().getTime().toDouble
+
+      HttpRequest(s"$SERVER_URL/set_cookie")
+        .withQueryParameters("token" -> currentDate.toString)
+        .withCrossDomainCookies(true)
+        .send()
+        .map(res => {
+          assert(res.statusCode == 200)
+
+          HttpRequest(s"$SERVER_URL/verify_cookie")
+            .withQueryParameters("token" -> currentDate.toString)
+            .withCrossDomainCookies(true)
+            .send()
+            .map(res => {
+              assert(res.statusCode == 200)
+            })
+        })
     }
 
   }

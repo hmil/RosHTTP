@@ -26,7 +26,7 @@ private object BrowserDriver extends DriverTrait {
 
     val xhr = new dom.XMLHttpRequest()
     xhr.open(req.method.toString, req.url)
-    xhr.withCredentials = req.credentials
+    xhr.withCredentials = req.crossDomainCookies
     xhr.responseType = "arraybuffer"
     req.headers.foreach(t => xhr.setRequestHeader(t._1, t._2))
 
