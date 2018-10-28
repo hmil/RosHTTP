@@ -139,12 +139,15 @@ HttpRequest("long.source.of/data")
 
 ### Cross-domain cookies
 
-By default, cross-domain client requests are not sent with authorization headers or cookies. To make sure
-that they do, `withCrossDomainCookies` is provided:
+For security reasons, cross-domain requests are not sent with authorization headers or cookies. If
+despite security concerns, this feature is needed, it can be enabled using `withCrossDomainCookies`,
+which internally uses the
+[`XMLHttpRequest.withCredentials`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials)
+method, but has no effect in non-browser environments. Also for same-site requests, setting it to
+`true` has no effect either.
 ```scala
 request.withCrossDomainCookies(true)
 ```
-Setting this to `true` has no effect on same-site requests though.
 
 ## Response headers
 
