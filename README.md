@@ -137,7 +137,7 @@ HttpRequest("long.source.of/data")
   .stream()
 ```
 
-### Cross-domain cookies
+### Cross-domain authorization information
 
 For security reasons, cross-domain requests are not sent with authorization headers or cookies. If
 despite security concerns, this feature is needed, it can be enabled using `withCrossDomainCookies`,
