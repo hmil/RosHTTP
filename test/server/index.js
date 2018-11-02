@@ -6,10 +6,17 @@ var bodyParser = require('body-parser');
 var multipart = require('connect-multiparty');
 var fs = require('fs');
 var path = require('path');
+var cookieParser = require('cookie-parser')
+var cors = require('cors')
 
 app.use(morgan('combined'));
-
-
+app.use(cookieParser())
+app.use(cors({
+    credentials: true,
+    preflightContinue: true,
+    origin: true
+  })
+)
 app.use(multipart());
 
 // parse application/x-www-form-urlencoded
@@ -158,6 +165,28 @@ app.post('/streams/in', function(req, res) {
     process.stdout.write("\n");
     res.send('Received ' + count + ' bytes.');
   })
+});
+
+app.get('/set_cookie', function(req, res) {
+  if (req.query.token !== undefined || req.cookies === undefined || Object.keys(req.cookies).length === 0) {
+    res.cookie('test_cookie', req.query.token);
+	res.status(200).send("Cookie request answered by sending cookie to client.");
+  } else {
+    res.status(500).send('Server sent no cookie to client!')
+  }
+});
+
+app.get('/verify_cookie', function(req, res) {
+  var testCookie = req.cookies['test_cookie'];
+  if (testCookie === undefined) {
+    res.status(500).send('Cookie not received from client!');
+  } else {
+    if (testCookie === req.query.token) {
+      res.status(200).send('Cookie received from client.')
+    } else {
+      res.status(500).send('Cookie received from client, but contained data was wrong!')
+    }
+  }
 });
 
 var ONE_MILLION = 1000000;

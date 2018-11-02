@@ -74,7 +74,7 @@ object ReadmeSanityCheck extends TestSuite {
       
       request.withHeaders(
         "Accept" -> "text/html",
-        "Cookie" -> "sessionid=f00ba242cafe"
+        "User-Agent" -> "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)"
       )
       
       import fr.hmil.roshttp.BackendConfig
@@ -85,6 +85,8 @@ object ReadmeSanityCheck extends TestSuite {
           maxChunkSize = 1024
         ))
         .stream()
+      
+      request.withCrossDomainCookies(true)
       
       request.send().map({res =>
         println(res.headers("Set-Cookie"))
