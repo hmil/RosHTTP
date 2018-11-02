@@ -14,7 +14,9 @@ app.use(cookieParser())
 app.use(cors({
     credentials: true,
     preflightContinue: true,
-    origin: true
+    origin: true,
+    exposedHeaders: [ 'X-Powered-By', 'X-Request-Method'],
+    methods: ["GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE", "PATCH", "TRACE"]
   })
 )
 app.use(multipart());
@@ -116,6 +118,10 @@ app.all('/headers', function(req, res) {
 app.all('/method', function(req, res) {
   res.set('X-Request-Method', req.method);
   res.send(req.method);
+});
+
+app.options('/body', function(req, res) {
+  res.end();
 });
 
 app.all('/body', function(req, res) {

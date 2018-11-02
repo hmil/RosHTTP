@@ -387,6 +387,10 @@ Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master
 
 # Changelog
 
+**pending***
+
+- Add withCrossDomainCookies (by @nondeterministic)
+
 **v2.1.0**
 
 - Fix edge cases with `require` in JS environments

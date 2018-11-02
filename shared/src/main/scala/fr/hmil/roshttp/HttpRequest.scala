@@ -206,7 +206,7 @@ final class HttpRequest  private (
     * @param toggle If true, browser is allowed to add cookie to cross-domain request.
     * @return A copy of this [[HttpRequest]] with an updated header set.
     */
-  def withCrossDomainCookies(toggle: Boolean) =
+  def withCrossDomainCookies(toggle: Boolean): HttpRequest =
     copy(crossDomainCookies = toggle)
     
   /** Specifies the request timeout.
