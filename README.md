@@ -14,7 +14,7 @@ A human-readable scala http client API compatible with:
 Add a dependency in your build.sbt:
 
 ```scala
-libraryDependencies += "fr.hmil" %%% "roshttp" % "2.1.0"
+libraryDependencies += "fr.hmil" %%% "roshttp" % "2.2.0"
 ```
 
 # Usage
@@ -387,7 +387,7 @@ Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master
 
 # Changelog
 
-**pending***
+**v2.2.0***
 
 - Add withCrossDomainCookies (by @nondeterministic)
 
