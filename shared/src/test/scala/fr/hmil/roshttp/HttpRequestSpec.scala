@@ -654,5 +654,26 @@ object HttpRequestSpec extends TestSuite {
         }
       }
     }
+
+    "CORS cookies" - {
+      val currentDate = new java.util.Date().getTime().toDouble
+
+      HttpRequest(s"$SERVER_URL/set_cookie")
+        .withQueryParameters("token" -> currentDate.toString)
+        .withCrossDomainCookies(true)
+        .send()
+        .map(res => {
+          assert(res.statusCode == 200)
+
+          HttpRequest(s"$SERVER_URL/verify_cookie")
+            .withQueryParameters("token" -> currentDate.toString)
+            .withCrossDomainCookies(true)
+            .send()
+            .map(res => {
+              assert(res.statusCode == 200)
+            })
+        })
+    }
+
   }
 }

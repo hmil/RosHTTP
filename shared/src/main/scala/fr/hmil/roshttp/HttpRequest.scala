@@ -24,6 +24,7 @@ final class HttpRequest  private (
     val port: Option[Int],
     val protocol: Protocol,
     val queryString: Option[String],
+    val crossDomainCookies: Boolean,
     val headers: HeaderMap[String],
     val body: Option[BodyPart],
     val backendConfig: BackendConfig,
@@ -199,6 +200,15 @@ final class HttpRequest  private (
   def withHeaders(newHeaders: (String, String)*): HttpRequest =
     copy(headers = HeaderMap(headers ++ newHeaders))
 
+  /** Allows browser to add a cookie to a cross-domain request, if one was
+    * received prior from the server.
+    *
+    * @param toggle If true, browser is allowed to add cookie to cross-domain request.
+    * @return A copy of this [[HttpRequest]] with an updated header set.
+    */
+  def withCrossDomainCookies(toggle: Boolean): HttpRequest =
+    copy(crossDomainCookies = toggle)
+    
   /** Specifies the request timeout.
     *
     * When a request takes longer than timeout to complete, the future is
@@ -337,6 +347,7 @@ final class HttpRequest  private (
       protocol: Protocol  = this.protocol,
       queryString: Option[String] = this.queryString,
       headers: HeaderMap[String]  = this.headers,
+      crossDomainCookies: Boolean = this.crossDomainCookies,
       body: Option[BodyPart] = this.body,
       backendConfig: BackendConfig = this.backendConfig,
       timeout: FiniteDuration = this.timeout
@@ -348,6 +359,7 @@ final class HttpRequest  private (
       port      = port,
       protocol  = protocol,
       queryString = queryString,
+      crossDomainCookies = crossDomainCookies,
       headers   = headers,
       body      = body,
       backendConfig = backendConfig,
@@ -366,6 +378,7 @@ object HttpRequest {
     protocol = Protocol.HTTP,
     queryString = None,
     headers = HeaderMap(),
+    crossDomainCookies = false,
     body = None,
     backendConfig = BackendConfig(),
     timeout = FiniteDuration(30, TimeUnit.SECONDS)

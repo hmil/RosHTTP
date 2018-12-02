@@ -14,7 +14,9 @@ A human-readable scala http client API compatible with:
 Add a dependency in your build.sbt:
 
 ```scala
-libraryDependencies += "fr.hmil" %%% "roshttp" % "2.1.0"
+Resolver.bintrayRepo("hmil", "maven")
+
+libraryDependencies += "fr.hmil" %%% "roshttp" % "2.2.3"
 ```
 
 # Usage
@@ -116,7 +118,7 @@ Or multiple headers at once using `.withHeaders`
 ```scala
 request.withHeaders(
   "Accept" -> "text/html",
-  "Cookie" -> "sessionid=f00ba242cafe"
+  "User-Agent" -> "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)"
 )
 ```
 
@@ -135,6 +137,18 @@ HttpRequest("long.source.of/data")
     maxChunkSize = 1024
   ))
   .stream()
+```
+
+### Cross-domain authorization information
+
+For security reasons, cross-domain requests are not sent with authorization headers or cookies. If
+despite security concerns, this feature is needed, it can be enabled using `withCrossDomainCookies`,
+which internally uses the
+[`XMLHttpRequest.withCredentials`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials)
+method, but has no effect in non-browser environments. Also for same-site requests, setting it to
+`true` has no effect either.
+```scala
+request.withCrossDomainCookies(true)
 ```
 
 ## Response headers
@@ -374,6 +388,10 @@ see something that is missing.
 Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master/CONTRIBUTING.md).
 
 # Changelog
+
+**v2.2.0***
+
+- Add withCrossDomainCookies (by @nondeterministic)
 
 **v2.1.0**
 
