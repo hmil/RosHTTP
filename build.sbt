@@ -2,27 +2,19 @@ name := "RösHTTP root project"
 
 crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.2")
 
-lazy val root = project.in(file(".")).
-aggregate(scalaHttpJS, scalaHttpJVM)
+lazy val root = project.in(file("."))
+  .aggregate(scalaHttpJS, scalaHttpJVM)
 
 lazy val scalaHttp = crossProject.in(file("."))
   .configureCross(InBrowserTesting.cross)
   .settings(
     name := "roshttp",
-    version := "2.1.0",
+    version := "2.2.3",
     scalaVersion := "2.11.11",
     organization := "fr.hmil",
-    licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT")),
+    licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
     homepage := Some(url("http://github.com/hmil/RosHTTP")),
 
-    publishMavenStyle := true,
-    publishTo := {
-      val nexus = "https://oss.sonatype.org/"
-      if (isSnapshot.value)
-        Some("snapshots" at nexus + "content/repositories/snapshots")
-      else
-        Some("releases" at nexus + "service/local/staging/deploy/maven2")
-    },
     pomExtra := (
       <scm>
         <url>git@github.com:hmil/RosHTTP.git</url>
