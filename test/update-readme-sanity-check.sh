@@ -40,7 +40,7 @@ object $test_name extends TestSuite {
     "Readme snippets compile and run successfully" - {
 EOF
   # print raw code in test suite
-  sed -rn 's/^(.*)$/      \1/p'
+  sed -e 's/^/      /'
   cat <<EOF
 
       "Success"
