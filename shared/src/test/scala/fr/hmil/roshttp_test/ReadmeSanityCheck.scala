@@ -23,10 +23,6 @@ object ReadmeSanityCheck extends TestSuite {
   val tests = this {
     "Readme snippets compile and run successfully" - {
       
-      Resolver.bintrayRepo("hmil", "maven")
-      
-      libraryDependencies += "fr.hmil" %%% "roshttp" % "2.2.3"
-      
       import fr.hmil.roshttp.HttpRequest
       import monix.execution.Scheduler.Implicits.global
       import scala.util.{Failure, Success}
