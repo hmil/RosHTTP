@@ -22,6 +22,7 @@ libraryDependencies += "fr.hmil" %%% "roshttp" % "2.2.3"
 
 The following is a simplified usage guide. You may find useful information in
 the [API doc](http://hmil.github.io/RosHTTP/docs/index.html) too.
+
 ## Basic usage
 
 ```scala
