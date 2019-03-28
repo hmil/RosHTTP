@@ -9,7 +9,7 @@ lazy val scalaHttp = crossProject.in(file("."))
   .configureCross(InBrowserTesting.cross)
   .settings(
     name := "roshttp",
-    version := "2.2.3",
+    version := "2.2.4",
     scalaVersion := "2.11.11",
     organization := "fr.hmil",
     licenses += ("MIT", url("http://opensource.org/licenses/MIT")),

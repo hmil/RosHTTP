@@ -15,7 +15,7 @@ Add a dependency in your build.sbt:
 
 ```
 Resolver.bintrayRepo("hmil", "maven")
-libraryDependencies += "fr.hmil" %%% "roshttp" % "2.2.3"
+libraryDependencies += "fr.hmil" %%% "roshttp" % "2.2.4"
 ```
 
 # Usage
@@ -389,7 +389,11 @@ Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master
 
 # Changelog
 
-**v2.2.0***
+**v2.2.4**
+
+- Update to monix v2.3.3
+
+**v2.2.0**
 
 - Add withCrossDomainCookies (by @nondeterministic)
 
