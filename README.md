@@ -1,6 +1,6 @@
 # RösHTTP
 [![Build Status](https://travis-ci.org/hmil/RosHTTP.svg?branch=master)](https://travis-ci.org/hmil/RosHTTP)
-[![Latest version on jcenter](https://img.shields.io/maven-metadata/v/https/jcenter.bintray.com/fr/hmil/roshttp_2.12/maven-metadata.xml.svg?label=latest+version)](https://repo.maven.apache.org/maven2/fr/hmil/)
+[![Latest version on jcenter](https://img.shields.io/maven-metadata/v/https/jcenter.bintray.com/fr/hmil/roshttp_2.12/maven-metadata.xml.svg?label=latest+version)](https://jcenter.bintray.com/fr/hmil/roshttp_2.12/)
 [![Scala.js](https://www.scala-js.org/assets/badges/scalajs-0.6.8.svg)](https://www.scala-js.org)
 
 A human-readable scala http client API compatible with:
