@@ -136,6 +136,6 @@ private object HttpDriver extends DriverTrait {
       }
     }
 
-    Observable.fromIterator(iterator)
+    Observable.fromIteratorUnsafe(iterator)
   }
 }

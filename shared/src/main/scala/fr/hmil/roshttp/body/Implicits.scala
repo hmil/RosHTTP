@@ -17,5 +17,5 @@ object Implicits {
 
   implicit def byteBufferToByteBufferBody(buffer: ByteBuffer): BodyPart = ByteBufferBody(buffer)
   implicit def observableToStreamBody(is: InputStream): BodyPart =
-    StreamBody(Observable.fromInputStream(is).map(ByteBuffer.wrap))
+    StreamBody(Observable.fromInputStreamUnsafe(is).map(ByteBuffer.wrap))
 }

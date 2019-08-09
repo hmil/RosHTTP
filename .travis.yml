@@ -4,9 +4,8 @@ jdk:
   - oraclejdk8
 
 scala:
-  - 2.10.6
-  - 2.11.11
-  - 2.12.2
+  - 2.12.9
+  - 2.13.0
 
 install:
   - nvm list

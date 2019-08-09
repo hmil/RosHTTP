@@ -19,7 +19,7 @@ object StreamingPressureTest extends TestSuite {
     "Upload streams do not leak" - {
       if (!JsEnvUtils.isRealBrowser) {
         HttpRequest(s"$SERVER_URL/streams/in")
-          .post(StreamBody(Observable.fromIterator(new Iterator[ByteBuffer]() {
+          .post(StreamBody(Observable.fromIteratorUnsafe(new Iterator[ByteBuffer]() {
             override def hasNext: Boolean = true
             override def next(): ByteBuffer = ByteBuffer.allocateDirect(8192)
           })

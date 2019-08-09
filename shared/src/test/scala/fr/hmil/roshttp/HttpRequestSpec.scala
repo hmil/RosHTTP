@@ -253,7 +253,7 @@ object HttpRequestSpec extends TestSuite {
               assert(buffer.limit <= config.maxChunkSize)
             })
             .bufferTumbling(3)
-            .firstL.runAsync
+            .firstL.runToFuture
           )
       }
     }
@@ -625,7 +625,7 @@ object HttpRequestSpec extends TestSuite {
           }
           "is properly sent" - {
             val part = MultiPartBody(
-              "stream" -> StreamBody(Observable.fromIterator(new Iterator[ByteBuffer]() {
+              "stream" -> StreamBody(Observable.fromIteratorUnsafe(new Iterator[ByteBuffer]() {
                 private var emitted = false
                 override def hasNext: Boolean = !emitted
                 override def next(): ByteBuffer = {
