@@ -1,6 +1,6 @@
 language: scala
 
-dist: xenial
+dist: trusty
 
 jdk:
   - openjdk8
