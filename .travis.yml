@@ -23,7 +23,6 @@ before_script:
   - cd test/server && npm install && node index.js &
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION scalastyle
   - test/update-readme-sanity-check.sh --fatalDiff
   - sbt ++$TRAVIS_SCALA_VERSION scalaHttpJS/test
   - sbt ++$TRAVIS_SCALA_VERSION scalaHttpJVM/test
