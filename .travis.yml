@@ -1,12 +1,13 @@
 language: scala
 
+dist: xenial
+
 jdk:
-  - oraclejdk8
+  - openjdk8
 
 scala:
-  - 2.10.6
-  - 2.11.11
-  - 2.12.2
+  - 2.12.10
+  - 2.13.1
 
 install:
   - nvm list
