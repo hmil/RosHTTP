@@ -96,7 +96,7 @@ private object BrowserDriver extends DriverTrait {
       override def onComplete(): Unit = p.success(recomposeBody(bufferQueue, bytes))
 
       override def onNext(elem: ByteBuffer): Future[Ack] = {
-        bytes += elem.limit
+        bytes += elem.limit()
         bufferQueue.enqueue(elem)
         Future.successful(Continue)
       }

@@ -2,8 +2,6 @@ package fr.hmil.roshttp.util
 
 import fr.hmil.roshttp.util.HeaderMap.CaseInsensitiveString
 
-import scala.collection.compat._
-
 
 /** A set of HTTP headers identified by case insensitive keys
   *
@@ -37,7 +35,7 @@ class HeaderMap[B >: String] private(map: Map[CaseInsensitiveString, B] = Map())
     new HeaderMap[B1](map - key + (key -> kv._2))
   }
 
-  def removed(key: String): HeaderMap[B] = {
+  override def -(key: String): HeaderMap[B] = {
     new HeaderMap[B](map - new CaseInsensitiveString(key))
   }
 

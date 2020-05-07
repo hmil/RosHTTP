@@ -9,6 +9,7 @@ import fr.hmil.roshttp.util.HeaderMap
 import monix.execution.Ack.Continue
 import monix.execution.{Ack, Scheduler}
 import monix.reactive.{Observable, Observer}
+import monix.eval.Task
 
 import scala.concurrent.{Future, Promise, blocking}
 
@@ -57,7 +58,7 @@ private object HttpDriver extends DriverTrait {
           }
           override def onNext(buffer: ByteBuffer): Future[Ack] = {
             if (buffer.hasArray) {
-              os.write(buffer.array().view(0, buffer.limit).toArray)
+              os.write(buffer.array().view.slice(0, buffer.limit()).toArray)
             } else {
               val tmp = new Array[Byte](buffer.limit)
               buffer.get(tmp)
@@ -136,6 +137,6 @@ private object HttpDriver extends DriverTrait {
       }
     }
 
-    Observable.fromIterator(iterator)
+    Observable.fromIterator(Task(iterator))
   }
 }

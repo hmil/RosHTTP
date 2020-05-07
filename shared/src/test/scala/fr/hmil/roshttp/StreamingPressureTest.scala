@@ -6,6 +6,7 @@ import fr.hmil.roshttp.body.StreamBody
 import monix.reactive.Observable
 import monix.execution.Scheduler.Implicits.global
 import utest._
+import monix.eval.Task
 
 object StreamingPressureTest extends TestSuite {
 
@@ -19,10 +20,10 @@ object StreamingPressureTest extends TestSuite {
     "Upload streams do not leak" - {
       if (!JsEnvUtils.isRealBrowser) {
         HttpRequest(s"$SERVER_URL/streams/in")
-          .post(StreamBody(Observable.fromIterator(new Iterator[ByteBuffer]() {
+          .post(StreamBody(Observable.fromIterator(Task(new Iterator[ByteBuffer]() {
             override def hasNext: Boolean = true
             override def next(): ByteBuffer = ByteBuffer.allocateDirect(8192)
-          })
+          }))
             .take(ONE_MILLION)))
           .map(r => r.body ==> "Received 8192000000 bytes.")
           .recover({
@@ -38,7 +39,7 @@ object StreamingPressureTest extends TestSuite {
       if (JsEnvUtils.userAgent == "jvm") {
         HttpRequest(s"$SERVER_URL/streams/out")
           .stream()
-          .flatMap(_.body.map(_.limit.asInstanceOf[Long]).reduce((l, r) => l + r).runAsyncGetFirst)
+          .flatMap(_.body.map(_.limit().asInstanceOf[Long]).reduce((l, r) => l + r).runAsyncGetFirst)
           .map(_.get ==> 8192000000L)
       }
     }

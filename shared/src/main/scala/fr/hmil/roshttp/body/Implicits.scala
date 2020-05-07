@@ -5,6 +5,8 @@ import java.nio.ByteBuffer
 
 import fr.hmil.roshttp.body.JSONBody._
 import monix.reactive.Observable
+import monix.eval.Task
+
 
 object Implicits {
   implicit def stringToJSONString(value: String): JSONString = new JSONString(value)
@@ -17,5 +19,5 @@ object Implicits {
 
   implicit def byteBufferToByteBufferBody(buffer: ByteBuffer): BodyPart = ByteBufferBody(buffer)
   implicit def observableToStreamBody(is: InputStream): BodyPart =
-    StreamBody(Observable.fromInputStream(is).map(ByteBuffer.wrap))
+    StreamBody(Observable.fromInputStream(Task(is)).map(ByteBuffer.wrap))
 }

@@ -1,10 +1,7 @@
 package fr.hmil.roshttp.node.http
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.ScalaJSDefined
 
-
-@ScalaJSDefined
 private[roshttp] trait AgentOptions extends js.Object {
   val keepAlive: Boolean
   val keepAliveMsecs: Integer

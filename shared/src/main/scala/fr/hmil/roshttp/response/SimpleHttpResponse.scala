@@ -54,7 +54,7 @@ object SimpleHttpResponse extends HttpResponseFactory[SimpleHttpResponse] {
     val buffer = ByteBuffer.allocate(seq.length * maxChunkSize)
     val totalBytes = seq.foldLeft(0)({ (count, chunk) =>
       buffer.put(chunk)
-      count + chunk.limit
+      count + chunk.limit()
     })
     buffer.limit(totalBytes)
     Utils.getStringFromBuffer(buffer, charset)

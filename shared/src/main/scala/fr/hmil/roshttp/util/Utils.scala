@@ -44,7 +44,7 @@ object Utils {
 
   def getStringFromBuffer(byteBuffer: ByteBuffer, charset: String): String = {
     if (byteBuffer.hasArray) {
-      new String(byteBuffer.array(), 0, byteBuffer.limit, charset)
+      new String(byteBuffer.array(), 0, byteBuffer.limit(), charset)
     } else {
       val tmp = new Array[Byte](byteBuffer.limit)
       byteBuffer.get(tmp)

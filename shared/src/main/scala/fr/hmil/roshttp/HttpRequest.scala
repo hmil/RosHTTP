@@ -190,7 +190,7 @@ final class HttpRequest  private (
     * @return A copy of this [[HttpRequest]] with an updated header set.
     */
   def withHeader(key: String, value: String): HttpRequest =
-    copy(headers = HeaderMap(headers + (key -> value)))
+    copy(headers = headers + (key -> value))
 
   /** Adds or updates multiple headers to the current set of headers.
     *
