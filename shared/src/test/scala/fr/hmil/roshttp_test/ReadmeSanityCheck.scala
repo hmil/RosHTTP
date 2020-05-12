@@ -21,7 +21,7 @@ object ReadmeSanityCheck extends TestSuite {
 
   // Test suite
   val tests = this {
-    "Readme snippets compile and run successfully" - {
+    test("Readme snippets compile and run successfully") - {
       
       import fr.hmil.roshttp.HttpRequest
       import monix.execution.Scheduler.Implicits.global

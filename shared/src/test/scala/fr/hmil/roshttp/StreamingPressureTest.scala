@@ -17,7 +17,7 @@ object StreamingPressureTest extends TestSuite {
   val tests = this{
 
     // Send approx. 8 gigs of data to the server to check that there is no leak
-    "Upload streams do not leak" - {
+    test("Upload streams do not leak") - {
       if (!JsEnvUtils.isRealBrowser) {
         HttpRequest(s"$SERVER_URL/streams/in")
           .post(StreamBody(Observable.fromIterator(Task(new Iterator[ByteBuffer]() {
@@ -34,7 +34,7 @@ object StreamingPressureTest extends TestSuite {
     }
 
     // Receive approx. 8 gigs of data to ensure that there is no leak
-    "Download streams do not leak" - {
+    test("Download streams do not leak") - {
       // Due to browser incompatibility and node memory leak, run this test only in the JVM
       if (JsEnvUtils.userAgent == "jvm") {
         HttpRequest(s"$SERVER_URL/streams/out")
