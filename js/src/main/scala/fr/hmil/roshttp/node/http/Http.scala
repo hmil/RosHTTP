@@ -1,7 +1,7 @@
 package fr.hmil.roshttp.node.http
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.{JSGlobal, JSName}
+import scala.scalajs.js.annotation.{JSGlobal, JSGlobalScope, JSName}
 
 /**
   * The node http API.

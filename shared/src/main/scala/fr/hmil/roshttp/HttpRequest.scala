@@ -208,7 +208,7 @@ final class HttpRequest  private (
     */
   def withCrossDomainCookies(toggle: Boolean): HttpRequest =
     copy(crossDomainCookies = toggle)
-    
+
   /** Specifies the request timeout.
     *
     * When a request takes longer than timeout to complete, the future is
