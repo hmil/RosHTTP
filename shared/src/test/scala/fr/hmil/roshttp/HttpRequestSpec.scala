@@ -435,11 +435,10 @@ object HttpRequestSpec extends TestSuite {
 
         req.headers ==> Map(
           "cache-control" -> "max-age=128",
-          "Custom" -> "barbar",
-          "Accept" -> "application/json")
+          "custom" -> "barbar",
+          "accept" -> "application/json")
 
         req.send().map(res => {
-          println("RES ----------------- " + res.body)
           assert(res.body.contains("\"cache-control\":\"max-age=128\""))
           assert(res.body.contains("\"custom\":\"barbar\""))
           assert(res.body.contains("\"accept\":\"application/json\""))
