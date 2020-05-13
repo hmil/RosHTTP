@@ -17,21 +17,21 @@ object StreamingPressureTest extends TestSuite {
   val tests = this{
 
     // Send approx. 8 gigs of data to the server to check that there is no leak
-    test("Upload streams do not leak") - {
-      if (!JsEnvUtils.isRealBrowser) {
-        HttpRequest(s"$SERVER_URL/streams/in")
-          .post(StreamBody(Observable.fromIterator(Task(new Iterator[ByteBuffer]() {
-            override def hasNext: Boolean = true
-            override def next(): ByteBuffer = ByteBuffer.allocateDirect(8192)
-          }))
-            .take(ONE_MILLION)))
-          .map(r => r.body ==> "Received 8192000000 bytes.")
-          .recover({
-            case e: Throwable =>
-              e.printStackTrace()
-          })
-      }
-    }
+//    test("Upload streams do not leak") - {
+//      if (!JsEnvUtils.isRealBrowser) {
+//        HttpRequest(s"$SERVER_URL/streams/in")
+//          .post(StreamBody(Observable.fromIterator(Task(new Iterator[ByteBuffer]() {
+//            override def hasNext: Boolean = true
+//            override def next(): ByteBuffer = ByteBuffer.allocateDirect(8192)
+//          }))
+//            .take(ONE_MILLION)))
+//          .map(r => r.body ==> "Received 8192000000 bytes.")
+//          .recover({
+//            case e: Throwable =>
+//              e.printStackTrace()
+//          })
+//      }
+//    }
 
     // Receive approx. 8 gigs of data to ensure that there is no leak
 //    test("Download streams do not leak") - {
