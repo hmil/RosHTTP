@@ -8,8 +8,3 @@ import scala.scalajs.js.annotation._
   */
 @js.native
 private[roshttp] trait Https extends Http
-
-@js.native
-@JSGlobal
-//@JSName("https")
-private[roshttp] object Https extends Https

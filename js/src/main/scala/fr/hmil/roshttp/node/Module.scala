@@ -1,10 +1,11 @@
 package fr.hmil.roshttp.node
 
-private[roshttp] abstract class Module[T](val name: String, val inst: T) {
-  def isAvailable: Boolean = required.isDefined
+private[roshttp] abstract class Module[T](val name: String) {
+  def isAvailable: Boolean = require.isDefined
 
-  def required: Option[T] = Helpers.require(this)
-  lazy val api = required.getOrElse(throw new ModuleNotFoundException(name))
+  def require(): Option[T]
+
+  lazy val api = require.getOrElse(throw new ModuleNotFoundException(name))
 }
 
 private[roshttp] class ModuleNotFoundException(name: String) extends RuntimeException("Module " + name + " not found")
