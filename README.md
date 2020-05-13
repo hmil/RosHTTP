@@ -15,7 +15,7 @@ Add a dependency in your build.sbt:
 
 ```
 Resolver.bintrayRepo("hmil", "maven")
-libraryDependencies += "fr.hmil" %%% "roshttp" % "2.2.4"
+libraryDependencies += "fr.hmil" %%% "roshttp" % "3.0.0"
 ```
 
 # Usage
@@ -388,6 +388,10 @@ see something that is missing.
 Please read the [contributing guide](https://github.com/hmil/RosHTTP/blob/master/CONTRIBUTING.md).
 
 # Changelog
+
+**v3.0.0**
+
+- Move to Scala.js 1.0
 
 **v2.2.4**
 

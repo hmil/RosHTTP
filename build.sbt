@@ -9,7 +9,7 @@ lazy val scalaHttp = crossProject(JSPlatform, JVMPlatform).in(file("."))
  // .configureCross(InBrowserTesting.cross)
   .settings(
     name := "roshttp",
-    version := "2.3.0",
+    version := "3.0.0",
     scalaVersion := "2.13.2",
     organization := "fr.hmil",
     licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
