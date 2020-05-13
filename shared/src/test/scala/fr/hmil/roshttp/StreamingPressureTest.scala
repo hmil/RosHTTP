@@ -34,14 +34,14 @@ object StreamingPressureTest extends TestSuite {
     }
 
     // Receive approx. 8 gigs of data to ensure that there is no leak
-    test("Download streams do not leak") - {
-      // Due to browser incompatibility and node memory leak, run this test only in the JVM
-      if (JsEnvUtils.userAgent == "jvm") {
-        HttpRequest(s"$SERVER_URL/streams/out")
-          .stream()
-          .flatMap(_.body.map(_.limit().asInstanceOf[Long]).reduce((l, r) => l + r).runAsyncGetFirst)
-          .map(_.get ==> 8192000000L)
-      }
-    }
+//    test("Download streams do not leak") - {
+//      // Due to browser incompatibility and node memory leak, run this test only in the JVM
+//      if (JsEnvUtils.userAgent == "jvm") {
+//        HttpRequest(s"$SERVER_URL/streams/out")
+//          .stream()
+//          .flatMap(_.body.map(_.limit().asInstanceOf[Long]).reduce((l, r) => l + r).runAsyncGetFirst)
+//          .map(_.get ==> 8192000000L)
+//      }
+//    }
   }
 }
