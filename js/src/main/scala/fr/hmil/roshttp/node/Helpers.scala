@@ -13,21 +13,18 @@ private[roshttp] object Helpers {
  *
     * @return true if the function "require" is available on the global scope
     */
-  def isRequireAvailable: Boolean = !js.isUndefined(js.Dynamic.global.selectDynamic("require"))
+  def isRequireAvailable: Boolean = js.typeOf(js.Dynamic.global.selectDynamic("require")) != "undefined"
 
   /**
-    * Gets javascript module using either require() or the global context
+    * Gets javascript module using require()
     *
-    * @param module Module descriptor
-    * @tparam T Module API facade type
+    * @param moduleName Module name
     * @return The requested module as a scala facade
     */
-  def require[T](module: Module[T]): Option[T] = {
-    if (!js.isUndefined(module.inst)) {
-      Some(module.inst)
-    } else if (isRequireAvailable) {
+  def require[T](moduleName: String): Option[T] = {
+    if (isRequireAvailable) {
       try {
-        Global.require[T](module.name).toOption
+        Global.require[T](moduleName).toOption
       } catch {
         case _: JavaScriptException => None
       }

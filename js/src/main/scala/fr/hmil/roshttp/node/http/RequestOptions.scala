@@ -1,11 +1,9 @@
 package fr.hmil.roshttp.node.http
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.ScalaJSDefined
 
 
 
-@ScalaJSDefined
 private[roshttp] trait RequestOptions extends js.Object {
   val protocol: String
   val host: String

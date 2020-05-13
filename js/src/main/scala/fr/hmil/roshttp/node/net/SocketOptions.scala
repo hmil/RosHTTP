@@ -1,9 +1,7 @@
 package fr.hmil.roshttp.node.net
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.ScalaJSDefined
 
-@ScalaJSDefined
 private[roshttp] trait SocketOptions extends js.Object {
   // val fd: FileDescriptor - not implemented here
   val allowHalfOpen: Boolean

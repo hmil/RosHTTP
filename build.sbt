@@ -1,16 +1,16 @@
 name := "RösHTTP root project"
 
-crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.2")
+crossScalaVersions := Seq("2.12.11", "2.13.2")
 
 lazy val root = project.in(file("."))
   .aggregate(scalaHttpJS, scalaHttpJVM)
 
-lazy val scalaHttp = crossProject.in(file("."))
-  .configureCross(InBrowserTesting.cross)
+lazy val scalaHttp = crossProject(JSPlatform, JVMPlatform).in(file("."))
+ // .configureCross(InBrowserTesting.cross)
   .settings(
     name := "roshttp",
-    version := "2.2.4",
-    scalaVersion := "2.11.11",
+    version := "2.3.0",
+    scalaVersion := "2.13.2",
     organization := "fr.hmil",
     licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
     homepage := Some(url("http://github.com/hmil/RosHTTP")),
@@ -30,8 +30,9 @@ lazy val scalaHttp = crossProject.in(file("."))
     ),
     pomIncludeRepository := { _ => false },
 
-    libraryDependencies += "com.lihaoyi" %%% "utest" % "0.4.5" % Test,
-    libraryDependencies += "io.monix" %%% "monix" % "2.3.3",
+    libraryDependencies += "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.6",
+    libraryDependencies += "com.lihaoyi" %%% "utest" % "0.7.4" % Test,
+    libraryDependencies += "io.monix" %%% "monix" % "3.2.1",
 
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
@@ -40,9 +41,9 @@ lazy val scalaHttp = crossProject.in(file("."))
   )
   .jsSettings(
     // js-specific settings
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.1",
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "1.0.0",
 
-    jsEnv := NodeJSEnv().value
+    jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv()
   )
 
 lazy val scalaHttpJVM = scalaHttp.jvm

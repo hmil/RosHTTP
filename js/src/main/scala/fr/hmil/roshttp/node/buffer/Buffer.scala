@@ -1,7 +1,7 @@
 package fr.hmil.roshttp.node.buffer
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSBracketAccess
+import js.annotation._
 
 
 /**
@@ -10,6 +10,7 @@ import scala.scalajs.js.annotation.JSBracketAccess
   * @see https://nodejs.org/api/buffer.html
   */
 @js.native
+@JSGlobal
 private[roshttp] class Buffer extends js.Object {
   // new Buffer(array)
   // new Buffer(buffer)

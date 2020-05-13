@@ -20,7 +20,7 @@ private object Converters {
     } else if (buffer.hasArray) {
       js.Dynamic.newInstance(js.Dynamic.global.Buffer)(byteArrayToUint8Array(buffer.array())).asInstanceOf[Buffer]
     } else {
-      val arr = new Int8Array(buffer.limit)
+      val arr = new Int8Array(buffer.limit())
       var i = 0
       while (i < arr.length) {
         arr(i) = buffer.get(i)

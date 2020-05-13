@@ -4,11 +4,13 @@ import fr.hmil.roshttp.node.events.EventEmitter
 import fr.hmil.roshttp.node.buffer.Buffer
 
 import scala.scalajs.js
+import js.annotation._
 
 /**
   * Complete nodejs http ClientRequest API facade
   */
 @js.native
+@JSGlobal
 private[roshttp] class ClientRequest extends EventEmitter {
 
   /**
