@@ -71,13 +71,13 @@ object SSLUtils {
 
       while (matcher.find()) {
         val certificateAsBytes = Base64.getDecoder.decode(matcher.group(1).replaceAll(NEW_LINE, EMPTY).trim)
-        val certificateFactory = CertificateFactory.getInstance(CERTIFICATE_TYPE)
+        val certificateAsByteArray = new ByteArrayInputStream(certificateAsBytes)
 
-        val byteArrayInputStream = new ByteArrayInputStream(certificateAsBytes)
-        val certificate = certificateFactory.generateCertificate(byteArrayInputStream).asInstanceOf[X509Certificate]
+        val certificateFactory = CertificateFactory.getInstance(CERTIFICATE_TYPE)
+        val certificate = certificateFactory.generateCertificate(certificateAsByteArray).asInstanceOf[X509Certificate]
 
         trustStore.setCertificateEntry(certificate.getSubjectDN.getName, certificate)
-        closeSafely(byteArrayInputStream)
+        closeSafely(certificateAsByteArray)
       }
 
       closeSafely(bufferedReader)
