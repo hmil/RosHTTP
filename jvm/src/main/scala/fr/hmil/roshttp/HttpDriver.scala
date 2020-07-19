@@ -6,6 +6,7 @@ import java.nio.ByteBuffer
 import fr.hmil.roshttp.exceptions._
 import fr.hmil.roshttp.response.{HttpResponse, HttpResponseFactory, HttpResponseHeader}
 import fr.hmil.roshttp.util.HeaderMap
+import javax.net.ssl.HttpsURLConnection
 import monix.execution.Ack.Continue
 import monix.execution.{Ack, Scheduler}
 import monix.reactive.{Observable, Observer}
@@ -29,6 +30,14 @@ private object HttpDriver extends DriverTrait {
     val connection = new URL(req.url).openConnection().asInstanceOf[HttpURLConnection]
     req.headers.foreach(t => connection.addRequestProperty(t._1, t._2))
     connection.setRequestMethod(req.method.toString)
+
+    connection match {
+      case httpsConnection: HttpsURLConnection if req.backendConfig.sslConfig.isDefined =>
+        val sslContext = SSLUtils.createSslContext(req.backendConfig.sslConfig.get)
+        httpsConnection.setSSLSocketFactory(sslContext.getSocketFactory)
+      case _ =>
+    }
+
     if (req.body.isDefined) {
       req.body.foreach({ part =>
         connection.setDoOutput(true)

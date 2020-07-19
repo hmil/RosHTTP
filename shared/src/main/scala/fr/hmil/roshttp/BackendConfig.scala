@@ -11,17 +11,20 @@ package fr.hmil.roshttp
 class BackendConfig private(
     val maxChunkSize: Int,
     val internalBufferLength: Int,
-    val allowChunkedRequestBody: Boolean
+    val allowChunkedRequestBody: Boolean,
+    val sslConfig: Option[SSLConfig]
 )
 
 object BackendConfig {
   def apply(
      maxChunkSize: Int = 8192,
      internalBufferLength: Int = 128,
-     allowChunkedRequestBody: Boolean = true
+     allowChunkedRequestBody: Boolean = true,
+     sslConfig: Option[SSLConfig] = Option.empty
    ): BackendConfig = new BackendConfig(
     maxChunkSize = maxChunkSize,
     internalBufferLength = internalBufferLength,
-    allowChunkedRequestBody = allowChunkedRequestBody
+    allowChunkedRequestBody = allowChunkedRequestBody,
+    sslConfig = sslConfig
   )
 }
