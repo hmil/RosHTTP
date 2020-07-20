@@ -5,10 +5,9 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 import java.security.cert.{CertificateFactory, X509Certificate}
 import java.security.{KeyStore, SecureRandom}
-import java.util.Objects.nonNull
+import java.util.Base64
 import java.util.regex.Pattern
 import java.util.stream.Collectors
-import java.util.{Base64, Objects}
 
 import javax.net.ssl._
 
@@ -37,21 +36,19 @@ object SSLUtils {
       trustManagers = createTrustManagers(sslConfig.trustStorePaths.get)
     }
 
-    sslContext.init(keyManagers, trustManagers, new SecureRandom())
+    sslContext.init(keyManagers, trustManagers, null)
     sslContext
   }
 
   def createKeyManagers(keyStorePath: String, keyStorePassphrase: Array[Char]): Array[KeyManager] = {
       val keyStore = KeyStore.getInstance(KEYSTORE_TYPE)
       val keyStoreInputStream = Files.newInputStream(Paths.get(keyStorePath))
-
-      Objects.requireNonNull(keyStoreInputStream)
       keyStore.load(keyStoreInputStream, keyStorePassphrase)
 
       val keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm)
       keyManagerFactory.init(keyStore, keyStorePassphrase)
 
-      closeSafely(keyStoreInputStream)
+      keyStoreInputStream.close()
       keyManagerFactory.getKeyManagers
   }
 
@@ -61,7 +58,6 @@ object SSLUtils {
 
     for (trustStorePath <- trustStorePaths) {
       val trustStoreStream: InputStream = Files.newInputStream(Paths.get(trustStorePath))
-      Objects.requireNonNull(trustStoreStream)
 
       val inputStreamReader = new InputStreamReader(trustStoreStream, StandardCharsets.UTF_8)
       val bufferedReader = new BufferedReader(inputStreamReader)
@@ -77,22 +73,17 @@ object SSLUtils {
         val certificate = certificateFactory.generateCertificate(certificateAsByteArray).asInstanceOf[X509Certificate]
 
         trustStore.setCertificateEntry(certificate.getSubjectDN.getName, certificate)
-        closeSafely(certificateAsByteArray)
+        certificateAsByteArray.close()
       }
 
-      closeSafely(bufferedReader)
-      closeSafely(inputStreamReader)
-      closeSafely(trustStoreStream)
+      bufferedReader.close()
+      inputStreamReader.close()
+      trustStoreStream.close()
     }
 
     val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
     trustManagerFactory.init(trustStore)
     trustManagerFactory.getTrustManagers
-  }
-
-
-  private def closeSafely(closeable: Closeable): Unit = {
-    if (nonNull(closeable)) closeable.close()
   }
 
 }
