@@ -20,7 +20,8 @@ I moved on to different ventures and I can no longer afford the time to maintain
 Add a dependency in your build.sbt:
 
 ```
-Resolver.bintrayRepo("hmil", "maven")
+resolvers += "hmil.fr" at "https://files.hmil.fr/maven/"
+
 libraryDependencies += "fr.hmil" %%% "roshttp" % "3.0.0"
 ```
 
